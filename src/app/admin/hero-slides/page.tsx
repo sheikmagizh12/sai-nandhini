@@ -1,0 +1,691 @@
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import {
+  Plus,
+  Trash2,
+  Save,
+  Loader2,
+  GripVertical,
+  ImageIcon,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  Upload,
+  X,
+  Pencil,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+
+/* ────────────────────────────────────────────── */
+/*  Types                                         */
+/* ────────────────────────────────────────────── */
+interface HeroSlide {
+  _id?: string;
+  title: string;
+  titleAccent: string;
+  tag: string;
+  description: string;
+  image: string;
+  ctaText: string;
+  ctaLink: string;
+  badge1: string;
+  badge2: string;
+  isActive: boolean;
+  order: number;
+}
+
+const emptySlide: HeroSlide = {
+  title: "",
+  titleAccent: "",
+  tag: "Bestseller",
+  description: "",
+  image: "",
+  ctaText: "Shop Now",
+  ctaLink: "/shop",
+  badge1: "100% Natural",
+  badge2: "Traditional Recipe",
+  isActive: true,
+  order: 0,
+};
+
+/* ────────────────────────────────────────────── */
+/*  Input Styles                                  */
+/* ────────────────────────────────────────────── */
+const INPUT_CLASS =
+  "w-full rounded-xl border border-gray-200 bg-gray-50/80 text-gray-900 py-3 px-4 outline-none focus:border-[#C6A75E] focus:ring-2 focus:ring-[#C6A75E]/20 transition-all placeholder:text-gray-400 text-sm";
+
+/* ────────────────────────────────────────────── */
+/*  Component                                     */
+/* ────────────────────────────────────────────── */
+export default function HeroSlidesPage() {
+  const [slides, setSlides] = useState<HeroSlide[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
+  const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  /* ── Fetch Slides ── */
+  useEffect(() => {
+    fetchSlides();
+  }, []);
+
+  const fetchSlides = async () => {
+    try {
+      const res = await fetch("/api/admin/hero-slides");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) setSlides(json.data || []);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ── Handle Image Upload ── */
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image must be under 5MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      setImagePreview(base64);
+      if (editingSlide) {
+        setEditingSlide({ ...editingSlide, image: base64 });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  /* ── Open editor for new or existing slide ── */
+  const openEditor = (slide?: HeroSlide) => {
+    if (slide) {
+      setEditingSlide({ ...slide });
+      setImagePreview(slide.image || null);
+    } else {
+      setEditingSlide({ ...emptySlide, order: slides.length + 1 });
+      setImagePreview(null);
+    }
+  };
+
+  const closeEditor = () => {
+    setEditingSlide(null);
+    setImagePreview(null);
+  };
+
+  /* ── Save (Create or Update) ── */
+  const handleSave = async () => {
+    if (!editingSlide) return;
+    if (!editingSlide.title || !editingSlide.image) {
+      alert("Title and Image are required");
+      return;
+    }
+
+    setSaving("save");
+    try {
+      const isNew = !editingSlide._id;
+      const url = isNew
+        ? "/api/admin/hero-slides"
+        : `/api/admin/hero-slides/${editingSlide._id}`;
+      const method = isNew ? "POST" : "PUT";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingSlide),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) {
+          setMessage(isNew ? "Slide created!" : "Slide updated!");
+          setTimeout(() => setMessage(""), 3000);
+          await fetchSlides();
+          closeEditor();
+        }
+      } else {
+        const err = await res.json();
+        alert(err.message || "Failed to save");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  /* ── Delete ── */
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this slide? This action cannot be undone.")) return;
+
+    setSaving(id);
+    try {
+      const res = await fetch(`/api/admin/hero-slides/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setMessage("Slide deleted");
+        setTimeout(() => setMessage(""), 3000);
+        setSlides(slides.filter((s) => s._id !== id));
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  /* ── Toggle Active ── */
+  const toggleActive = async (slide: HeroSlide) => {
+    setSaving(slide._id || "");
+    try {
+      await fetch(`/api/admin/hero-slides/${slide._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !slide.isActive }),
+      });
+      await fetchSlides();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  /* ── Loading State ── */
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="animate-spin text-[#C6A75E]" size={40} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F8F6F2] font-['Inter',sans-serif]">
+      <div className="max-w-[1200px] mx-auto py-8 px-4 md:px-8">
+        {/* ── Header ── */}
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+          <div>
+            <nav className="flex text-sm text-gray-400 mb-1.5 items-center gap-1">
+              <Link
+                href="/admin/settings"
+                className="hover:text-[#2F3E2C] cursor-pointer transition-colors flex items-center gap-1"
+              >
+                <ArrowLeft size={14} /> Settings
+              </Link>
+              <span className="mx-1 text-gray-300">/</span>
+              <span className="text-[#2F3E2C] font-semibold">
+                Hero Carousel
+              </span>
+            </nav>
+            <h1 className="text-3xl font-bold text-[#2F3E2C] tracking-tight">
+              Hero Carousel Manager
+            </h1>
+            <p className="text-gray-500 mt-1 text-sm">
+              Manage the slides displayed on the home page hero section. Images
+              are saved to Cloudinary.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <AnimatePresence>
+              {message && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, x: 20 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, x: 20 }}
+                  className="bg-[#2F3E2C] text-white px-4 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-lg"
+                >
+                  <Save size={14} /> {message}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <button
+              onClick={() => openEditor()}
+              className="bg-[#C6A75E] hover:bg-[#b0934e] text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-[#C6A75E]/20 hover:shadow-xl transition-all"
+            >
+              <Plus size={16} /> Add Slide
+            </button>
+          </div>
+        </header>
+
+        {/* ── Slides Grid ── */}
+        {slides.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+            <ImageIcon size={48} className="mx-auto text-gray-300 mb-4" />
+            <p className="text-gray-500 text-lg font-medium">No slides yet</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Add your first hero carousel slide to get started.
+            </p>
+            <button
+              onClick={() => openEditor()}
+              className="mt-6 bg-[#C6A75E] text-white px-6 py-3 rounded-xl font-bold text-sm inline-flex items-center gap-2"
+            >
+              <Plus size={16} /> Create First Slide
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {slides.map((slide, index) => (
+              <motion.div
+                key={slide._id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className={`bg-white rounded-2xl border shadow-sm overflow-hidden group transition-all hover:shadow-lg ${
+                  slide.isActive
+                    ? "border-gray-100"
+                    : "border-red-200/60 opacity-70"
+                }`}
+              >
+                {/* Image */}
+                <div className="relative aspect-[16/9] overflow-hidden bg-gray-100">
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+
+                  {/* Overlay actions */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                    <button
+                      onClick={() => openEditor(slide)}
+                      className="bg-white text-gray-800 p-2.5 rounded-xl hover:bg-[#C6A75E] hover:text-white transition-all shadow-lg"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(slide._id!)}
+                      disabled={saving === slide._id}
+                      className="bg-white text-red-500 p-2.5 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg"
+                    >
+                      {saving === slide._id ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Tag badge */}
+                  <div className="absolute top-3 left-3 bg-[#C6A75E] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                    {slide.tag}
+                  </div>
+
+                  {/* Order badge */}
+                  <div className="absolute top-3 right-3 bg-white/90 text-gray-700 text-xs font-bold w-7 h-7 rounded-lg flex items-center justify-center shadow-sm">
+                    {slide.order}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="font-bold text-[#2F3E2C] text-base mb-0.5 truncate">
+                    {slide.title}{" "}
+                    <span className="text-[#C6A75E] italic">
+                      {slide.titleAccent}
+                    </span>
+                  </h3>
+                  <p className="text-gray-400 text-xs line-clamp-2 mb-4">
+                    {slide.description}
+                  </p>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-[#2F3E2C]/5 text-[#2F3E2C] text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide">
+                        {slide.ctaText}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => toggleActive(slide)}
+                      className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
+                        slide.isActive
+                          ? "bg-green-50 text-green-600 hover:bg-green-100"
+                          : "bg-red-50 text-red-500 hover:bg-red-100"
+                      }`}
+                    >
+                      {slide.isActive ? (
+                        <Eye size={13} />
+                      ) : (
+                        <EyeOff size={13} />
+                      )}
+                      {slide.isActive ? "Active" : "Hidden"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════════════════════════
+            Edit/Create Modal
+        ═══════════════════════════════════════════════════════════ */}
+        <AnimatePresence>
+          {editingSlide && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start justify-center overflow-y-auto py-10"
+              onClick={closeEditor}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden"
+              >
+                {/* Modal Header */}
+                <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100">
+                  <div>
+                    <h2 className="text-xl font-bold text-[#2F3E2C]">
+                      {editingSlide._id ? "Edit Slide" : "New Slide"}
+                    </h2>
+                    <p className="text-gray-400 text-sm mt-0.5">
+                      Fill in the details for the hero carousel slide.
+                    </p>
+                  </div>
+                  <button
+                    onClick={closeEditor}
+                    className="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition-all"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="px-8 py-6 space-y-5 max-h-[65vh] overflow-y-auto">
+                  {/* Image Upload */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                      Slide Image *
+                    </label>
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="relative cursor-pointer border-2 border-dashed border-gray-200 hover:border-[#C6A75E] rounded-2xl overflow-hidden transition-all group"
+                    >
+                      {imagePreview || editingSlide.image ? (
+                        <div className="relative aspect-[16/9]">
+                          <img
+                            src={imagePreview || editingSlide.image}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <div className="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2">
+                              <Upload size={16} /> Change Image
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="aspect-[16/9] flex flex-col items-center justify-center text-gray-400">
+                          <Upload size={32} className="mb-2 text-gray-300" />
+                          <p className="text-sm font-medium">
+                            Click to upload image
+                          </p>
+                          <p className="text-xs text-gray-300 mt-1">
+                            JPG, PNG, WebP — Max 5MB
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                    />
+                  </div>
+
+                  {/* Title + Title Accent */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        Title (White Text) *
+                      </label>
+                      <input
+                        type="text"
+                        value={editingSlide.title}
+                        onChange={(e) =>
+                          setEditingSlide({
+                            ...editingSlide,
+                            title: e.target.value,
+                          })
+                        }
+                        placeholder="e.g. Authentic South Indian"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        Accent Word (Gold Italic)
+                      </label>
+                      <input
+                        type="text"
+                        value={editingSlide.titleAccent}
+                        onChange={(e) =>
+                          setEditingSlide({
+                            ...editingSlide,
+                            titleAccent: e.target.value,
+                          })
+                        }
+                        placeholder="e.g. Pickles"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tag */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                      Tag Badge
+                    </label>
+                    <select
+                      value={editingSlide.tag}
+                      onChange={(e) =>
+                        setEditingSlide({
+                          ...editingSlide,
+                          tag: e.target.value,
+                        })
+                      }
+                      className={INPUT_CLASS}
+                    >
+                      <option value="Bestseller">Bestseller</option>
+                      <option value="New Arrival">New Arrival</option>
+                      <option value="Limited Edition">Limited Edition</option>
+                      <option value="Seasonal Special">Seasonal Special</option>
+                      <option value="Featured">Featured</option>
+                      <option value="Premium">Premium</option>
+                    </select>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      value={editingSlide.description}
+                      onChange={(e) =>
+                        setEditingSlide({
+                          ...editingSlide,
+                          description: e.target.value,
+                        })
+                      }
+                      rows={3}
+                      placeholder="Short description for the slide..."
+                      className={INPUT_CLASS + " resize-none"}
+                    />
+                  </div>
+
+                  {/* CTA Text + Link */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        CTA Button Text
+                      </label>
+                      <input
+                        type="text"
+                        value={editingSlide.ctaText}
+                        onChange={(e) =>
+                          setEditingSlide({
+                            ...editingSlide,
+                            ctaText: e.target.value,
+                          })
+                        }
+                        placeholder="Shop Now"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        CTA Link
+                      </label>
+                      <input
+                        type="text"
+                        value={editingSlide.ctaLink}
+                        onChange={(e) =>
+                          setEditingSlide({
+                            ...editingSlide,
+                            ctaLink: e.target.value,
+                          })
+                        }
+                        placeholder="/shop"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Badge 1 + Badge 2 */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        Badge 1
+                      </label>
+                      <input
+                        type="text"
+                        value={editingSlide.badge1}
+                        onChange={(e) =>
+                          setEditingSlide({
+                            ...editingSlide,
+                            badge1: e.target.value,
+                          })
+                        }
+                        placeholder="100% Natural"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        Badge 2
+                      </label>
+                      <input
+                        type="text"
+                        value={editingSlide.badge2}
+                        onChange={(e) =>
+                          setEditingSlide({
+                            ...editingSlide,
+                            badge2: e.target.value,
+                          })
+                        }
+                        placeholder="Traditional Recipe"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Order + Active */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        Display Order
+                      </label>
+                      <input
+                        type="number"
+                        value={editingSlide.order}
+                        onChange={(e) =>
+                          setEditingSlide({
+                            ...editingSlide,
+                            order: Number(e.target.value),
+                          })
+                        }
+                        min={0}
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        Visibility
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditingSlide({
+                            ...editingSlide,
+                            isActive: !editingSlide.isActive,
+                          })
+                        }
+                        className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all ${
+                          editingSlide.isActive
+                            ? "bg-green-50 text-green-600 border border-green-200"
+                            : "bg-red-50 text-red-500 border border-red-200"
+                        }`}
+                      >
+                        {editingSlide.isActive ? (
+                          <Eye size={16} />
+                        ) : (
+                          <EyeOff size={16} />
+                        )}
+                        {editingSlide.isActive ? "Active" : "Hidden"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="flex items-center justify-end gap-3 px-8 py-5 border-t border-gray-100 bg-gray-50/50">
+                  <button
+                    onClick={closeEditor}
+                    className="px-6 py-3 rounded-xl text-gray-500 hover:text-gray-700 font-semibold text-sm transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={saving === "save"}
+                    className="bg-[#C6A75E] hover:bg-[#b0934e] text-white px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-[#C6A75E]/20 hover:shadow-xl transition-all"
+                  >
+                    {saving === "save" ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Save size={16} />
+                    )}
+                    {editingSlide._id ? "Update Slide" : "Create Slide"}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}

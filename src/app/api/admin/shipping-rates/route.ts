@@ -1,37 +1,43 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import ShippingRate from "@/models/ShippingRate";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export async function GET() {
-    try {
-        await connectDB();
-        const rates = await ShippingRate.find({}).sort({ minWeight: 1 });
-        return NextResponse.json(rates);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+  try {
+    await connectDB();
+    const rates = await ShippingRate.find().sort({ minAmount: 1 });
+    return NextResponse.json(rates);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
-    try {
-        const session = await getServerSession(authOptions);
-        if (!session || (session.user as any).role !== "admin") {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
-        const body = await req.json();
-        await connectDB();
-
-        // Ensure weights are valid numbers
-        if (body.minWeight >= body.maxWeight) {
-            return NextResponse.json({ error: "Min weight must be less than max weight" }, { status: 400 });
-        }
-
-        const rate = await ShippingRate.create(body);
-        return NextResponse.json(rate, { status: 201 });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!session || (session.user as any).role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const body = await req.json();
+    await connectDB();
+
+    // Ensure weights are valid numbers
+    if (body.minWeight >= body.maxWeight) {
+      return NextResponse.json(
+        { error: "Min weight must be less than max weight" },
+        { status: 400 },
+      );
+    }
+
+    const rate = await ShippingRate.create(body);
+    return NextResponse.json(rate, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }

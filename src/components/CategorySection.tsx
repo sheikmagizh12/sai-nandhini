@@ -6,80 +6,93 @@ import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function CategorySection() {
-    const [categories, setCategories] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const res = await fetch('/api/categories');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) {
-                        setCategories(data);
-                    }
-                }
-            } catch (error) {
-                console.error("Failed to fetch categories", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchCategories();
-    }, []);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("/api/categories");
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            setCategories(data);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
-    if (loading) return null;
-    if (categories.length === 0) return null;
+  if (loading) return null;
+  if (categories.length === 0) return null;
 
-    return (
-        <section className="py-24 bg-secondary/30">
-            <div className="w-full px-4 sm:px-6 lg:px-10">
-                <div className="text-center mb-16">
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-4 block">Our Collection</span>
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-black text-primary-dark tracking-tighter">
-                        Curated for Every <br className="hidden lg:block" /> <span className="text-brown italic italic-font">Taste & Occasion</span>
-                    </h2>
+  return (
+    <section className="py-24 bg-[#F8F6F2]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#C6A75E] mb-3 block">
+            Explore Our Range
+          </span>
+          <h2 className="text-4xl md:text-5xl font-serif font-black text-[#2F3E2C] tracking-tight">
+            Curated for Every{" "}
+            <span className="text-[#C6A75E] italic">Taste</span>
+          </h2>
+          <p className="text-gray-500 mt-4 max-w-lg mx-auto text-sm leading-relaxed">
+            From tangy pickles to melt-in-your-mouth sweets — discover our
+            handcrafted collection.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {categories.map((cat, i) => (
+            <motion.div
+              key={cat._id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.08, duration: 0.5 }}
+              viewport={{ once: true }}
+            >
+              <Link
+                href={`/shop?category=${encodeURIComponent(cat.name)}`}
+                className="group relative block h-[380px] rounded-3xl overflow-hidden shadow-lg shadow-[#2F3E2C]/5"
+              >
+                <img
+                  src={
+                    cat.image ||
+                    "https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=800"
+                  }
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
+                  alt={cat.name}
+                />
+                {/* Glass overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#2F3E2C]/90 via-[#2F3E2C]/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+
+                <div className="absolute inset-x-0 bottom-0 p-7">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C6A75E]/90 mb-1.5 block">
+                    {cat.description || "Fresh & Authentic"}
+                  </span>
+                  <h3 className="text-2xl font-serif font-black text-white mb-4 leading-tight">
+                    {cat.name}
+                  </h3>
+                  <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/80 group-hover:text-[#C6A75E] transition-colors">
+                    Shop Collection{" "}
+                    <ArrowRight
+                      size={14}
+                      className="group-hover:translate-x-1.5 transition-transform"
+                    />
+                  </span>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8">
-                    {categories.map((cat, i) => (
-                        <motion.div
-                            key={cat._id}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: i * 0.1 }}
-                            viewport={{ once: true }}
-                            className="group relative h-[450px] md:h-[550px] rounded-[3rem] overflow-hidden shadow-2xl shadow-primary/10"
-                        >
-                            <img
-                                src={cat.image || "https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=800"}
-                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
-                                alt={cat.name}
-                            />
-                            {/* Layered Gradient for better text readability */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-
-                            <div className="absolute inset-x-0 bottom-0 p-8 md:p-10 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                <span className="text-[9px] font-sans font-black uppercase tracking-[0.2em] text-secondary/80 mb-2 block group-hover:text-secondary transition-colors line-clamp-1">
-                                    {cat.description || "Fresh & Authentic"}
-                                </span>
-                                <h3 className="text-2xl md:text-3xl font-serif font-black text-white mb-6 leading-tight group-hover:scale-105 transition-transform origin-left line-clamp-2">
-                                    {cat.name}
-                                </h3>
-                                <Link
-                                    href={`/shop?category=${encodeURIComponent(cat.name)}`}
-                                    className="inline-flex items-center text-[10px] font-sans font-black uppercase tracking-widest text-white group-hover:text-secondary transition-colors"
-                                >
-                                    Explore Collection <ArrowRight size={14} className="ml-2 group-hover:translate-x-2 transition-transform" />
-                                </Link>
-                            </div>
-
-                            {/* Accent border on hover */}
-                            <div className="absolute inset-0 border-0 group-hover:border-[8px] border-accent/20 transition-all pointer-events-none" />
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }

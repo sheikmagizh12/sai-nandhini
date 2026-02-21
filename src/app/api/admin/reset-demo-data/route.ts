@@ -9,36 +9,39 @@ import Coupon from "@/models/Coupon";
 import UOM from "@/models/UOM";
 import StockTransaction from "@/models/StockTransaction";
 import ShippingRate from "@/models/ShippingRate";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export async function POST(req: Request) {
-    try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== "admin") {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
-        await connectDB();
-
-        // Delete all transactional and catalog data
-        await Promise.all([
-            Product.deleteMany({}),
-            Category.deleteMany({}),
-            SubCategory.deleteMany({}),
-            Order.deleteMany({}),
-            Enquiry.deleteMany({}),
-            Coupon.deleteMany({}),
-            UOM.deleteMany({}),
-            StockTransaction.deleteMany({}),
-            ShippingRate.deleteMany({})
-        ]);
-
-        return NextResponse.json({ message: "All demo data erased successfully" });
-    } catch (error: any) {
-        return NextResponse.json(
-            { error: error.message || "Failed to erase data" },
-            { status: 500 }
-        );
+    if (!session || (session.user as any).role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    await connectDB();
+
+    // Delete all transactional and catalog data
+    await Promise.all([
+      Product.deleteMany({}),
+      Category.deleteMany({}),
+      SubCategory.deleteMany({}),
+      Order.deleteMany({}),
+      Enquiry.deleteMany({}),
+      Coupon.deleteMany({}),
+      UOM.deleteMany({}),
+      StockTransaction.deleteMany({}),
+      ShippingRate.deleteMany({}),
+    ]);
+
+    return NextResponse.json({ message: "All demo data erased successfully" });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message || "Failed to erase data" },
+      { status: 500 },
+    );
+  }
 }

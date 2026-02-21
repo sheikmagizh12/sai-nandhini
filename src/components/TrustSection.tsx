@@ -1,85 +1,83 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { Leaf, Timer, Heart, Award } from "lucide-react";
 
 const trustPoints = [
-    {
-        photo: "https://images.pexels.com/photos/1028714/pexels-photo-1028714.jpeg?auto=compress&cs=tinysrgb&w=200",
-        title: "Cold-Pressed Purity",
-        desc: "0% industrial processing. We strictly use traditional wood-pressed methods for maximum nutrient retention.",
-        stats: "100% PURITY",
-        bg: "bg-[#FFF9F0]", // Warm Beige
-        badge: "bg-[#F3E6D0] text-[#8C7B60]"
-    },
-    {
-        photo: "https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=200",
-        title: "4 AM Fresh Batch",
-        desc: "Baked before the city wakes up. From our ovens to your doorstep within 4 hours of preparation.",
-        stats: "FRESH DAILY",
-        bg: "bg-[#F2F7F5]", // Muted Sage
-        badge: "bg-[#E0EBE6] text-[#5C7A6F]"
-    },
-    {
-        photo: "https://images.pexels.com/photos/1105068/pexels-photo-1105068.jpeg?auto=compress&cs=tinysrgb&w=200",
-        title: "Native Millets",
-        desc: "Sourced directly from 12 partner farms in Tamil Nadu. Supporting sustainable local agriculture.",
-        stats: "12+ FARMERS",
-        bg: "bg-[#F5F5F7]", // Warm Grey
-        badge: "bg-[#E6E6E8] text-[#6B6B75]"
-    },
-    {
-        photo: "https://images.pexels.com/photos/2014705/pexels-photo-2014705.jpeg?auto=compress&cs=tinysrgb&w=200",
-        title: "Chennai Soul",
-        desc: "Born in Anna Nagar. Delivered with the warmth of true Southern hospitality to your home.",
-        stats: "LOCAL FOCUS",
-        bg: "bg-[#FFF0F0]", // Dusty Rose
-        badge: "bg-[#FFE0E0] text-[#9E6B6B]"
-    }
+  {
+    icon: Leaf,
+    title: "100% Natural",
+    desc: "Pure ingredients with zero preservatives. Every product passes our quality check.",
+    accent: "bg-emerald-50 text-emerald-600",
+    iconBg: "bg-emerald-100",
+  },
+  {
+    icon: Timer,
+    title: "Fresh Daily",
+    desc: "Made fresh every morning in our Madurai kitchen using traditional wood-fired methods.",
+    accent: "bg-amber-50 text-amber-600",
+    iconBg: "bg-amber-100",
+  },
+  {
+    icon: Award,
+    title: "Premium Quality",
+    desc: "Sourced from 12+ partner farms in Tamil Nadu. Supporting sustainable local agriculture.",
+    accent: "bg-blue-50 text-blue-600",
+    iconBg: "bg-blue-100",
+  },
+  {
+    icon: Heart,
+    title: "Made with Love",
+    desc: "Heritage recipes refined over 25 years — delivering the authentic taste of home.",
+    accent: "bg-rose-50 text-rose-600",
+    iconBg: "bg-rose-100",
+  },
 ];
 
 export default function TrustSection() {
-    return (
-        <section className="py-20 bg-white">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {trustPoints.map((point, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1, duration: 0.5 }}
-                            viewport={{ once: true }}
-                            className={`${point.bg} rounded-[24px] p-6 relative group transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)]`}
-                        >
-                            <div className="flex justify-between items-start mb-5">
-                                <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-sm shadow-black/5">
-                                    <img
-                                        src={point.photo}
-                                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                                        alt={point.title}
-                                    />
-                                </div>
-                                <span className={`${point.badge} px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest`}>
-                                    {point.stats}
-                                </span>
-                            </div>
+  return (
+    <section className="py-20 bg-[#F8F6F2]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="text-center mb-14">
+          <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#C6A75E] mb-3 block">
+            Why Sai Nandhini
+          </span>
+          <h2 className="text-3xl md:text-4xl font-serif font-black text-[#2F3E2C] tracking-tight">
+            The Promise Behind Every Bite
+          </h2>
+        </div>
 
-                            <h3 className="text-xl font-sans font-bold text-gray-900 mb-2">
-                                {point.title}
-                            </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {trustPoints.map((point, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-7 relative group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#2F3E2C]/5 border border-gray-100"
+            >
+              <div
+                className={`w-12 h-12 ${point.iconBg} rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}
+              >
+                <point.icon size={22} className={point.accent.split(" ")[1]} />
+              </div>
 
-                            <p className="text-sm text-gray-500 font-medium leading-relaxed mb-6 min-h-[60px]">
-                                {point.desc}
-                            </p>
+              <h3 className="text-lg font-bold text-[#2F3E2C] mb-2">
+                {point.title}
+              </h3>
 
-                            <button className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-900 opacity-60 group-hover:opacity-100 transition-all group-hover:gap-3">
-                                Explore <ArrowRight size={14} />
-                            </button>
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
+              <p className="text-sm text-gray-500 leading-relaxed">
+                {point.desc}
+              </p>
+
+              {/* Hover accent line */}
+              <div className="absolute bottom-0 left-6 right-6 h-[3px] bg-[#C6A75E] rounded-full scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }

@@ -4,28 +4,30 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 253, 245, 230;
+  --background-start-rgb: 248, 246, 242;
   --background-end-rgb: 255, 255, 255;
 }
 
 body {
-  color: #14331D;
-  background: #FAF3E0;
+  color: #2f3e2c;
+  background: #f8f6f2;
   min-height: 100vh;
-  font-family: var(--font-poppins), sans-serif;
+  font-family: var(--font-poppins), "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary hover:bg-primary-light text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg;
+    @apply bg-[#2F3E2C] hover:bg-[#1f2b1d] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg;
   }
 
   .glass-card {
-    @apply bg-white bg-opacity-70 backdrop-blur-md border border-white border-opacity-30 rounded-3xl shadow-xl;
+    @apply bg-white bg-opacity-70 backdrop-blur-md border border-white border-opacity-30 rounded-2xl shadow-xl;
   }
 
   .premium-heading {
-    @apply font-sans text-4xl md:text-6xl font-bold tracking-tight text-primary-dark;
+    @apply font-sans text-4xl md:text-6xl font-bold tracking-tight text-[#2F3E2C];
   }
 }
 
@@ -34,16 +36,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #FAF3E0;
+  background: #f8f6f2;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1F4D2B;
+  background: #2f3e2c;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #FBC02D;
+  background: #c6a75e;
 }
 
 @keyframes slow-zoom {

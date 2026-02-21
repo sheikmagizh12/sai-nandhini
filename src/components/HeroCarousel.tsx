@@ -1,0 +1,365 @@
+"use client";
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Leaf,
+  Shield,
+  ArrowRight,
+} from "lucide-react";
+import Link from "next/link";
+
+/* ═══════════════════════════════════════════════════════════════
+   Types
+   ═══════════════════════════════════════════════════════════════ */
+interface Slide {
+  _id?: string;
+  title: string;
+  titleAccent: string;
+  tag: string;
+  description: string;
+  image: string;
+  ctaText: string;
+  ctaLink: string;
+  badge1: string;
+  badge2: string;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Fallback slides (used only while API is loading)
+   ═══════════════════════════════════════════════════════════════ */
+const fallbackSlides: Slide[] = [
+  {
+    title: "Freshly Baked",
+    titleAccent: "Cookies",
+    tag: "Bestseller",
+    description:
+      "Irresistible homemade cookies baked fresh daily with premium butter and finest ingredients. From classic choco-chip to exotic flavours — pure indulgence in every bite.",
+    image:
+      "https://images.pexels.com/photos/890577/pexels-photo-890577.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    ctaText: "Shop Cookies",
+    ctaLink: "/shop?category=Cookies",
+    badge1: "Freshly Baked",
+    badge2: "Premium Butter",
+  },
+  {
+    title: "Decadent Fudge",
+    titleAccent: "Brownies",
+    tag: "New Arrival",
+    description:
+      "Rich, moist and intensely chocolatey brownies made with Belgian cocoa. Our special and classic brownies are the ultimate treat for every chocolate lover.",
+    image:
+      "https://images.pexels.com/photos/3026804/pexels-photo-3026804.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    ctaText: "Shop Brownies",
+    ctaLink: "/shop?category=Brownie",
+    badge1: "Belgian Cocoa",
+    badge2: "Eggless Options",
+  },
+  {
+    title: "Celebration",
+    titleAccent: "Cakes",
+    tag: "Premium",
+    description:
+      "Handcrafted cakes for every occasion — birthdays, anniversaries, and festive moments. Made fresh to order with love and the finest ingredients from Madurai.",
+    image:
+      "https://images.pexels.com/photos/1854652/pexels-photo-1854652.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    ctaText: "Shop Cakes",
+    ctaLink: "/shop?category=Cake",
+    badge1: "Made to Order",
+    badge2: "Fresh Cream",
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   Animation variants
+   ═══════════════════════════════════════════════════════════════ */
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 120 : -120,
+    opacity: 0,
+    scale: 0.96,
+  }),
+  center: { x: 0, opacity: 1, scale: 1 },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -120 : 120,
+    opacity: 0,
+    scale: 0.96,
+  }),
+};
+
+const imageVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 200 : -200,
+    opacity: 0,
+    scale: 0.85,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -200 : 200,
+    opacity: 0,
+    scale: 0.85,
+    transition: { duration: 0.5 },
+  }),
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   Component
+   ═══════════════════════════════════════════════════════════════ */
+export default function HeroCarousel() {
+  const [[currentSlide, direction], setSlide] = useState<[number, number]>([
+    0, 0,
+  ]);
+  const [isPaused, setIsPaused] = useState(false);
+  const [slides, setSlides] = useState<Slide[]>(fallbackSlides);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  /* ── Fetch slides from API ── */
+  useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const res = await fetch("/api/admin/hero-slides?activeOnly=true");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data?.length > 0) {
+            setSlides(json.data);
+          }
+        }
+      } catch {
+        /* silently fall back to defaults */
+      }
+    };
+    fetchSlides();
+  }, []);
+
+  /* ── Auto-play ── */
+  const startAutoPlay = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      if (!isPaused) {
+        setSlide(([prev]) => [(prev + 1) % slides.length, 1]);
+      }
+    }, 6000);
+  }, [isPaused, slides.length]);
+
+  useEffect(() => {
+    startAutoPlay();
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [startAutoPlay]);
+
+  const goTo = (index: number) => {
+    const dir = index > currentSlide ? 1 : -1;
+    setSlide([index, dir]);
+  };
+
+  const next = () => {
+    setSlide(([prev]) => [(prev + 1) % slides.length, 1]);
+    startAutoPlay();
+  };
+
+  const prev = () => {
+    setSlide(([prev]) => [(prev - 1 + slides.length) % slides.length, -1]);
+    startAutoPlay();
+  };
+
+  const slide = slides[currentSlide] || slides[0];
+
+  return (
+    <section
+      className="relative bg-[#2F3E2C] overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* ───── Decorative Background ───── */}
+      <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, #C6A75E 0.8px, transparent 0.8px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <div className="absolute -top-40 -right-40 w-[700px] h-[700px] bg-[#C6A75E]/[0.06] rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[100px]" />
+      </div>
+
+      {/* ───── Main Carousel Content ───── */}
+      <div className="relative z-10 max-w-[1440px] mx-auto min-h-[85vh] md:min-h-[720px] flex items-center px-6 md:px-12 lg:px-20 pt-32 md:pt-28 pb-10">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-4 items-center">
+          {/* ── Left: Text Content ── */}
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={`text-${currentSlide}`}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="flex flex-col items-start justify-center"
+            >
+              {/* Tag */}
+              <div className="inline-flex items-center gap-2 bg-[#C6A75E]/15 border border-[#C6A75E]/25 rounded-full px-4 py-1.5 mb-6">
+                <Sparkles size={13} className="text-[#C6A75E]" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#C6A75E]">
+                  {slide.tag}
+                </span>
+              </div>
+
+              {/* Headline */}
+              <h1 className="text-[2.8rem] md:text-6xl lg:text-[4.2rem] font-serif font-black text-white leading-[1.08] tracking-tight mb-2">
+                {slide.title}
+              </h1>
+              <h1 className="text-[2.8rem] md:text-6xl lg:text-[4.2rem] font-serif font-black text-[#C6A75E] italic leading-[1.08] tracking-tight mb-6">
+                {slide.titleAccent}
+              </h1>
+
+              {/* Gold divider */}
+              <div className="w-16 h-[2px] bg-gradient-to-r from-[#C6A75E] to-transparent mb-6" />
+
+              {/* Description */}
+              <p className="text-white/55 text-base md:text-[17px] leading-relaxed max-w-md mb-10 font-medium">
+                {slide.description}
+              </p>
+
+              {/* CTA + Badges */}
+              <div className="flex flex-wrap items-center gap-5 mb-8">
+                <Link
+                  href={slide.ctaLink}
+                  className="group bg-[#C6A75E] text-[#2F3E2C] px-9 py-4 rounded-full font-bold uppercase tracking-wider text-[11px] shadow-xl shadow-[#C6A75E]/20 hover:bg-[#d4b76e] hover:shadow-2xl transition-all active:scale-95 flex items-center gap-2.5"
+                >
+                  {slide.ctaText}
+                  <ArrowRight
+                    size={15}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
+                </Link>
+                <Link
+                  href="/shop"
+                  className="text-white/60 hover:text-white text-xs font-bold uppercase tracking-widest border-b border-white/20 hover:border-white/60 pb-0.5 transition-all"
+                >
+                  View All →
+                </Link>
+              </div>
+
+              {/* Bottom Badges */}
+              <div className="flex gap-5">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-[#C6A75E]/15 flex items-center justify-center">
+                    <Leaf size={13} className="text-[#C6A75E]" />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+                    {slide.badge1}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-[#C6A75E]/15 flex items-center justify-center">
+                    <Shield size={13} className="text-[#C6A75E]" />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+                    {slide.badge2}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* ── Right: Product Image ── */}
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={`img-${currentSlide}`}
+              custom={direction}
+              variants={imageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="relative flex items-center justify-center"
+            >
+              <div className="relative w-full max-w-lg lg:max-w-xl mx-auto">
+                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl shadow-black/40 border border-white/5 group">
+                  <img
+                    src={slide.image}
+                    alt={`${slide.title} ${slide.titleAccent}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2F3E2C]/30 via-transparent to-transparent" />
+                </div>
+
+                {/* Floating decorative cards */}
+                <div className="absolute -top-6 -right-6 w-28 h-28 bg-[#C6A75E]/10 rounded-2xl border border-[#C6A75E]/15 -z-10 rotate-6" />
+                <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-white/5 rounded-xl border border-white/5 -z-10 -rotate-6" />
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* ───── Navigation Arrows ───── */}
+      {slides.length > 1 && (
+        <>
+          <button
+            onClick={prev}
+            className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-black/40 flex items-center justify-center transition-all group"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft
+              size={22}
+              className="group-hover:-translate-x-0.5 transition-transform"
+            />
+          </button>
+          <button
+            onClick={next}
+            className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-black/40 flex items-center justify-center transition-all group"
+            aria-label="Next slide"
+          >
+            <ChevronRight
+              size={22}
+              className="group-hover:translate-x-0.5 transition-transform"
+            />
+          </button>
+        </>
+      )}
+
+      {/* ───── Slide Indicators (Dots) ───── */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2.5">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goTo(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            className={`rounded-full transition-all duration-300 ${
+              i === currentSlide
+                ? "w-8 h-2.5 bg-[#C6A75E] shadow-lg shadow-[#C6A75E]/30"
+                : "w-2.5 h-2.5 bg-white/25 hover:bg-white/50"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* ───── Bottom Curve ───── */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
+        <svg
+          viewBox="0 0 1440 50"
+          fill="none"
+          className="w-full"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0 50V25C240 5 480 0 720 8C960 16 1200 40 1440 25V50H0Z"
+            fill="#F8F6F2"
+          />
+        </svg>
+      </div>
+    </section>
+  );
+}

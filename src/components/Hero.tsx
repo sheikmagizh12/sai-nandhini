@@ -1,126 +1,158 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Play, MapPin } from "lucide-react";
+import { ArrowRight, Sparkles, Shield, Truck } from "lucide-react";
 import Link from "next/link";
-
 import { useState, useEffect } from "react";
 
 export default function Hero() {
-    const [banner, setBanner] = useState("https://images.pexels.com/photos/1854652/pexels-photo-1854652.jpeg?auto=compress&cs=tinysrgb&w=1600");
+  const [banner, setBanner] = useState(
+    "https://images.pexels.com/photos/1854652/pexels-photo-1854652.jpeg?auto=compress&cs=tinysrgb&w=1600",
+  );
 
-    useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const res = await fetch('/api/admin/settings');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.heroBanner) {
-                        setBanner(data.heroBanner);
-                    }
-                }
-            } catch (error) {
-                console.error("Failed to fetch hero settings", error);
-            }
-        };
-        fetchSettings();
-    }, []);
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/admin/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.heroBanner) {
+            setBanner(data.heroBanner);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch hero settings", error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
-    return (
-        <section className="relative min-h-[90vh] flex items-center pt-20 overflow-hidden bg-secondary">
-            {/* Background Image with more natural blending */}
-            <div className="absolute inset-0 z-0">
-                <img
-                    src={banner}
-                    className="w-full h-full object-cover opacity-80"
-                    alt="Madurai bakery atmosphere"
+  return (
+    <section className="relative min-h-[100vh] flex items-center overflow-hidden bg-[#2F3E2C]">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src={banner}
+          className="w-full h-full object-cover opacity-40"
+          alt="Authentic Indian food spread"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#2F3E2C] via-[#2F3E2C]/85 to-[#2F3E2C]/40" />
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#2F3E2C] to-transparent" />
+      </div>
+
+      {/* Content */}
+      <div className="w-full px-6 md:px-12 lg:px-24 relative z-10 pt-32 pb-20">
+        <div className="max-w-3xl">
+          {/* Trust Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2.5 bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-5 py-2.5 mb-8"
+          >
+            <Sparkles size={14} className="text-[#C6A75E]" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/90">
+              Trusted by 5,000+ Families in Madurai
+            </span>
+          </motion.div>
+
+          {/* Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.7 }}
+            className="text-5xl md:text-7xl lg:text-[5.5rem] font-serif font-black text-white leading-[1.05] tracking-tight mb-7"
+          >
+            Authentic Flavours, <br className="hidden md:block" />
+            Crafted with{" "}
+            <span className="relative inline-block text-[#C6A75E]">
+              Love
+              <svg
+                className="absolute -bottom-2 left-0 w-full"
+                viewBox="0 0 200 12"
+                fill="none"
+              >
+                <path
+                  d="M2 8 C 40 2, 80 12, 120 6 S 180 2, 198 8"
+                  stroke="#C6A75E"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  opacity="0.5"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-secondary via-secondary/90 to-transparent lg:to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-secondary to-transparent" />
-            </div>
+              </svg>
+            </span>
+          </motion.h1>
 
-            <div className="w-full px-6 md:px-12 lg:px-24 relative z-10">
-                <div className="max-w-2xl">
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-2 mb-6"
-                    >
-                        <div className="flex -space-x-2">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="w-8 h-8 rounded-full border-2 border-white overflow-hidden shadow-sm">
-                                    <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="Customer" />
-                                </div>
-                            ))}
-                        </div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-primary-dark/60">
-                            Loved by <span className="text-primary-dark">2,400+ Families</span> in Chennai
-                        </p>
-                    </motion.div>
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="text-lg md:text-xl text-white/70 font-medium mb-12 leading-relaxed max-w-xl"
+          >
+            Handpicked spices, traditional recipes, and pure ingredients —
+            delivered fresh from our kitchen to your doorstep.
+          </motion.p>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-7xl font-serif font-black text-primary-dark leading-[1.1] tracking-tight mb-6"
-                    >
-                        Freshly Baked with <br />
-                        <span className="text-brown italic relative inline-block px-2">
-                            Love
-                            <svg className="absolute -bottom-1 left-0 w-full text-secondary/30 -z-10" viewBox="0 0 100 20" preserveAspectRatio="none">
-                                <path d="M0 10 Q 25 20, 50 10 T 100 10" fill="none" stroke="currentColor" strokeWidth="4" />
-                            </svg>
-                        </span> in Madurai.
-                    </motion.h1>
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45, duration: 0.6 }}
+            className="flex flex-wrap gap-4 mb-16"
+          >
+            <Link
+              href="/shop"
+              className="bg-[#C6A75E] text-[#2F3E2C] px-10 py-5 rounded-2xl font-bold uppercase tracking-wider text-[12px] shadow-xl shadow-[#C6A75E]/20 hover:bg-[#d4b76e] transition-all active:scale-95 flex items-center gap-3 group"
+            >
+              Shop Now
+              <ArrowRight
+                size={16}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+            </Link>
+            <Link
+              href="/about"
+              className="bg-white/10 backdrop-blur-sm text-white px-10 py-5 rounded-2xl font-bold uppercase tracking-wider text-[12px] border border-white/20 hover:bg-white/20 transition-all active:scale-95"
+            >
+              Our Story
+            </Link>
+          </motion.div>
 
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="text-lg md:text-xl text-primary-dark/80 font-sans font-medium mb-10 leading-relaxed max-w-lg"
-                    >
-                        Our traditional wood-fired kitchen brings you the authentic taste of <span className="text-primary font-bold underline decoration-accent/50">homemade goodness</span>, crafted fresh every single morning.
-                    </motion.p>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="flex flex-wrap gap-4"
-                    >
-                        <Link href="/shop" className="bg-accent text-primary-dark px-10 py-5 rounded-full font-sans font-bold uppercase tracking-widest text-[11px] shadow-xl hover:bg-black hover:text-white transition-all active:scale-95 flex items-center gap-2 group">
-                            Order Now <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                        <button className="bg-white/80 backdrop-blur-sm text-primary-dark px-10 py-5 rounded-full font-sans font-bold uppercase tracking-widest text-[11px] shadow-sm border border-primary/10 hover:border-primary transition-all active:scale-95 flex items-center gap-2 group">
-                            <Play size={14} fill="currentColor" /> Our Story
-                        </button>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.8 }}
-                        className="mt-16 flex items-center gap-8"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center text-primary-dark font-serif font-black bg-white">SN</div>
-                            <div className="text-[10px] font-sans font-bold uppercase tracking-widest text-primary-dark/60 leading-tight">
-                                Heritage Baking <br /> <span className="text-primary-dark">Est. 2024</span>
-                            </div>
-                        </div>
-                        <div className="h-8 w-px bg-primary/20" />
-                        <div className="flex items-center gap-2">
-                            <MapPin size={14} className="text-accent" />
-                            <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-primary-dark/60">Delivering Fresh <br /> Across Madurai</span>
-                        </div>
-                    </motion.div>
+          {/* Trust Points */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7, duration: 0.8 }}
+            className="flex flex-wrap gap-8"
+          >
+            {[
+              { icon: Shield, text: "100% Natural" },
+              { icon: Sparkles, text: "Handmade Fresh" },
+              { icon: Truck, text: "Pan-India Delivery" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                  <item.icon size={16} className="text-[#C6A75E]" />
                 </div>
-            </div>
+                <span className="text-xs font-bold text-white/60 uppercase tracking-wider">
+                  {item.text}
+                </span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
 
-            {/* Subtle Brand Imperfections - Floating elements */}
-            <div className="absolute top-1/4 right-10 hidden lg:block opacity-10">
-                <img src="https://img.icons8.com/ios/100/000000/wheat.png" className="w-24 h-24 rotate-12" alt="" />
-            </div>
-        </section>
-    );
+      {/* Decorative Bottom Curve */}
+      <div className="absolute bottom-0 left-0 right-0 z-10">
+        <svg viewBox="0 0 1440 60" fill="none" className="w-full">
+          <path
+            d="M0 60V30C240 5 480 0 720 10C960 20 1200 45 1440 30V60H0Z"
+            fill="#F8F6F2"
+          />
+        </svg>
+      </div>
+    </section>
+  );
 }

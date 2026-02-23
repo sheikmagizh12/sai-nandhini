@@ -213,7 +213,7 @@ export default function AdminSettings() {
 
   return (
     <div className="min-h-screen bg-[#F8F6F2] font-['Inter',sans-serif]">
-      <div className="max-w-[1200px] mx-auto py-8 px-4 md:px-8">
+      <div className="mx-auto py-8 px-4 md:px-8">
         {/* Page Header */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
           <div>

@@ -100,7 +100,7 @@ const imageVariants = {
     x: 0,
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.7, ease: "easeOut" as const },
   },
   exit: (direction: number) => ({
     x: direction > 0 ? -200 : 200,
@@ -205,7 +205,7 @@ export default function HeroCarousel() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
               className="flex flex-col items-start justify-center"
             >
               {/* Tag */}

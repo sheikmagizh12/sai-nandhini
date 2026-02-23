@@ -27,7 +27,7 @@ export const auth = betterAuth({
         required: false,
       },
       address: {
-        type: "object",
+        type: "string",
         required: false,
       },
     },

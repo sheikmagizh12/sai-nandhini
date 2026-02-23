@@ -85,18 +85,20 @@ export default function Footer() {
                 <span className="absolute -bottom-1.5 left-0 w-8 h-[2px] bg-[#C6A75E] rounded-full" />
               </h4>
               <ul className="space-y-3">
-                {["Privacy Policy", "Shipping Policy", "Return & Refund"].map(
-                  (item) => (
-                    <li key={item}>
-                      <Link
-                        href={`/${item.toLowerCase().replace(/ /g, "-")}`}
-                        className="text-white/50 hover:text-[#C6A75E] hover:pl-1 transition-all text-sm"
-                      >
-                        {item}
-                      </Link>
-                    </li>
-                  ),
-                )}
+                {[
+                  { name: "Privacy Policy", link: "/privacy-policy" },
+                  { name: "Shipping Policy", link: "/shipping-policy" },
+                  { name: "Return & Refund", link: "/return-and-refund" },
+                ].map((item) => (
+                  <li key={item.name}>
+                    <Link
+                      href={item.link}
+                      className="text-white/50 hover:text-[#C6A75E] hover:pl-1 transition-all text-sm"
+                    >
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -135,11 +137,11 @@ export default function Footer() {
               </h4>
               <ul className="space-y-3 mb-8">
                 {[
-                  { name: "Customizable Packs", link: "/custom" },
-                  { name: "Personalized Branding", link: "/branding" },
-                  { name: "Bulk Orders", link: "/bulk" },
-                  { name: "Corporate Gifting", link: "/corporate" },
-                  { name: "Event Gifting", link: "/events" },
+                  { name: "Customizable Packs", link: "/enquiry" },
+                  { name: "Personalized Branding", link: "/enquiry" },
+                  { name: "Bulk Orders", link: "/enquiry" },
+                  { name: "Corporate Gifting", link: "/enquiry" },
+                  { name: "Event Gifting", link: "/enquiry" },
                 ].map((item) => (
                   <li key={item.name}>
                     <Link
@@ -174,7 +176,7 @@ export default function Footer() {
           <div className="flex flex-wrap justify-center gap-4 mb-12">
             {[
               { label: "Order Now", link: "/shop" },
-              { label: "Bulk Enquiry", link: "/bulk" },
+              { label: "Bulk Enquiry", link: "/enquiry" },
               { label: "Special Offers", link: "/offers" },
             ].map((btn) => (
               <Link

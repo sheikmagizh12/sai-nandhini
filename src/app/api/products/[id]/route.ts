@@ -6,11 +6,12 @@ import { headers } from "next/headers";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     await connectDB();
-    const product = await Product.findById(params.id);
+    const { id } = await params;
+    const product = await Product.findById(id);
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
@@ -22,7 +23,7 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth.api.getSession({
@@ -34,8 +35,9 @@ export async function PUT(
     }
 
     await connectDB();
+    const { id } = await params;
     const body = await req.json();
-    const product = await Product.findByIdAndUpdate(params.id, body, {
+    const product = await Product.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     });
@@ -51,7 +53,7 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth.api.getSession({
@@ -63,7 +65,8 @@ export async function DELETE(
     }
 
     await connectDB();
-    const product = await Product.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const product = await Product.findByIdAndDelete(id);
     if (!product)
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     return NextResponse.json({ message: "Product deleted successfully" });

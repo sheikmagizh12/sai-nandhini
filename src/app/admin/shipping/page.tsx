@@ -98,35 +98,35 @@ export default function ShippingManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-              <Truck className="text-white" size={24} />
+        <div className="bg-white p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[3rem] shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-10">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 sm:w-16 sm:h-16 bg-gradient-to-br from-primary to-primary-dark rounded-[1rem] sm:rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+              <Truck className="text-white sm:w-8 sm:h-8" size={20} />
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-primary-dark">
-                Shipping Management
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-3xl font-serif font-black text-primary-dark leading-none">
+                Shipping Manager
               </h1>
-              <p className="text-gray-500 text-sm">
-                Manage amount-based shipping rates
+              <p className="text-gray-400 mt-2 font-medium text-[10px] sm:text-sm truncate">
+                Set and maintain amount-based delivery rates.
               </p>
             </div>
           </div>
         </div>
 
         {/* Add New Rate Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
-          <h2 className="text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-            <Plus size={20} />
+        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 sm:p-8 mb-6">
+          <h2 className="text-lg sm:text-xl font-serif font-black text-primary-dark mb-6 flex items-center gap-2">
+            <Plus size={20} className="text-primary" />
             Add New Shipping Rate
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-2">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2 px-1">
                 Min Amount (₹)
               </label>
               <input
@@ -139,12 +139,12 @@ export default function ShippingManagementPage() {
                     minAmount: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="w-full border border-gray-300 rounded-lg py-3 px-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base tabular-nums focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-2">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2 px-1">
                 Max Amount (₹)
               </label>
               <input
@@ -157,12 +157,12 @@ export default function ShippingManagementPage() {
                     maxAmount: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="w-full border border-gray-300 rounded-lg py-3 px-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base tabular-nums focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-2">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2 px-1">
                 Rate (₹)
               </label>
               <input
@@ -175,7 +175,7 @@ export default function ShippingManagementPage() {
                     rate: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="w-full border border-gray-300 rounded-lg py-3 px-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base tabular-nums focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
               />
             </div>
 
@@ -183,7 +183,7 @@ export default function ShippingManagementPage() {
               <button
                 onClick={addRate}
                 disabled={saving}
-                className="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full bg-primary hover:bg-primary-dark text-white py-3.5 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation text-xs uppercase tracking-widest"
               >
                 {saving ? (
                   <Loader2 className="animate-spin" size={18} />
@@ -199,9 +199,9 @@ export default function ShippingManagementPage() {
         </div>
 
         {/* Existing Rates */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <h2 className="text-xl font-bold text-primary-dark mb-6 flex items-center gap-2">
-            <Package size={20} />
+        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-serif font-black text-primary-dark mb-6 flex items-center gap-2">
+            <Package size={20} className="text-primary" />
             Current Shipping Rates
           </h2>
 
@@ -215,23 +215,23 @@ export default function ShippingManagementPage() {
               {rates.map((rate) => (
                 <div
                   key={rate._id}
-                  className="flex items-center justify-between p-5 border border-gray-200 rounded-xl hover:border-primary/30 transition-all"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 border border-gray-100 rounded-2xl hover:border-primary/30 transition-all gap-4"
                 >
-                  <div className="flex items-center gap-6">
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500 uppercase font-bold mb-1">
-                        Amount Range
+                  <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full sm:w-auto">
+                    <div className="min-w-0">
+                      <p className="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black tracking-widest mb-1.5 leading-none">
+                        Order Range
                       </p>
-                      <p className="text-lg font-bold text-primary-dark">
+                      <p className="text-[13px] sm:text-lg font-black text-primary-dark tabular-nums truncate">
                         ₹{rate.minAmount} - ₹{rate.maxAmount}
                       </p>
                     </div>
-                    <div className="h-12 w-px bg-gray-200" />
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500 uppercase font-bold mb-1">
-                        Shipping Rate
+                    <div className="hidden sm:block h-10 w-px bg-gray-50" />
+                    <div className="min-w-0">
+                      <p className="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black tracking-widest mb-1.5 leading-none">
+                        Ship Rate
                       </p>
-                      <p className="text-2xl font-bold text-primary">
+                      <p className="text-lg sm:text-2xl font-serif font-black text-primary tabular-nums">
                         ₹{rate.rate}
                       </p>
                     </div>
@@ -239,9 +239,9 @@ export default function ShippingManagementPage() {
 
                   <button
                     onClick={() => deleteRate(rate._id!)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-3 rounded-lg transition-all"
+                    className="self-end sm:self-auto text-red-500 hover:text-red-700 hover:bg-red-50 p-2.5 sm:p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-500 focus-visible:outline-none touch-manipulation"
                   >
-                    <Trash2 size={20} />
+                    <Trash2 size={18} />
                   </button>
                 </div>
               ))}

@@ -265,76 +265,77 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
   return (
     <div className="space-y-8 pb-20">
       {/* Header Section */}
-      <div className="relative overflow-hidden rounded-[3rem] bg-white border border-gray-100 p-8 shadow-sm">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <span className="text-primary font-bold uppercase tracking-[0.3em] text-[10px] block">
-              Marketing Tools
-            </span>
-            <h1 className="text-3xl md:text-4xl font-serif font-black text-primary-dark">
-              Coupon Management
-            </h1>
-            <p className="text-gray-400 text-sm max-w-xl font-medium">
-              Create and manage promotional discount codes to drive sales and
-              reward customer loyalty.
+      <div className="relative overflow-hidden rounded-[1.5rem] sm:rounded-[3rem] bg-white border border-gray-100 p-5 sm:p-10 shadow-sm">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-4">
+            <div>
+              <span className="text-primary font-black uppercase tracking-[0.3em] text-[8px] sm:text-[10px] block mb-2">
+                Marketing Tools
+              </span>
+              <h1 className="text-xl sm:text-3xl lg:text-4xl font-serif font-black text-primary-dark text-balance leading-none sm:leading-tight">
+                Coupon Manager
+              </h1>
+            </div>
+            <p className="text-gray-400 text-[10px] sm:text-sm max-w-xl font-medium">
+              Create and manage promotional codes to drive sales.
             </p>
           </div>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button
               onClick={() => setIsBulkDialogOpen(true)}
-              className="px-6 py-3 rounded-2xl font-bold border border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all flex items-center gap-2 text-sm"
+              className="px-6 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-black border border-gray-100 text-gray-400 hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest focus:ring-4 focus:ring-primary/5 touch-manipulation w-full sm:w-auto active:scale-95"
             >
-              <Copy size={16} />
-              Bulk Generate
+              <Copy size={16} className="shrink-0" />
+              Bulk Create
             </button>
             <button
               onClick={openAddDialog}
-              className="bg-primary text-white px-6 py-3 rounded-2xl font-bold shadow-xl hover:bg-primary-dark transition-all flex items-center gap-2 active:scale-95 text-sm"
+              className="bg-primary text-white px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-black shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all flex items-center justify-center gap-2 active:scale-95 text-[10px] uppercase tracking-widest focus:ring-4 focus:ring-primary/10 touch-manipulation w-full sm:w-auto"
             >
-              <Plus size={16} />
-              Create Coupon
+              <Plus size={16} className="shrink-0" />
+              New Coupon
             </button>
           </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-[2rem] border border-gray-100 flex items-center gap-4">
-          <div className="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary">
-            <Ticket size={24} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-white p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-gray-100 flex items-center gap-5 sm:gap-6 shadow-sm">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/5 rounded-xl sm:rounded-2xl flex items-center justify-center text-primary shrink-0 transition-transform group-hover:scale-110">
+            <Ticket size={24} className="sm:w-8 sm:h-8" />
           </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-              Total Coupons
+          <div className="min-w-0">
+            <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 leading-none">
+              Total
             </p>
-            <h3 className="text-2xl font-serif font-black text-primary-dark">
+            <h3 className="text-2xl sm:text-3xl font-serif font-black text-primary-dark tabular-nums truncate">
               {coupons.length}
             </h3>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-[2rem] border border-gray-100 flex items-center gap-4">
-          <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600">
-            <Activity size={24} />
+        <div className="bg-white p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-gray-100 flex items-center gap-5 sm:gap-6 shadow-sm">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-50 rounded-xl sm:rounded-2xl flex items-center justify-center text-green-600 shrink-0 transition-transform group-hover:scale-110">
+            <Activity size={24} className="sm:w-8 sm:h-8" />
           </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-              Active Now
+          <div className="min-w-0">
+            <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 leading-none">
+              Active
             </p>
-            <h3 className="text-2xl font-serif font-black text-primary-dark">
+            <h3 className="text-2xl sm:text-3xl font-serif font-black text-primary-dark tabular-nums truncate">
               {coupons.filter((c) => c.isActive).length}
             </h3>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-[2rem] border border-gray-100 flex items-center gap-4">
-          <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600">
-            <ShoppingCart size={24} />
+        <div className="bg-white p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-gray-100 flex items-center gap-5 sm:gap-6 shadow-sm sm:col-span-2 lg:col-span-1">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-orange-50 rounded-xl sm:rounded-2xl flex items-center justify-center text-orange-600 shrink-0 transition-transform group-hover:scale-110">
+            <ShoppingCart size={24} className="sm:w-8 sm:h-8" />
           </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-              Total Redemptions
+          <div className="min-w-0">
+            <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 leading-none">
+              Used
             </p>
-            <h3 className="text-2xl font-serif font-black text-primary-dark">
+            <h3 className="text-2xl sm:text-3xl font-serif font-black text-primary-dark tabular-nums truncate">
               {coupons.reduce((acc, c) => acc + (c.usedCount || 0), 0)}
             </h3>
           </div>
@@ -346,7 +347,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
           <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center text-primary mb-6">
             <Ticket size={40} />
           </div>
-          <h2 className="text-2xl font-serif font-bold text-primary-dark mb-2">
+          <h2 className="text-2xl font-serif font-bold text-primary-dark mb-2 text-balance">
             No Active Coupons
           </h2>
           <p className="text-gray-400 max-w-md mx-auto mb-8 text-sm">
@@ -354,7 +355,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
           </p>
           <button
             onClick={openAddDialog}
-            className="border-2 border-primary/20 text-primary px-8 py-3 rounded-2xl font-bold hover:bg-primary/5 transition-all"
+            className="border-2 border-primary/20 text-primary px-8 py-3 rounded-2xl font-bold hover:bg-primary/5 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
           >
             Create First Coupon
           </button>
@@ -368,7 +369,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-[2rem] shadow-sm border border-gray-100 group hover:border-primary/20 transition-all flex flex-col overflow-hidden"
+                className="bg-white rounded-[1.5rem] sm:rounded-[2rem] shadow-sm border border-gray-100 group hover:border-primary/20 transition-all flex flex-col overflow-hidden"
               >
                 <div className="p-6 border-b border-gray-50 flex justify-between items-start bg-gray-50/30">
                   <div className="space-y-1">
@@ -389,21 +390,21 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                   <div className="flex gap-1">
                     <button
                       onClick={() => handleShare(coupon.code)}
-                      className="w-8 h-8 rounded-lg text-primary hover:bg-primary/10 flex items-center justify-center transition-colors"
+                      className="w-8 h-8 rounded-lg text-primary hover:bg-primary/10 flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                       title="Share Coupon"
                     >
                       <Share2 size={14} />
                     </button>
                     <button
                       onClick={() => openEditDialog(coupon)}
-                      className="w-8 h-8 rounded-lg text-gray-400 hover:text-primary hover:bg-gray-100 flex items-center justify-center transition-colors"
+                      className="w-8 h-8 rounded-lg text-gray-400 hover:text-primary hover:bg-gray-100 flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                       title="Edit Coupon"
                     >
                       <Pencil size={14} />
                     </button>
                     <button
                       onClick={() => setDeleteId(coupon._id)}
-                      className="w-8 h-8 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors"
+                      className="w-8 h-8 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                       title="Delete Coupon"
                     >
                       <Trash2 size={14} />
@@ -413,45 +414,57 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
 
                 <div className="p-6 space-y-5 flex-1 bg-white">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">
+                    <div className="space-y-1 min-w-0">
+                      <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-gray-400 leading-none">
                         Discount
                       </p>
-                      <div className="flex items-center gap-1.5 font-bold text-xl text-primary-dark">
+                      <div className="flex items-center gap-1.5 font-black text-lg sm:text-2xl text-primary-dark tabular-nums truncate">
                         {coupon.discountType === "percentage" ? (
                           <>
                             {coupon.discountValue}
-                            <Percent size={16} className="text-primary" />
+                            <Percent
+                              size={14}
+                              className="text-primary sm:w-5 sm:h-5"
+                            />
                           </>
                         ) : coupon.discountType === "fixed" ? (
                           <>
-                            <IndianRupee size={16} className="text-[#f8bf51]" />
+                            <IndianRupee
+                              size={14}
+                              className="text-[#f8bf51] sm:w-5 sm:h-5"
+                            />
                             {coupon.discountValue}
                           </>
                         ) : (
-                          <div className="flex items-center gap-2 text-primary">
-                            <Truck size={16} />
-                            <span className="text-sm">Free Delivery</span>
+                          <div className="flex items-center gap-1 text-primary">
+                            <Truck size={14} className="shrink-0" />
+                            <span className="text-[10px] sm:text-xs">
+                              Free Del.
+                            </span>
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">
+                    <div className="space-y-1 min-w-0 text-right md:text-left">
+                      <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-gray-400 leading-none">
                         Min. Order
                       </p>
-                      <div className="flex items-center gap-1.5 font-bold text-xl text-gray-700">
-                        <IndianRupee size={16} className="text-gray-300" />
+                      <div className="flex items-center justify-end md:justify-start gap-1 sm:gap-1.5 font-black text-lg sm:text-2xl text-gray-500 tabular-nums truncate">
+                        <IndianRupee
+                          size={14}
+                          className="text-gray-200 sm:w-4 sm:h-4"
+                        />
                         {coupon.minOrderValue || 0}
                       </div>
                     </div>
                   </div>
 
                   <div className="pt-4 border-t border-gray-50 space-y-2">
-                    <div className="flex justify-between items-center text-xs font-medium text-gray-500">
+                    <div className="flex justify-between items-center text-xs font-medium text-gray-500 tabular-nums">
                       <div className="flex items-center gap-1.5">
                         <Activity size={14} className="text-gray-300" />
-                        Total Used: {coupon.usedCount || 0} / {coupon.usageLimit || "∞"}
+                        Total Used: {coupon.usedCount || 0} /{" "}
+                        {coupon.usageLimit || "∞"}
                       </div>
                       {coupon.expiresAt && (
                         <div className="flex items-center gap-1.5 text-orange-500/80">
@@ -471,7 +484,8 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                           Per User:
                         </span>
                         <span className="text-gray-600">
-                          {coupon.perUserLimit} use{coupon.perUserLimit > 1 ? 's' : ''} max
+                          {coupon.perUserLimit} use
+                          {coupon.perUserLimit > 1 ? "s" : ""} max
                         </span>
                       </div>
                     )}
@@ -498,7 +512,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden relative"
+                className="bg-white rounded-[2.5rem] shadow-2xl w-[95%] md:w-full max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden relative"
               >
                 <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-[#ece0cc]">
                   <div>
@@ -511,7 +525,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                   </div>
                   <button
                     onClick={() => setIsDialogOpen(false)}
-                    className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all"
+                    className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation shrink-0"
                   >
                     <X size={18} />
                   </button>
@@ -538,7 +552,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                               code: e.target.value.toUpperCase(),
                             })
                           }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-all font-black text-lg uppercase tracking-wider text-primary-dark placeholder:text-gray-300"
+                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-shadow font-black text-lg uppercase tracking-wider text-primary-dark placeholder:text-gray-300"
                           placeholder="SUMMER2026"
                         />
                         <Ticket
@@ -561,7 +575,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                               discountType: e.target.value,
                             })
                           }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-all font-medium text-gray-700 appearance-none cursor-pointer"
+                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-colors font-medium text-gray-700 appearance-none cursor-pointer"
                         >
                           <option value="percentage">Percentage (%)</option>
                           <option value="fixed">Fixed Amount (₹)</option>
@@ -592,7 +606,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                                   discountValue: Number(e.target.value),
                                 })
                               }
-                              className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-all font-bold text-gray-700"
+                              className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-shadow font-bold text-gray-700"
                               placeholder="20"
                             />
                           </div>
@@ -618,7 +632,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                               minOrderValue: Number(e.target.value),
                             })
                           }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-all font-bold text-gray-700"
+                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-shadow font-bold text-gray-700"
                           placeholder="0"
                         />
                       </div>
@@ -640,7 +654,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                                 : undefined,
                             })
                           }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-all font-bold text-gray-700"
+                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
                           placeholder="∞"
                         />
                       </div>
@@ -659,7 +673,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                                 : undefined,
                             })
                           }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-all font-bold text-gray-700"
+                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
                           placeholder="∞"
                         />
                       </div>
@@ -686,7 +700,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                                   : undefined,
                               })
                             }
-                            className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-all font-bold text-gray-700"
+                            className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-shadow font-bold text-gray-700"
                             placeholder="No limit"
                           />
                         </div>
@@ -706,7 +720,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                             expiresAt: e.target.value,
                           })
                         }
-                        className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-all font-bold text-gray-700"
+                        className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
                       />
                     </div>
 
@@ -723,7 +737,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                             description: e.target.value,
                           })
                         }
-                        className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-all font-bold text-gray-700"
+                        className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
                         placeholder="E.g. Diwali Special"
                       />
                     </div>
@@ -769,7 +783,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                 <div className="p-8 border-t border-gray-100 bg-gray-50 flex gap-4">
                   <button
                     onClick={() => setIsDialogOpen(false)}
-                    className="flex-1 py-4 rounded-2xl font-bold bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 transition-all"
+                    className="flex-1 py-4 rounded-2xl font-bold bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                   >
                     Cancel
                   </button>
@@ -777,7 +791,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                     type="submit"
                     form="coupon-form"
                     disabled={isActionLoading}
-                    className="flex-1 bg-primary text-white py-4 rounded-2xl font-bold hover:bg-primary-dark transition-all shadow-xl active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
+                    className="flex-1 bg-primary text-white py-4 rounded-2xl font-bold hover:bg-primary-dark transition-colors shadow-xl active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                   >
                     {isActionLoading ? (
                       <Loader2 className="animate-spin" size={18} />
@@ -796,7 +810,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg flex flex-col overflow-hidden relative"
+                className="bg-white rounded-[2.5rem] shadow-2xl w-[95%] md:w-full max-w-lg flex flex-col overflow-hidden relative"
               >
                 <div className="p-8 border-b border-gray-100 bg-[#ece0cc] flex items-center justify-between">
                   <div>
@@ -810,7 +824,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                   </div>
                   <button
                     onClick={() => setIsBulkDialogOpen(false)}
-                    className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all"
+                    className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                   >
                     <X size={18} />
                   </button>
@@ -839,7 +853,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                               count: Number(e.target.value),
                             })
                           }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-all font-bold text-gray-700"
+                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
                         />
                       </div>
                       <div className="space-y-2">
@@ -855,7 +869,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                               prefix: e.target.value.toUpperCase(),
                             })
                           }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-all font-black uppercase text-primary-dark"
+                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-black uppercase text-primary-dark"
                           placeholder="E.g. NEW"
                         />
                       </div>
@@ -873,7 +887,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                             discountType: e.target.value,
                           })
                         }
-                        className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-all font-medium text-gray-700 appearance-none cursor-pointer"
+                        className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-medium text-gray-700 appearance-none cursor-pointer"
                       >
                         <option value="percentage">Percentage (%)</option>
                         <option value="fixed">Fixed Amount (₹)</option>
@@ -904,7 +918,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                                 discountValue: Number(e.target.value),
                               })
                             }
-                            className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-all font-bold text-gray-700"
+                            className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-shadow font-bold text-gray-700"
                           />
                         </div>
                       </div>
@@ -923,7 +937,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                             minOrderValue: Number(e.target.value),
                           })
                         }
-                        className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-all font-bold text-gray-700"
+                        className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
                       />
                     </div>
 
@@ -942,7 +956,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                               usageLimit: Number(e.target.value),
                             })
                           }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-all font-bold text-gray-700"
+                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
                         />
                       </div>
                       <div className="space-y-2">
@@ -959,7 +973,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                               perUserLimit: Number(e.target.value),
                             })
                           }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-all font-bold text-gray-700"
+                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
                         />
                       </div>
                     </div>
@@ -969,7 +983,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                 <div className="p-8 border-t border-gray-100 bg-gray-50 flex gap-4">
                   <button
                     onClick={() => setIsBulkDialogOpen(false)}
-                    className="flex-1 py-4 rounded-2xl font-bold bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 transition-all"
+                    className="flex-1 py-4 rounded-2xl font-bold bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors"
                   >
                     Cancel
                   </button>
@@ -977,7 +991,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                     type="submit"
                     form="bulk-form"
                     disabled={isActionLoading}
-                    className="flex-1 bg-primary text-white py-4 rounded-2xl font-bold hover:bg-primary-dark transition-all shadow-xl active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
+                    className="flex-1 bg-primary text-white py-4 rounded-2xl font-bold hover:bg-primary-dark transition-colors shadow-xl active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
                   >
                     {isActionLoading ? (
                       <Loader2 className="animate-spin" size={18} />

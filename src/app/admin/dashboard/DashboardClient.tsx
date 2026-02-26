@@ -183,78 +183,83 @@ export default function DashboardClient({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-8 pb-20"
+      className="space-y-8 pb-20 px-0 sm:px-0"
     >
       {/* Header Section */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-        <div>
-          <motion.h1
-            variants={itemVariants}
-            className="text-5xl font-serif font-black text-[#234d1b] tracking-tight"
-          >
-            Dashboard
-          </motion.h1>
-          <motion.p
-            variants={itemVariants}
-            className="text-gray-500 mt-2 font-medium flex items-center gap-2"
-          >
-            <Zap size={14} className="text-[#f8bf51] fill-[#f8bf51]" />
-            Real-time business performance for{" "}
-            <span className="text-[#234d1b] font-black underline decoration-[#f8bf51] decoration-2">
-              Sai Nandhini
-            </span>
-          </motion.p>
-        </div>
-
-        <motion.div
-          variants={itemVariants}
-          className="flex bg-white/50 backdrop-blur-md p-1.5 rounded-2xl shadow-inner border border-white/20"
-        >
-          {(["today", "week", "month"] as const).map((r) => (
-            <button
-              key={r}
-              onClick={() => setDateRange(r)}
-              className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
-                dateRange === r
-                  ? "bg-[#234d1b] text-white shadow-xl scale-105"
-                  : "text-gray-400 hover:text-[#234d1b] hover:bg-white/40"
-              }`}
+      <header className="flex flex-col lg:flex-row justify-between lg:items-center gap-4 sm:gap-6">
+        <div className="bg-white p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[3rem] shadow-sm border border-gray-100 flex flex-col lg:flex-row justify-between lg:items-center gap-4 sm:gap-6">
+          <div className="min-w-0">
+            <motion.h1
+              variants={itemVariants}
+              className="text-xl sm:text-3xl lg:text-5xl font-serif font-black text-[#234d1b] leading-none"
             >
-              {r}
-            </button>
-          ))}
-        </motion.div>
+              Dashboard
+            </motion.h1>
+            <motion.p
+              variants={itemVariants}
+              className="text-gray-400 mt-2 font-medium flex items-center gap-2 text-[10px] sm:text-sm truncate"
+            >
+              <Zap
+                size={14}
+                className="text-[#f8bf51] fill-[#f8bf51] shrink-0"
+              />
+              Live overview for{" "}
+              <span className="text-[#234d1b] font-black underline decoration-[#f8bf51]/50">
+                Sai Nandhini
+              </span>
+            </motion.p>
+          </div>
+
+          <motion.div
+            variants={itemVariants}
+            className="flex bg-gray-50/50 p-1 rounded-xl sm:rounded-2xl border border-gray-100 gap-1 w-full sm:w-auto"
+          >
+            {(["today", "week", "month"] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setDateRange(r)}
+                className={`flex-1 sm:flex-none px-4 sm:px-8 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] transition-all touch-manipulation whitespace-nowrap ${
+                  dateRange === r
+                    ? "bg-[#234d1b] text-white shadow-lg shadow-primary/20 scale-[1.02]"
+                    : "text-gray-400 hover:text-[#234d1b] hover:bg-white"
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+          </motion.div>
+        </div>
       </header>
 
       {/* Primary KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
         {/* Revenue Card */}
         <motion.div
           variants={itemVariants}
-          className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 hover:shadow-xl transition-all group overflow-hidden relative"
+          className="bg-white p-4 sm:p-6 lg:p-8 rounded-[2rem] sm:rounded-[32px] shadow-sm border border-gray-100 hover:shadow-xl transition-shadow group overflow-hidden relative"
         >
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
-            <TrendingUp size={80} className="text-[#234d1b]" />
+          <div className="absolute top-0 right-0 p-4 sm:p-8 opacity-5 group-hover:scale-110 transition-transform">
+            <TrendingUp
+              size={60}
+              className="text-[#234d1b] sm:w-[80px] sm:h-[80px]"
+            />
           </div>
           <div className="relative z-10 h-full flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-6">
-              <div className="p-3 bg-green-50 text-[#234d1b] rounded-2xl">
-                <TrendingUp size={24} />
+            <div className="flex justify-between items-start mb-4 sm:mb-6">
+              <div className="p-2.5 sm:p-3 bg-green-50 text-[#234d1b] rounded-xl sm:rounded-2xl">
+                <TrendingUp size={20} className="sm:w-6 sm:h-6" />
               </div>
               <GrowthIndicator value={data.stats.revenue.growth} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
+              <p className="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 leading-none">
                 Period Revenue
               </p>
-              <h3 className="text-3xl font-serif font-black text-[#234d1b]">
+              <h3 className="text-xl sm:text-3xl font-serif font-black text-[#234d1b]">
                 {formatCurrency(data.stats.revenue.current)}
               </h3>
-              <p className="text-[10px] text-gray-400 mt-2 flex items-center gap-1">
-                Total:{" "}
-                <span className="font-bold text-[#234d1b]">
-                  {formatCurrency(data.stats.revenue.total)}
-                </span>
+              <p className="text-[8px] sm:text-[10px] text-gray-400 mt-2.5 flex items-center gap-1 font-medium italic">
+                Life: {formatCurrency(data.stats.revenue.total)}
               </p>
             </div>
           </div>
@@ -263,31 +268,34 @@ export default function DashboardClient({
         {/* Orders Card */}
         <motion.div
           variants={itemVariants}
-          className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 hover:shadow-xl transition-all group overflow-hidden relative"
+          className="bg-white p-4 sm:p-6 lg:p-8 rounded-[2rem] sm:rounded-[32px] shadow-sm border border-gray-100 hover:shadow-xl transition-shadow group overflow-hidden relative"
         >
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
-            <ShoppingBag size={80} className="text-[#f8bf51]" />
+          <div className="absolute top-0 right-0 p-4 sm:p-8 opacity-5 group-hover:scale-110 transition-transform">
+            <ShoppingBag
+              size={60}
+              className="text-[#f8bf51] sm:w-[80px] sm:h-[80px]"
+            />
           </div>
           <div className="relative z-10 h-full flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-6">
-              <div className="p-3 bg-amber-50 text-[#f8bf51] rounded-2xl">
-                <ShoppingBag size={24} />
+            <div className="flex justify-between items-start mb-4 sm:mb-6">
+              <div className="p-2.5 sm:p-3 bg-amber-50 text-[#f8bf51] rounded-xl sm:rounded-2xl">
+                <ShoppingBag size={20} className="sm:w-6 sm:h-6" />
               </div>
               <GrowthIndicator value={data.stats.orders.growth} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                New Orders
+              <p className="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 leading-none">
+                New Transactions
               </p>
-              <h3 className="text-3xl font-serif font-black text-[#234d1b]">
+              <h3 className="text-xl sm:text-3xl font-serif font-black text-[#234d1b]">
                 {data.stats.orders.current}
               </h3>
-              <div className="flex gap-3 mt-2">
-                <span className="flex items-center gap-1 text-[9px] font-black px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">
-                  {data.stats.orders.pending} Pending
+              <div className="flex flex-wrap gap-2 mt-2.5">
+                <span className="text-[8px] sm:text-[9px] font-black px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100">
+                  {data.stats.orders.pending} Wait
                 </span>
-                <span className="flex items-center gap-1 text-[9px] font-black px-2 py-0.5 bg-green-50 text-green-600 rounded-full">
-                  {data.stats.orders.active - data.stats.orders.pending} Work
+                <span className="text-[8px] sm:text-[9px] font-black px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100">
+                  {data.stats.orders.active - data.stats.orders.pending} Done
                 </span>
               </div>
             </div>
@@ -297,36 +305,39 @@ export default function DashboardClient({
         {/* Products Card */}
         <motion.div
           variants={itemVariants}
-          className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 hover:shadow-xl transition-all group overflow-hidden relative"
+          className="bg-white p-4 sm:p-6 lg:p-8 rounded-[2rem] sm:rounded-[32px] shadow-sm border border-gray-100 hover:shadow-xl transition-shadow group overflow-hidden relative"
         >
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
-            <Layers size={80} className="text-indigo-600" />
+          <div className="absolute top-0 right-0 p-4 sm:p-8 opacity-5 group-hover:scale-110 transition-transform">
+            <Layers
+              size={60}
+              className="text-indigo-600 sm:w-[80px] sm:h-[80px]"
+            />
           </div>
           <div className="relative z-10 h-full flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-6">
-              <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-                <Layers size={24} />
+            <div className="flex justify-between items-start mb-4 sm:mb-6">
+              <div className="p-2.5 sm:p-3 bg-indigo-50 text-indigo-600 rounded-xl sm:rounded-2xl">
+                <Layers size={20} className="sm:w-6 sm:h-6" />
               </div>
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                Catalog Status
+              <p className="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 leading-none">
+                Active Catalog
               </p>
-              <h3 className="text-3xl font-serif font-black text-[#234d1b]">
+              <h3 className="text-xl sm:text-3xl font-serif font-black text-[#234d1b]">
                 {data.stats.products.total}
               </h3>
-              <div className="flex gap-2 mt-2">
+              <div className="flex flex-wrap gap-2 mt-2.5">
                 {data.stats.products.outOfStock > 0 ? (
-                  <span className="text-[9px] font-black px-2 py-0.5 bg-red-50 text-red-600 rounded-full border border-red-100">
-                    {data.stats.products.outOfStock} Out
+                  <span className="text-[8px] sm:text-[9px] font-black px-2 py-1 bg-red-50 text-red-600 rounded-lg border border-red-100">
+                    {data.stats.products.outOfStock} Empty
                   </span>
                 ) : (
-                  <span className="text-[9px] font-black px-2 py-0.5 bg-green-50 text-green-600 rounded-full">
+                  <span className="text-[8px] sm:text-[9px] font-black px-2 py-1 bg-green-50 text-green-600 rounded-lg">
                     Stocked
                   </span>
                 )}
                 {data.stats.products.lowStock > 0 && (
-                  <span className="text-[9px] font-black px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full border border-amber-100">
+                  <span className="text-[8px] sm:text-[9px] font-black px-2 py-1 bg-amber-50 text-amber-600 rounded-lg border border-amber-100">
                     {data.stats.products.lowStock} Low
                   </span>
                 )}
@@ -338,25 +349,28 @@ export default function DashboardClient({
         {/* Customers Card */}
         <motion.div
           variants={itemVariants}
-          className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 hover:shadow-xl transition-all group overflow-hidden relative"
+          className="bg-white p-4 sm:p-6 lg:p-8 rounded-[2rem] sm:rounded-[32px] shadow-sm border border-gray-100 hover:shadow-xl transition-shadow group overflow-hidden relative"
         >
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
-            <Users size={80} className="text-emerald-600" />
+          <div className="absolute top-0 right-0 p-4 sm:p-8 opacity-5 group-hover:scale-110 transition-transform">
+            <Users
+              size={60}
+              className="text-emerald-600 sm:w-[80px] sm:h-[80px]"
+            />
           </div>
           <div className="relative z-10 h-full flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-6">
-              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
-                <Users size={24} />
+            <div className="flex justify-between items-start mb-4 sm:mb-6">
+              <div className="p-2.5 sm:p-3 bg-emerald-50 text-emerald-600 rounded-xl sm:rounded-2xl">
+                <Users size={20} className="sm:w-6 sm:h-6" />
               </div>
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
+              <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
                 Customer Base
               </p>
-              <h3 className="text-3xl font-serif font-black text-[#234d1b]">
+              <h3 className="text-2xl sm:text-3xl font-serif font-black text-[#234d1b]">
                 {data.stats.customers.total}
               </h3>
-              <p className="text-[10px] text-emerald-600 mt-2 font-bold flex items-center gap-1">
+              <p className="text-[9px] sm:text-[10px] text-emerald-600 mt-2 font-bold flex items-center gap-1">
                 Verified Profiles
               </p>
             </div>
@@ -369,14 +383,14 @@ export default function DashboardClient({
         {/* Main Performance Graph */}
         <motion.div
           variants={itemVariants}
-          className="lg:col-span-2 bg-white p-10 rounded-[40px] shadow-sm border border-gray-100"
+          className="lg:col-span-2 bg-white p-4 sm:p-6 md:p-10 rounded-[2rem] sm:rounded-[40px] shadow-sm border border-gray-100"
         >
-          <div className="flex justify-between items-center mb-10">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6 md:mb-10">
             <div>
-              <h3 className="text-2xl font-serif font-black text-[#234d1b]">
+              <h3 className="text-lg md:text-2xl font-serif font-black text-[#234d1b] text-balance">
                 Revenue Velocity
               </h3>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">
+              <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1">
                 Transaction Performance
               </p>
             </div>
@@ -390,7 +404,7 @@ export default function DashboardClient({
             </div>
           </div>
 
-          <div className="h-[350px] w-full">
+          <div className="h-[250px] sm:h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data.salesTrend}>
                 <defs>
@@ -467,13 +481,13 @@ export default function DashboardClient({
         {/* Status Distribution */}
         <motion.div
           variants={itemVariants}
-          className="bg-white p-10 rounded-[40px] shadow-sm border border-gray-100 flex flex-col"
+          className="bg-white p-4 sm:p-6 md:p-10 rounded-[2rem] sm:rounded-[40px] shadow-sm border border-gray-100 flex flex-col"
         >
-          <div className="mb-8">
-            <h3 className="text-2xl font-serif font-black text-[#234d1b]">
+          <div className="mb-6 sm:mb-8">
+            <h3 className="text-lg md:text-2xl font-serif font-black text-[#234d1b] text-balance">
               Order Split
             </h3>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">
+            <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1">
               Status Distribution
             </p>
           </div>
@@ -557,11 +571,11 @@ export default function DashboardClient({
         {/* Top Products */}
         <motion.div
           variants={itemVariants}
-          className="bg-white p-10 rounded-[40px] shadow-sm border border-gray-100"
+          className="bg-white p-5 md:p-10 rounded-[40px] shadow-sm border border-gray-100"
         >
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h3 className="text-2xl font-serif font-black text-[#234d1b]">
+              <h3 className="text-xl md:text-2xl font-serif font-black text-[#234d1b] text-balance">
                 Signature Items
               </h3>
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">
@@ -599,11 +613,11 @@ export default function DashboardClient({
         {/* Revenue by Category */}
         <motion.div
           variants={itemVariants}
-          className="bg-white p-10 rounded-[40px] shadow-sm border border-gray-100"
+          className="bg-white p-5 md:p-10 rounded-[40px] shadow-sm border border-gray-100"
         >
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h3 className="text-2xl font-serif font-black text-[#234d1b]">
+              <h3 className="text-xl md:text-2xl font-serif font-black text-[#234d1b] text-balance">
                 Profit Centers
               </h3>
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">
@@ -666,11 +680,11 @@ export default function DashboardClient({
       {/* Recent Activity Table */}
       <motion.div
         variants={itemVariants}
-        className="bg-white p-10 rounded-[40px] shadow-sm border border-gray-100"
+        className="bg-white p-5 md:p-10 rounded-[40px] shadow-sm border border-gray-100"
       >
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6 md:mb-10">
           <div>
-            <h3 className="text-2xl font-serif font-black text-[#234d1b]">
+            <h3 className="text-xl md:text-2xl font-serif font-black text-[#234d1b] text-balance">
               Recent Transactions
             </h3>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">
@@ -679,7 +693,7 @@ export default function DashboardClient({
           </div>
           <Link
             href="/admin/orders"
-            className="group flex items-center gap-2 px-6 py-2.5 bg-gray-50 hover:bg-[#234d1b] text-[#234d1b] hover:text-white rounded-2xl transition-all duration-300 font-black text-[10px] uppercase tracking-widest"
+            className="group flex items-center gap-2 px-6 py-2.5 bg-gray-50 hover:bg-[#234d1b] text-[#234d1b] hover:text-white rounded-2xl transition-colors duration-300 font-black text-[10px] uppercase tracking-widest self-start sm:self-auto"
           >
             Full Ledger
             <ChevronRight
@@ -689,8 +703,8 @@ export default function DashboardClient({
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="hidden md:block overflow-x-auto w-full">
+          <table className="w-full min-w-[700px]">
             <thead>
               <tr className="text-left text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] border-b border-gray-50">
                 <th className="pb-6 pl-4">Client</th>
@@ -748,7 +762,7 @@ export default function DashboardClient({
                   <td className="py-6 text-right pr-4">
                     <Link
                       href={`/admin/orders?id=${order._id}`}
-                      className="p-2 text-gray-300 hover:text-[#234d1b] hover:bg-gray-50 rounded-xl transition-all inline-block"
+                      className="p-2 text-gray-300 hover:text-[#234d1b] hover:bg-gray-50 rounded-xl transition-colors inline-block"
                     >
                       <ExternalLink size={18} />
                     </Link>
@@ -758,13 +772,66 @@ export default function DashboardClient({
             </tbody>
           </table>
         </div>
+
+        {/* Mobile View: Cards */}
+        <div className="md:hidden space-y-4">
+          {data.recentOrders.map((order) => (
+            <div
+              key={order._id}
+              className="p-5 bg-gray-50 rounded-[1.5rem] border border-gray-100 flex flex-col gap-4"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-[#234d1b] font-black text-xs">
+                    {order.shippingAddress?.fullName?.[0] || "G"}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-[#234d1b] leading-none mb-1">
+                      {order.shippingAddress?.fullName || "Guest"}
+                    </h4>
+                    <span className="text-[9px] font-bold text-gray-400 font-mono">
+                      #{order._id.slice(-8).toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end">
+                  <p className="text-sm font-black text-[#234d1b] leading-none mb-1">
+                    {formatCurrency(order.totalPrice)}
+                  </p>
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white rounded-full border border-gray-100">
+                    <div
+                      className={`w-1.5 h-1.5 rounded-full ${order.status === "Delivered" ? "bg-green-500" : "bg-amber-500"}`}
+                    />
+                    <span className="text-[8px] font-black text-gray-500 uppercase tracking-tighter">
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-2 border-t border-gray-100/50">
+                <Link
+                  href={`/admin/orders?id=${order._id}`}
+                  className="flex-1 py-2.5 bg-white border border-gray-200 rounded-xl flex items-center justify-center gap-2 text-[9px] font-black uppercase tracking-widest text-[#234d1b] active:scale-95 transition-all"
+                >
+                  <Eye size={12} />
+                  View Track
+                </Link>
+                <div className="px-3 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
+                  <span className="text-[8px] font-black italic">
+                    {order.paymentMethod}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </motion.div>
 
       {/* Action Hub & Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <motion.div
           variants={itemVariants}
-          className="lg:col-span-1 bg-[#234d1b] p-10 rounded-[40px] text-white shadow-2xl relative overflow-hidden group"
+          className="lg:col-span-1 bg-[#234d1b] p-6 md:p-10 rounded-[40px] text-white shadow-2xl relative overflow-hidden group"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#f8bf51]/10 rounded-full blur-[100px] -mr-32 -mt-32 group-hover:scale-150 transition-transform duration-1000" />
           <div className="relative z-10 flex flex-col h-full">
@@ -783,7 +850,7 @@ export default function DashboardClient({
             <div className="mt-auto space-y-4">
               <Link
                 href="/admin/settings"
-                className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all group/btn"
+                className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-colors group/btn"
               >
                 <span className="text-[10px] font-black uppercase tracking-widest">
                   Global Governance
@@ -793,7 +860,7 @@ export default function DashboardClient({
                   className="text-[#f8bf51] group-hover/btn:translate-x-1 transition-transform"
                 />
               </Link>
-              <button className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-red-500/10 rounded-2xl border border-white/10 transition-all group/exit">
+              <button className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-red-500/10 rounded-2xl border border-white/10 transition-colors group/exit focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none touch-manipulation">
                 <span className="text-[10px] font-black uppercase tracking-widest text-red-300">
                   Terminate Session
                 </span>
@@ -808,11 +875,11 @@ export default function DashboardClient({
 
         <motion.div
           variants={itemVariants}
-          className="lg:col-span-2 bg-white p-10 rounded-[40px] shadow-sm border border-gray-100"
+          className="lg:col-span-2 bg-white p-5 md:p-10 rounded-[40px] shadow-sm border border-gray-100"
         >
-          <div className="flex justify-between items-center mb-10">
+          <div className="flex justify-between items-center mb-6 md:mb-10">
             <div>
-              <h3 className="text-2xl font-serif font-black text-[#234d1b]">
+              <h3 className="text-xl md:text-2xl font-serif font-black text-[#234d1b] text-balance">
                 Operational Alerts
               </h3>
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">
@@ -845,7 +912,8 @@ export default function DashboardClient({
                       <Image
                         src={item.images?.[0] || "/placeholder.png"}
                         alt={item.name}
-                        fill
+                        width={48}
+                        height={48}
                         className="object-cover"
                       />
                     </div>
@@ -882,7 +950,8 @@ export default function DashboardClient({
                       <Image
                         src={item.images?.[0] || "/placeholder.png"}
                         alt={item.name}
-                        fill
+                        width={48}
+                        height={48}
                         className="object-cover"
                       />
                     </div>

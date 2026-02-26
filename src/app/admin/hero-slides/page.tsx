@@ -209,50 +209,33 @@ export default function HeroSlidesPage() {
     <div className="min-h-screen bg-[#ece0cc] font-['Inter',sans-serif]">
       <div className="mx-auto py-8 px-4 md:px-8">
         {/* ── Header ── */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
-          <div>
-            <nav className="flex text-sm text-gray-400 mb-1.5 items-center gap-1">
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 bg-white p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[3rem] border border-gray-100 shadow-sm mb-8 sm:mb-10">
+          <div className="min-w-0">
+            <nav className="flex text-[10px] sm:text-xs text-gray-400 mb-2 items-center gap-1.5 font-bold uppercase tracking-widest">
               <Link
                 href="/admin/settings"
-                className="hover:text-[#234d1b] cursor-pointer transition-colors flex items-center gap-1"
+                className="hover:text-[#234d1b] transition-colors flex items-center gap-1"
               >
-                <ArrowLeft size={14} /> Settings
+                <ArrowLeft size={12} /> Settings
               </Link>
-              <span className="mx-1 text-gray-300">/</span>
-              <span className="text-[#234d1b] font-semibold">
-                Hero Carousel
-              </span>
+              <span className="text-gray-200">/</span>
+              <span className="text-[#234d1b]">Hero Carousel</span>
             </nav>
-            <h1 className="text-3xl font-bold text-[#234d1b] tracking-tight">
-              Hero Carousel Manager
+            <h1 className="text-xl sm:text-3xl font-serif font-black text-[#234d1b] leading-none">
+              Carousel <span className="text-[#f8bf51] italic">Manager</span>
             </h1>
-            <p className="text-gray-500 mt-1 text-sm">
-              Manage the slides displayed on the home page hero section. Images
-              are saved to Cloudinary.
+            <p className="text-gray-400 mt-2 font-medium text-[10px] sm:text-sm truncate">
+              Update home page visual highlight slides.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <AnimatePresence>
-              {message && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9, x: 20 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, x: 20 }}
-                  className="bg-[#234d1b] text-white px-4 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-lg"
-                >
-                  <Save size={14} /> {message}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <button
-              onClick={() => openEditor()}
-              className="bg-[#f8bf51] hover:bg-[#b0934e] text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-[#f8bf51]/20 hover:shadow-xl transition-all"
-            >
-              <Plus size={16} /> Add Slide
-            </button>
-          </div>
+          <button
+            onClick={() => openEditor()}
+            className="w-full sm:w-auto bg-[#f8bf51] text-white px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-black shadow-lg shadow-[#f8bf51]/20 hover:bg-[#b0934e] transition-all flex items-center justify-center gap-2 active:scale-95 text-[10px] sm:text-xs uppercase tracking-widest"
+          >
+            <Plus size={18} />
+            <span>Add New Slide</span>
+          </button>
         </header>
 
         {/* ── Slides Grid ── */}
@@ -296,22 +279,26 @@ export default function HeroSlidesPage() {
                   />
 
                   {/* Overlay actions */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                  {/* Overlay actions - visible on mobile, overlay on hover for desktop */}
+                  <div className="absolute inset-0 bg-black/40 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                     <button
                       onClick={() => openEditor(slide)}
-                      className="bg-white text-gray-800 p-2.5 rounded-xl hover:bg-[#f8bf51] hover:text-white transition-all shadow-lg"
+                      className="bg-white text-gray-800 p-3 sm:p-2.5 rounded-xl hover:bg-[#f8bf51] hover:text-white transition-all shadow-lg active:scale-95"
                     >
-                      <Pencil size={16} />
+                      <Pencil size={18} className="sm:w-4 sm:h-4" />
                     </button>
                     <button
                       onClick={() => setDeleteId(slide._id!)}
                       disabled={saving === slide._id}
-                      className="bg-white text-red-500 p-2.5 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg"
+                      className="bg-white text-red-500 p-3 sm:p-2.5 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg active:scale-95"
                     >
                       {saving === slide._id ? (
-                        <Loader2 size={16} className="animate-spin" />
+                        <Loader2
+                          size={18}
+                          className="animate-spin sm:w-4 sm:h-4"
+                        />
                       ) : (
-                        <Trash2 size={16} />
+                        <Trash2 size={18} className="sm:w-4 sm:h-4" />
                       )}
                     </button>
                   </div>
@@ -339,27 +326,27 @@ export default function HeroSlidesPage() {
                     {slide.description}
                   </p>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mt-auto">
                     <div className="flex items-center gap-2">
-                      <span className="bg-[#234d1b]/5 text-[#234d1b] text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide">
+                      <span className="bg-[#234d1b]/5 text-[#234d1b] text-[9px] sm:text-[10px] font-black px-2.5 py-1.5 rounded-lg uppercase tracking-widest border border-[#234d1b]/10">
                         {slide.ctaText}
                       </span>
                     </div>
 
                     <button
                       onClick={() => toggleActive(slide)}
-                      className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
+                      className={`flex items-center gap-1.5 text-[9px] sm:text-xs font-black uppercase tracking-widest px-3 py-2 rounded-lg transition-all ${
                         slide.isActive
                           ? "bg-green-50 text-green-600 hover:bg-green-100"
                           : "bg-red-50 text-red-500 hover:bg-red-100"
                       }`}
                     >
                       {slide.isActive ? (
-                        <Eye size={13} />
+                        <Eye size={12} className="sm:w-3 sm:h-3" />
                       ) : (
-                        <EyeOff size={13} />
+                        <EyeOff size={12} className="sm:w-3 sm:h-3" />
                       )}
-                      {slide.isActive ? "Active" : "Hidden"}
+                      <span>{slide.isActive ? "Live" : "Hidden"}</span>
                     </button>
                   </div>
                 </div>
@@ -388,18 +375,18 @@ export default function HeroSlidesPage() {
                 className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden"
               >
                 {/* Modal Header */}
-                <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100">
+                <div className="flex items-center justify-between px-6 sm:px-10 py-6 border-b border-gray-100">
                   <div>
-                    <h2 className="text-xl font-bold text-[#234d1b]">
+                    <h2 className="text-xl sm:text-2xl font-serif font-black text-[#234d1b]">
                       {editingSlide._id ? "Edit Slide" : "New Slide"}
                     </h2>
-                    <p className="text-gray-400 text-sm mt-0.5">
-                      Fill in the details for the hero carousel slide.
+                    <p className="text-gray-400 text-[10px] sm:text-xs font-medium mt-1 uppercase tracking-widest leading-none">
+                      Slide Configuration
                     </p>
                   </div>
                   <button
                     onClick={closeEditor}
-                    className="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition-all"
+                    className="text-gray-400 hover:text-[#234d1b] p-2 bg-gray-50 rounded-xl transition-all"
                   >
                     <X size={20} />
                   </button>
@@ -418,7 +405,7 @@ export default function HeroSlidesPage() {
                   />
 
                   {/* Title + Title Accent */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                         Title (White Text) *
@@ -499,7 +486,7 @@ export default function HeroSlidesPage() {
                   </div>
 
                   {/* CTA Text + Link */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                         CTA Button Text
@@ -537,7 +524,7 @@ export default function HeroSlidesPage() {
                   </div>
 
                   {/* Badge 1 + Badge 2 */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                         Badge 1
@@ -575,7 +562,7 @@ export default function HeroSlidesPage() {
                   </div>
 
                   {/* Order + Active */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                         Display Order

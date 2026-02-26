@@ -41,83 +41,84 @@ export default function CustomersClient({
 
   return (
     <div className="space-y-10">
-      <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100 flex justify-between items-center">
+      <div className="bg-white p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[3rem] shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between sm:items-center gap-4 sm:gap-6">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-primary-dark">
+          <h1 className="text-xl sm:text-3xl font-serif font-black text-primary-dark text-balance leading-none">
             Customer Database
           </h1>
-          <p className="text-gray-400 mt-1 font-medium">
-            Manage your relationships and view customer lifetime value.
+          <p className="text-gray-400 mt-2 font-medium text-[10px] sm:text-sm">
+            Manage your relationships and view lifetime value.
           </p>
         </div>
-        <div className="relative w-72">
+        <div className="relative w-full sm:w-72 group">
           <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            size={18}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary transition-colors"
+            size={16}
           />
           <input
             type="text"
-            placeholder="Search by name or email..."
+            placeholder="Search customers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-all shadow-sm font-medium"
+            className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-2xl py-3.5 sm:py-4 pl-11 pr-6 outline-none transition-all shadow-sm font-bold text-[13px] sm:text-sm placeholder:text-gray-300 focus:bg-white focus-visible:ring-4 focus-visible:ring-primary/5"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
         {filtered.map((customer, i) => (
           <motion.div
             key={customer._id}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.05 }}
-            className="bg-white p-8 rounded-[3rem] shadow-sm border border-gray-50 hover:shadow-md transition-all group"
+            className="bg-white p-4 sm:p-6 lg:p-8 rounded-[2rem] sm:rounded-[3rem] shadow-sm border border-gray-50 hover:shadow-md transition-shadow group flex flex-col"
           >
-            <div className="flex items-center gap-5 mb-8">
-              <div className="w-16 h-16 bg-primary/5 rounded-2xl flex items-center justify-center text-primary font-bold text-xl relative">
+            <div className="flex items-center gap-4 sm:gap-5 mb-6 sm:mb-8">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/5 rounded-[1rem] sm:rounded-2xl flex items-center justify-center text-primary font-black text-lg sm:text-xl relative shadow-inner border border-primary/5">
                 {customer.name[0]}
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-lg border-4 border-white flex items-center justify-center text-white">
-                  <UserCheck size={10} />
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-lg border-2 sm:border-4 border-white flex items-center justify-center text-white shadow-sm">
+                  <UserCheck size={10} className="sm:w-3" />
                 </div>
               </div>
-              <div>
-                <h3 className="text-lg font-serif font-bold text-primary-dark">
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-serif font-black text-primary-dark truncate">
                   {customer.name}
                 </h3>
-                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                  <Calendar size={12} /> Joined{" "}
+                <div className="flex items-center gap-1.5 text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">
+                  <Calendar size={10} className="sm:w-3" /> Joined{" "}
                   {new Date(customer.createdAt).toLocaleDateString()}
                 </div>
               </div>
             </div>
 
-            <div className="space-y-4 mb-8">
-              <div className="flex items-center gap-3 text-sm text-gray-500 font-medium">
-                <Mail size={16} className="text-gray-400" /> {customer.email}
+            <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+              <div className="flex items-center gap-3 text-[11px] sm:text-sm text-gray-500 font-bold min-w-0">
+                <Mail size={14} className="text-gray-300 shrink-0" />{" "}
+                <span className="truncate">{customer.email}</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-gray-500 font-medium">
-                <Phone size={16} className="text-gray-400" />{" "}
+              <div className="flex items-center gap-3 text-[11px] sm:text-sm text-gray-500 font-bold">
+                <Phone size={14} className="text-gray-300 shrink-0" />{" "}
                 {customer.phone || "N/A"}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-8 border-t border-gray-50">
+            <div className="grid grid-cols-2 gap-4 py-6 border-t border-gray-50">
               <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                  Total Orders
+                <p className="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 leading-none">
+                  Orders
                 </p>
-                <div className="flex items-center gap-2 font-bold text-primary-dark">
-                  <ShoppingBag size={16} className="text-primary" />{" "}
+                <div className="flex items-center gap-1.5 font-black text-primary-dark tabular-nums text-xs sm:text-sm">
+                  <ShoppingBag size={14} className="text-primary/70" />{" "}
                   {customer.orderCount}
                 </div>
               </div>
-              <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+              <div className="text-right">
+                <p className="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 leading-none">
                   Lifetime Value
                 </p>
-                <p className="font-bold text-primary text-lg">
-                  ₹{customer.totalSpent.toLocaleString()}
+                <p className="font-black text-primary text-sm sm:text-lg tabular-nums">
+                  ₹{customer.totalSpent?.toLocaleString() || 0}
                 </p>
               </div>
             </div>
@@ -128,12 +129,12 @@ export default function CustomersClient({
                   `/admin/orders?search=${encodeURIComponent(customer.name)}`,
                 )
               }
-              className="w-full mt-8 py-4 bg-gray-50 rounded-2xl text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:bg-primary/5 hover:text-primary transition-all flex items-center justify-center gap-2 group"
+              className="w-full mt-auto py-3.5 sm:py-4 bg-gray-50 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2 group active:scale-[0.98] active:bg-primary-dark focus-visible:ring-4 focus-visible:ring-primary/10"
             >
-              View Purchase History{" "}
+              View Purchases{" "}
               <ChevronRight
-                size={14}
-                className="group-hover:translate-x-1 transition-transform"
+                size={12}
+                className="group-hover:translate-x-1 transition-transform sm:w-3.5"
               />
             </button>
           </motion.div>

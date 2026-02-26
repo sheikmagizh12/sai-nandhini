@@ -90,21 +90,21 @@ export default function AdminReviewsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="bg-white p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[3rem] shadow-sm border border-gray-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-primary-dark">
+          <h1 className="text-xl sm:text-3xl font-serif font-black text-primary-dark text-balance leading-tight">
             Product Reviews
           </h1>
-          <p className="text-gray-400 mt-1 font-medium">
+          <p className="text-gray-400 mt-2 font-medium text-[10px] sm:text-sm">
             Manage customer reviews and ratings.
           </p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {["all", "pending", "approved"].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-6 py-3 rounded-2xl font-bold text-sm tracking-wide capitalize transition-all ${
+              className={`flex-grow sm:flex-grow-0 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-black text-[9px] sm:text-[10px] uppercase tracking-widest transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation ${
                 filter === f
                   ? "bg-primary text-white shadow-lg shadow-primary/20"
                   : "bg-gray-50 text-gray-500 hover:bg-gray-100"
@@ -123,26 +123,26 @@ export default function AdminReviewsPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.05 }}
-            className={`bg-white p-8 rounded-[3rem] shadow-sm border-2 transition-all ${
-              review.isApproved ? "border-green-100" : "border-orange-100"
+            className={`bg-white p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[3rem] shadow-sm border-2 transition-all flex flex-col ${
+              review.isApproved ? "border-green-50/50" : "border-orange-50/50"
             }`}
           >
-            <div className="flex justify-between items-start mb-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-lg">
+            <div className="flex justify-between items-start mb-6 shrink-0">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-black text-base sm:text-lg shrink-0">
                   {review.user?.name?.[0] || "A"}
                 </div>
-                <div>
-                  <h3 className="font-bold text-primary-dark">
+                <div className="min-w-0">
+                  <h3 className="font-black text-primary-dark text-sm sm:text-base truncate">
                     {review.user?.name || "Anonymous"}
                   </h3>
-                  <div className="flex text-yellow-400">
+                  <div className="flex text-yellow-500 mt-0.5">
                     {[...Array(5)].map((_, index) => (
                       <Star
                         key={index}
-                        size={14}
+                        size={12}
                         className={
-                          index < review.rating ? "fill-current" : "opacity-30"
+                          index < review.rating ? "fill-current" : "opacity-20"
                         }
                       />
                     ))}
@@ -151,27 +151,27 @@ export default function AdminReviewsPage() {
               </div>
             </div>
 
-            <div className="mb-6">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+            <div className="mb-4 shrink-0">
+              <p className="text-[8px] sm:text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1 leading-none">
                 Product
               </p>
-              <div className="font-bold text-primary text-sm line-clamp-1">
+              <div className="font-black text-primary text-xs sm:text-sm truncate">
                 {review.product?.name || "Unknown Product"}
               </div>
             </div>
 
-            <p className="text-gray-600 text-sm mb-8 leading-relaxed italic relative">
+            <p className="text-gray-500 text-[13px] sm:text-sm mb-6 leading-relaxed italic relative font-medium line-clamp-4 flex-grow">
               <MessageSquare
                 size={20}
-                className="absolute -top-2 -left-3 text-gray-100 -z-10"
+                className="absolute -top-2 -left-3 text-gray-100 -z-10 opacity-50"
               />
               "{review.comment}"
             </p>
 
-            <div className="flex gap-3 pt-6 border-t border-gray-100">
+            <div className="flex gap-2 sm:gap-3 pt-6 border-t border-gray-50 shrink-0 mt-auto">
               <button
                 onClick={() => toggleApproval(review._id, review.isApproved)}
-                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-wider transition-all ${
+                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 font-black text-[9px] sm:text-[10px] uppercase tracking-widest transition-all active:scale-[0.98] ${
                   review.isApproved
                     ? "bg-orange-50 text-orange-600 hover:bg-orange-100"
                     : "bg-green-50 text-green-600 hover:bg-green-100"
@@ -179,11 +179,11 @@ export default function AdminReviewsPage() {
               >
                 {review.isApproved ? (
                   <>
-                    <XCircle size={16} /> Reject
+                    <XCircle size={14} className="sm:w-4 sm:h-4" /> Reject
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 size={16} /> Approve
+                    <CheckCircle2 size={14} className="sm:w-4 sm:h-4" /> Approve
                   </>
                 )}
               </button>
@@ -192,9 +192,9 @@ export default function AdminReviewsPage() {
                   setDeleteId(review._id);
                   setIsModalOpen(true);
                 }}
-                className="p-3 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors flex items-center justify-center active:scale-[0.98] shrink-0"
               >
-                <Trash2 size={20} />
+                <Trash2 size={18} className="sm:w-5 sm:h-5" />
               </button>
             </div>
           </motion.div>

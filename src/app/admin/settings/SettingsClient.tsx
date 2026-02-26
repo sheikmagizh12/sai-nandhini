@@ -36,6 +36,7 @@ const TABS = [
   { id: "payment", label: "Payment Gateway", icon: CreditCard },
   { id: "email", label: "Email Config", icon: Mail },
   { id: "seo", label: "SEO & Metadata", icon: Search },
+  { id: "inventory", label: "Inventory", icon: Package },
   { id: "reviews", label: "Google Reviews", icon: MessageSquare },
 ];
 
@@ -49,7 +50,7 @@ function SettingsCard({
 }) {
   return (
     <section
-      className={`bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 ${className}`}
+      className={`bg-white rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-10 shadow-sm border border-gray-50 ${className}`}
     >
       {children}
     </section>
@@ -67,13 +68,17 @@ function CardHeader({
   description: string;
 }) {
   return (
-    <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-      <div className="p-2.5 bg-primary/8 rounded-xl text-primary">
-        {icon}
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 pb-6 border-b border-gray-50">
+      <div className="w-10 h-10 sm:w-12 sm:h-12 p-2.5 bg-primary/5 rounded-xl text-primary flex items-center justify-center shrink-0">
+        <div className="sm:scale-110">{icon}</div>
       </div>
-      <div>
-        <h2 className="text-lg font-bold text-primary-dark">{title}</h2>
-        <p className="text-xs text-gray-500">{description}</p>
+      <div className="min-w-0">
+        <h2 className="text-base sm:text-lg font-black text-primary-dark uppercase tracking-tight">
+          {title}
+        </h2>
+        <p className="text-[10px] sm:text-xs text-gray-400 font-medium">
+          {description}
+        </p>
       </div>
     </div>
   );
@@ -88,9 +93,8 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Input class constants
 const INPUT_CLASS =
-  "w-full rounded-xl border border-gray-200 bg-gray-50/80 text-gray-900 py-3 px-4 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all placeholder:text-gray-400 text-sm";
+  "w-full rounded-xl border border-gray-200 bg-gray-50/80 text-gray-900 py-3 px-4 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-shadow placeholder:text-gray-400 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation";
 
 // Toggle switch component
 function ToggleSwitch({
@@ -106,7 +110,7 @@ function ToggleSwitch({
 }) {
   return (
     <div
-      className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+      className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer touch-manipulation"
       onClick={onChange}
     >
       <div>
@@ -181,10 +185,10 @@ export default function SettingsClient({
     }
     const updated = [
       ...(settings.taxRates || []),
-      { 
-        name: newTaxRate.name, 
-        rate: Number(newTaxRate.rate), 
-        isDefault: (settings.taxRates || []).length === 0 // First tax is default
+      {
+        name: newTaxRate.name,
+        rate: Number(newTaxRate.rate),
+        isDefault: (settings.taxRates || []).length === 0, // First tax is default
       },
     ];
     setSettings({ ...settings, taxRates: updated });
@@ -193,7 +197,9 @@ export default function SettingsClient({
   };
 
   const removeTaxRate = (index: number) => {
-    const updated = settings.taxRates.filter((_: any, i: number) => i !== index);
+    const updated = settings.taxRates.filter(
+      (_: any, i: number) => i !== index,
+    );
     // If we removed the default, make the first one default
     if (settings.taxRates[index].isDefault && updated.length > 0) {
       updated[0].isDefault = true;
@@ -220,9 +226,9 @@ export default function SettingsClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
-      
+
       const data = await res.json();
-      
+
       if (res.ok) {
         toast.success("Settings saved successfully");
         setMessage("Settings saved successfully!");
@@ -248,55 +254,46 @@ export default function SettingsClient({
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
-      <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div>
-            <span className="text-primary font-bold uppercase tracking-[0.3em] text-[10px] block mb-2">
-              Configuration
-            </span>
-            <h1 className="text-4xl font-serif font-black text-primary-dark">
-              Global Settings
-            </h1>
-            <p className="text-gray-400 font-medium mt-2">
-              Manage your store configuration and preferences
-            </p>
-          </div>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-primary text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center gap-3 shadow-xl hover:bg-primary-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="animate-spin" size={16} />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                Save All Changes
-              </>
-            )}
-          </button>
+      <div className="bg-white p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[3rem] shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between sm:items-center gap-4 sm:gap-6">
+        <div>
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-serif font-black text-primary-dark leading-none">
+            Configuration
+          </h1>
+          <p className="text-gray-400 mt-2 font-medium text-[10px] sm:text-sm">
+            Manage your store's global preferences and system settings.
+          </p>
         </div>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="w-full sm:w-auto bg-primary text-white px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs flex items-center justify-center gap-3 shadow-lg hover:bg-primary-dark transition-all disabled:opacity-50 active:scale-[0.98] outline-none focus:ring-4 focus:ring-primary/10 touch-manipulation"
+        >
+          {saving ? (
+            <Loader2 className="animate-spin" size={16} />
+          ) : (
+            <Save size={16} />
+          )}
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
       </div>
 
       {/* Tabs Navigation */}
-      <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 p-2">
-        <div className="flex flex-wrap gap-2">
+      <div className="bg-white rounded-[1.5rem] sm:rounded-[24px] shadow-sm border border-gray-100 p-1.5 overflow-hidden">
+        <div className="flex flex-row gap-1.5 overflow-x-auto scrollbar-hide snap-x transition-all px-0.5 pb-1 sm:pb-0">
           {TABS.map((tab) => {
             const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${
-                  activeTab === tab.id
-                    ? "bg-primary text-white shadow-md"
-                    : "text-gray-600 hover:bg-gray-50"
+                className={`flex-grow md:flex-grow-0 flex items-center justify-center md:justify-start gap-2 px-5 py-3 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-sm transition-all whitespace-nowrap snap-start focus:ring-2 focus:ring-primary/10 touch-manipulation min-w-fit ${
+                  isActive
+                    ? "bg-primary text-white shadow-md shadow-primary/10"
+                    : "text-gray-400 hover:bg-gray-50 bg-transparent"
                 }`}
               >
-                <Icon size={16} />
+                <Icon size={14} className="shrink-0" />
                 {tab.label}
               </button>
             );
@@ -338,15 +335,17 @@ export default function SettingsClient({
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button
                             type="button"
-                            onClick={() => setSettings({ ...settings, logo: "" })}
-                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all"
+                            onClick={() =>
+                              setSettings({ ...settings, logo: "" })
+                            }
+                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                           >
                             <X size={16} />
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <label className="w-full max-w-md h-32 border-2 border-dashed border-gray-200 hover:border-accent rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gray-50/50 hover:bg-white transition-all">
+                      <label className="w-full max-w-md h-32 border-2 border-dashed border-gray-200 hover:border-accent rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gray-50/50 hover:bg-white transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation">
                         <ImageIcon size={24} className="text-gray-300 mb-2" />
                         <p className="text-xs font-bold text-primary-dark">
                           Upload Logo
@@ -368,7 +367,10 @@ export default function SettingsClient({
                               // For now, just set the file object - you'll need to upload it
                               const reader = new FileReader();
                               reader.onloadend = () => {
-                                setSettings({ ...settings, logo: reader.result as string });
+                                setSettings({
+                                  ...settings,
+                                  logo: reader.result as string,
+                                });
                               };
                               reader.readAsDataURL(file);
                             }
@@ -398,15 +400,17 @@ export default function SettingsClient({
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button
                             type="button"
-                            onClick={() => setSettings({ ...settings, favicon: "" })}
-                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all"
+                            onClick={() =>
+                              setSettings({ ...settings, favicon: "" })
+                            }
+                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                           >
                             <X size={14} />
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <label className="w-24 h-24 border-2 border-dashed border-gray-200 hover:border-accent rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gray-50/50 hover:bg-white transition-all">
+                      <label className="w-24 h-24 border-2 border-dashed border-gray-200 hover:border-accent rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gray-50/50 hover:bg-white transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation">
                         <ImageIcon size={20} className="text-gray-300 mb-1" />
                         <p className="text-[9px] font-bold text-primary-dark">
                           Upload
@@ -424,7 +428,10 @@ export default function SettingsClient({
                               }
                               const reader = new FileReader();
                               reader.onloadend = () => {
-                                setSettings({ ...settings, favicon: reader.result as string });
+                                setSettings({
+                                  ...settings,
+                                  favicon: reader.result as string,
+                                });
                               };
                               reader.readAsDataURL(file);
                             }
@@ -464,7 +471,10 @@ export default function SettingsClient({
                         className={`${INPUT_CLASS} pl-12`}
                         value={settings.contactEmail || ""}
                         onChange={(e) =>
-                          setSettings({ ...settings, contactEmail: e.target.value })
+                          setSettings({
+                            ...settings,
+                            contactEmail: e.target.value,
+                          })
                         }
                         placeholder="contact@example.com"
                       />
@@ -483,7 +493,10 @@ export default function SettingsClient({
                         className={`${INPUT_CLASS} pl-12`}
                         value={settings.contactPhone || ""}
                         onChange={(e) =>
-                          setSettings({ ...settings, contactPhone: e.target.value })
+                          setSettings({
+                            ...settings,
+                            contactPhone: e.target.value,
+                          })
                         }
                         placeholder="+91 1234567890"
                       />
@@ -537,8 +550,6 @@ export default function SettingsClient({
                 description="Configure tax rates and pricing settings for your store"
               />
               <div className="space-y-8">
-                
-
                 {/* Tax Rates Section */}
                 <div className="border-t-2 border-gray-100 pt-8">
                   <div className="flex items-center justify-between mb-6">
@@ -562,7 +573,7 @@ export default function SettingsClient({
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.05 }}
-                          className={`group relative overflow-hidden rounded-2xl border-2 transition-all ${
+                          className={`group relative overflow-hidden rounded-2xl border-2 transition-colors ${
                             tax.isDefault
                               ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-md"
                               : "bg-white border-gray-100 hover:border-[#f8bf51]/30 hover:shadow-md"
@@ -621,7 +632,7 @@ export default function SettingsClient({
                                 <button
                                   type="button"
                                   onClick={() => setDefaultTax(index)}
-                                  className="px-4 py-2 bg-white text-[#234d1b] text-xs font-bold rounded-xl border-2 border-gray-200 hover:border-[#234d1b] hover:bg-[#234d1b] hover:text-white transition-all uppercase tracking-wider"
+                                  className="px-4 py-2 bg-white text-[#234d1b] text-xs font-bold rounded-xl border-2 border-gray-200 hover:border-[#234d1b] hover:bg-[#234d1b] hover:text-white transition-colors uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                                 >
                                   Set Default
                                 </button>
@@ -629,7 +640,7 @@ export default function SettingsClient({
                               <button
                                 type="button"
                                 onClick={() => removeTaxRate(index)}
-                                className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 border-2 border-transparent hover:border-red-200 transition-all"
+                                className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 border-2 border-transparent hover:border-red-200 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                               >
                                 <Trash2 size={18} />
                               </button>
@@ -665,7 +676,7 @@ export default function SettingsClient({
                       <div className="flex-1">
                         <input
                           type="text"
-                          className="w-full bg-white border-2 border-gray-200 focus:border-[#f8bf51] rounded-xl py-3 px-4 outline-none transition-all font-bold text-[#234d1b]"
+                          className="w-full bg-white border-2 border-gray-200 focus:border-[#f8bf51] rounded-xl py-3 px-4 outline-none transition-shadow font-bold text-[#234d1b] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                           placeholder="Tax Name (e.g., GST, VAT, Sales Tax)"
                           value={newTaxRate.name}
                           onChange={(e) =>
@@ -681,7 +692,7 @@ export default function SettingsClient({
                           <input
                             type="number"
                             step="0.01"
-                            className="w-full bg-white border-2 border-gray-200 focus:border-[#f8bf51] rounded-xl py-3 pl-4 pr-10 outline-none transition-all font-bold text-[#234d1b]"
+                            className="w-full bg-white border-2 border-gray-200 focus:border-[#f8bf51] rounded-xl py-3 pl-4 pr-10 outline-none transition-shadow font-bold text-[#234d1b] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                             placeholder="Rate"
                             value={newTaxRate.rate}
                             onChange={(e) =>
@@ -699,7 +710,7 @@ export default function SettingsClient({
                       <button
                         type="button"
                         onClick={addTaxRate}
-                        className="px-8 py-3 bg-[#234d1b] text-white rounded-xl font-black hover:bg-[#1a3a14] transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-sm shadow-lg hover:shadow-xl active:scale-95"
+                        className="px-8 py-3 bg-[#234d1b] text-white rounded-xl font-black hover:bg-[#1a3a14] transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-sm shadow-lg hover:shadow-xl active:scale-95 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                       >
                         <Plus size={18} strokeWidth={3} />
                         Add Tax
@@ -792,7 +803,7 @@ export default function SettingsClient({
                     <button
                       type="button"
                       onClick={() => setShowRzpSecret(!showRzpSecret)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation rounded"
                     >
                       {showRzpSecret ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -820,7 +831,8 @@ export default function SettingsClient({
                     placeholder="whsec_xxxxxxxxxxxxx"
                   />
                   <p className="text-xs text-gray-500 mt-1.5">
-                    Webhook secret for payment verification (optional but recommended)
+                    Webhook secret for payment verification (optional but
+                    recommended)
                   </p>
                 </div>
 
@@ -835,8 +847,8 @@ export default function SettingsClient({
                           Security Note
                         </p>
                         <p className="text-xs text-amber-700">
-                          Never share your Key Secret publicly. Use test keys for
-                          development and live keys only in production.
+                          Never share your Key Secret publicly. Use test keys
+                          for development and live keys only in production.
                         </p>
                       </div>
                     </div>
@@ -926,7 +938,7 @@ export default function SettingsClient({
                     <button
                       type="button"
                       onClick={() => setShowSmtpPass(!showSmtpPass)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation rounded"
                     >
                       {showSmtpPass ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -955,12 +967,29 @@ export default function SettingsClient({
                         Google Places API Setup
                       </p>
                       <p className="text-xs text-blue-700 mb-2">
-                        Display your Google reviews using Google Places API (simpler than My Business API).
+                        Display your Google reviews using Google Places API
+                        (simpler than My Business API).
                       </p>
                       <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
-                        <li>Your Google Maps API Key should have "Places API" enabled</li>
-                        <li>Find your Place ID: <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener noreferrer" className="underline font-semibold">Place ID Finder</a></li>
-                        <li>Or search your business on Google Maps, copy the URL, and extract the Place ID</li>
+                        <li>
+                          Your Google Maps API Key should have "Places API"
+                          enabled
+                        </li>
+                        <li>
+                          Find your Place ID:{" "}
+                          <a
+                            href="https://developers.google.com/maps/documentation/places/web-service/place-id"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline font-semibold"
+                          >
+                            Place ID Finder
+                          </a>
+                        </li>
+                        <li>
+                          Or search your business on Google Maps, copy the URL,
+                          and extract the Place ID
+                        </li>
                       </ol>
                     </div>
                   </div>
@@ -1000,7 +1029,15 @@ export default function SettingsClient({
                       placeholder="ChIJN1t_tDeuEmsRUsoyG83frY4"
                     />
                     <p className="text-xs text-gray-500 mt-1.5">
-                      Find your Place ID using the <a href="https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder" target="_blank" rel="noopener noreferrer" className="text-primary underline">Place ID Finder</a>
+                      Find your Place ID using the{" "}
+                      <a
+                        href="https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline"
+                      >
+                        Place ID Finder
+                      </a>
                     </p>
                   </div>
                 </div>
@@ -1025,7 +1062,8 @@ export default function SettingsClient({
                     />
                   </div>
                   <p className="text-xs text-gray-500 mt-1.5">
-                    Your Google Maps API Key with Places API enabled (starts with AIzaSy)
+                    Your Google Maps API Key with Places API enabled (starts
+                    with AIzaSy)
                   </p>
                 </div>
 
@@ -1040,9 +1078,17 @@ export default function SettingsClient({
                           Important Notes
                         </p>
                         <ul className="text-xs text-amber-700 space-y-1 list-disc list-inside">
-                          <li>Reviews are cached for 1 hour to avoid API rate limits</li>
-                          <li>Only approved reviews will be displayed publicly</li>
-                          <li>Keep your API credentials secure and never share them</li>
+                          <li>
+                            Reviews are cached for 1 hour to avoid API rate
+                            limits
+                          </li>
+                          <li>
+                            Only approved reviews will be displayed publicly
+                          </li>
+                          <li>
+                            Keep your API credentials secure and never share
+                            them
+                          </li>
                           <li>OAuth 2.0 is recommended for production use</li>
                         </ul>
                       </div>
@@ -1089,7 +1135,10 @@ export default function SettingsClient({
                     onChange={(e) =>
                       setSettings({
                         ...settings,
-                        seo: { ...settings.seo, metaDescription: e.target.value },
+                        seo: {
+                          ...settings.seo,
+                          metaDescription: e.target.value,
+                        },
                       })
                     }
                     placeholder="Describe your store in 150-160 characters..."
@@ -1139,14 +1188,14 @@ export default function SettingsClient({
                                 seo: { ...settings.seo, ogImage: "" },
                               })
                             }
-                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all"
+                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                           >
                             <X size={16} />
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <label className="w-full max-w-md h-48 border-2 border-dashed border-gray-200 hover:border-accent rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gray-50/50 hover:bg-white transition-all">
+                      <label className="w-full max-w-md h-48 border-2 border-dashed border-gray-200 hover:border-accent rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gray-50/50 hover:bg-white transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation">
                         <ImageIcon size={32} className="text-gray-300 mb-2" />
                         <p className="text-xs font-bold text-primary-dark">
                           Upload OG Image
@@ -1183,7 +1232,8 @@ export default function SettingsClient({
                     )}
                   </div>
                   <p className="text-xs text-gray-500 mt-1.5">
-                    Image shown when your site is shared on social media (1200x630px)
+                    Image shown when your site is shared on social media
+                    (1200x630px)
                   </p>
                 </div>
 
@@ -1235,6 +1285,104 @@ export default function SettingsClient({
                       }
                       placeholder="Twitter URL"
                     />
+                  </div>
+                </div>
+              </div>
+            </SettingsCard>
+          )}
+
+          {/* Inventory Management Tab */}
+          {activeTab === "inventory" && (
+            <SettingsCard>
+              <CardHeader
+                icon={<Package size={20} />}
+                title="Inventory Management"
+                description="Global settings for tracking and managing product stock"
+              />
+              <div className="space-y-8">
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-6">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
+                      <Package size={16} className="text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-amber-900 mb-1">
+                        Stock Control Policies
+                      </p>
+                      <p className="text-xs text-amber-700">
+                        These settings affect how the store handles out-of-stock
+                        items and when to notify you about low inventory levels.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <ToggleSwitch
+                  checked={settings.manageInventory ?? true}
+                  onChange={() =>
+                    setSettings({
+                      ...settings,
+                      manageInventory: !(settings.manageInventory ?? true),
+                    })
+                  }
+                  label="Enable Global Inventory Tracking"
+                  description="When enabled, the system will track stock quantities and prevent orders for out-of-stock items"
+                />
+
+                <div className="border-t border-gray-100 pt-8">
+                  <div className="max-w-xs">
+                    <FieldLabel>Low Stock Threshold</FieldLabel>
+                    <div className="relative">
+                      <Package
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                        size={16}
+                      />
+                      <input
+                        type="number"
+                        className={`${INPUT_CLASS} pl-12`}
+                        value={settings.lowStockThreshold || 10}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            lowStockThreshold: Number(e.target.value),
+                          })
+                        }
+                        placeholder="10"
+                        min="0"
+                      />
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-2 font-medium">
+                      Items with stock below this number will be flagged in the
+                      inventory dashboard.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-100 pt-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ToggleSwitch
+                      checked={settings.allowOrderCancellation ?? true}
+                      onChange={() =>
+                        setSettings({
+                          ...settings,
+                          allowOrderCancellation:
+                            !settings.allowOrderCancellation,
+                        })
+                      }
+                      label="Allow Order Cancellation"
+                      description="Let customers cancel orders before they are processed"
+                    />
+                    {/* <ToggleSwitch
+                      checked={settings.allowScheduledOrders ?? false}
+                      onChange={() =>
+                        setSettings({
+                          ...settings,
+                          allowScheduledOrders: !settings.allowScheduledOrders,
+                        })
+                      }
+                      label="Enable Scheduled Orders"
+                      description="Allow customers to pick a delivery date during checkout"
+                    /> */}
                   </div>
                 </div>
               </div>

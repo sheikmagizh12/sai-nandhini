@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import Link from "next/link";
 import {
   Plus,
   Search,
@@ -198,63 +199,69 @@ export default function ProductsClient({
   return (
     <div className="space-y-8 font-sans">
       {/* KPI Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {[
           {
-            label: "Total Products",
+            label: "Stock Total",
             value: totalProducts,
             icon: Package,
-            color: "text-[#234d1b]",
+            color: "text-emerald-700",
+            bg: "bg-emerald-50",
           },
           {
-            label: "Total Categories",
+            label: "Categories",
             value: totalCategories,
             icon: Layers,
-            color: "text-[#f8bf51]",
+            color: "text-amber-700",
+            bg: "bg-amber-50",
           },
           {
-            label: "Low Stock Items",
+            label: "Low Alert",
             value: lowStockCount,
             icon: AlertTriangle,
-            color: "text-orange-500",
+            color: "text-orange-700",
+            bg: "bg-orange-50",
           },
           {
-            label: "Monthly Revenue",
+            label: "Revenue",
             value: "₹45.2k",
             icon: Activity,
-            color: "text-green-600",
-          }, // Mocked
+            color: "text-indigo-700",
+            bg: "bg-indigo-50",
+          },
         ].map((kpi, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-shadow duration-300"
+            transition={{ delay: i * 0.05 }}
+            className="bg-white p-3 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
           >
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-1">
+            <div className="min-w-0">
+              <p className="text-[7px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1 leading-none">
                 {kpi.label}
               </p>
-              <h3 className="text-3xl font-serif font-bold text-[#234d1b]">
+              <h3 className="text-sm sm:text-2xl font-serif font-black text-[#234d1b] tabular-nums truncate">
                 {kpi.value}
               </h3>
             </div>
-            <div className={`p-4 rounded-2xl bg-gray-50 ${kpi.color}`}>
-              <kpi.icon size={24} />
+            <div
+              className={`p-2 sm:p-3 rounded-xl ${kpi.bg} ${kpi.color} shrink-0`}
+            >
+              <kpi.icon size={14} className="sm:w-5 sm:h-5" />
             </div>
           </motion.div>
         ))}
       </div>
 
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-end gap-6 pb-4 border-b border-[#234d1b]/5">
-        <div>
-          <h1 className="text-4xl font-serif font-black text-[#234d1b] tracking-tight">
-            Inventory Management
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 bg-white p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[3rem] border border-gray-100 shadow-sm transition-all">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-serif font-black text-[#234d1b] leading-none">
+            Product <span className="text-[#f8bf51] italic">Vault</span>
           </h1>
-          <p className="text-gray-400 mt-2 font-medium tracking-wide">
-            Manage your product catalog, stock levels, and store inventory.
+          <p className="text-gray-400 mt-2 font-medium text-[10px] sm:text-sm truncate">
+            Manage your high-quality product catalog and stock.
           </p>
         </div>
         <button
@@ -262,55 +269,59 @@ export default function ProductsClient({
             setEditingProduct(null);
             setIsModalOpen(true);
           }}
-          className="bg-gradient-to-r from-[#f8bf51] to-[#D4B874] text-white px-8 py-4 rounded-xl flex items-center gap-3 font-bold uppercase tracking-wider text-xs shadow-lg shadow-[#f8bf51]/30 hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 group"
+          className="w-full sm:w-auto bg-[#234d1b] text-white px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-black shadow-lg shadow-primary/20 hover:bg-[#1a3a14] transition-all flex items-center justify-center gap-2 active:scale-95 text-[10px] sm:text-xs uppercase tracking-widest"
         >
-          <Plus
-            size={18}
-            strokeWidth={3}
-            className="group-hover:rotate-90 transition-transform duration-300"
-          />
-          Add New Product
+          <Plus size={18} />
+          <span>New Product</span>
         </button>
       </div>
 
       {/* Controls Bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between sticky top-0 z-30 py-4 bg-[#ece0cc]/80 backdrop-blur-md">
-        <div className="relative w-full md:w-[480px] group">
+      <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between sticky top-0 z-30 py-3 sm:py-5 bg-[#ece0cc]/90 backdrop-blur-md">
+        <div className="relative flex-grow max-w-full md:max-w-md group bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm">
           <Search
-            className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#f8bf51] transition-colors"
-            size={20}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#234d1b] transition-colors"
+            size={16}
           />
           <input
             type="text"
-            placeholder="Search products by name, category..."
+            placeholder="Find items..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white border border-gray-100 focus:border-[#f8bf51]/50 rounded-2xl py-4 pl-14 pr-6 outline-none shadow-sm transition-all font-medium text-[#234d1b] placeholder:text-gray-300"
+            className="w-full bg-transparent py-3 sm:py-4 pl-12 pr-4 outline-none font-bold text-[#234d1b] placeholder:text-gray-300 touch-manipulation text-[11px] sm:text-sm"
           />
         </div>
-        <div className="flex gap-3 w-full md:w-auto">
+        <div className="flex gap-2 sm:gap-3">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold transition-all shadow-sm uppercase tracking-widest text-[10px] ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 sm:py-4 rounded-xl font-black uppercase tracking-widest text-[9px] sm:text-[10px] transition-all touch-manipulation shadow-sm ${
               showFilters
-                ? "bg-[#234d1b] text-white border-[#234d1b]"
-                : "bg-white border border-gray-100 text-gray-400 hover:text-[#234d1b] hover:border-[#234d1b]/20"
+                ? "bg-[#234d1b] text-white shadow-lg shadow-primary/20"
+                : "bg-white border border-gray-100 text-gray-400 hover:text-[#234d1b]"
             }`}
           >
-            <Filter size={16} /> Filter
+            <Filter size={14} /> <span>Show Filter</span>
             {(selectedCategory !== "all" || selectedStockStatus !== "all") && (
-              <span className="w-2 h-2 bg-[#f8bf51] rounded-full animate-pulse" />
+              <span className="w-1.5 h-1.5 bg-[#f8bf51] rounded-full animate-pulse" />
             )}
           </button>
-          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-4 bg-white border border-gray-100 rounded-2xl font-bold text-gray-400 hover:text-[#234d1b] hover:border-[#234d1b]/20 transition-all shadow-sm uppercase tracking-widest text-[10px]">
-            <Package size={16} /> Manage UOMs
-          </button>
-          <div className="w-px h-10 bg-gray-200 mx-2 hidden md:block"></div>
+
+          <Link
+            href="/admin/uom"
+            className="hidden sm:flex items-center justify-center gap-2 px-6 py-4 bg-white border border-gray-100 rounded-2xl font-black text-gray-400 hover:text-[#234d1b] transition-all shadow-sm uppercase tracking-widest text-[10px]"
+          >
+            <Package size={14} /> Units
+          </Link>
+
           <button
             onClick={() => setViewMode(viewMode === "list" ? "grid" : "list")}
-            className="p-4 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-[#234d1b] transition-colors shadow-sm"
+            className="w-12 h-12 sm:w-14 sm:h-14 bg-white border border-gray-100 rounded-xl sm:rounded-2xl flex items-center justify-center text-gray-400 hover:text-[#234d1b] transition-all shadow-sm shrink-0"
           >
-            <LayoutGrid size={20} />
+            {viewMode === "list" ? (
+              <LayoutGrid size={18} />
+            ) : (
+              <Filter size={18} />
+            )}
           </button>
         </div>
       </div>
@@ -334,7 +345,7 @@ export default function ProductsClient({
                     setSelectedCategory("all");
                     setSelectedStockStatus("all");
                   }}
-                  className="text-xs font-bold text-[#f8bf51] hover:underline uppercase tracking-wider"
+                  className="text-xs font-bold text-[#f8bf51] hover:underline uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation rounded"
                 >
                   Clear All
                 </button>
@@ -349,7 +360,7 @@ export default function ProductsClient({
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setSelectedCategory("all")}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                      className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation ${
                         selectedCategory === "all"
                           ? "bg-[#234d1b] text-white shadow-md"
                           : "bg-gray-50 text-gray-500 hover:bg-gray-100"
@@ -361,7 +372,7 @@ export default function ProductsClient({
                       <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                        className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation ${
                           selectedCategory === cat
                             ? "bg-[#234d1b] text-white shadow-md"
                             : "bg-gray-50 text-gray-500 hover:bg-gray-100"
@@ -401,7 +412,7 @@ export default function ProductsClient({
                         <button
                           key={status.value}
                           onClick={() => setSelectedStockStatus(status.value)}
-                          className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
+                          className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation ${
                             selectedStockStatus === status.value
                               ? "bg-[#234d1b] text-white shadow-md"
                               : "bg-gray-50 text-gray-500 hover:bg-gray-100"
@@ -452,9 +463,7 @@ export default function ProductsClient({
                         Status:{" "}
                         {selectedStockStatus
                           .split("-")
-                          .map(
-                            (w) => w.charAt(0).toUpperCase() + w.slice(1),
-                          )
+                          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
                           .join(" ")}
                         <button
                           onClick={() => setSelectedStockStatus("all")}
@@ -520,93 +529,106 @@ export default function ProductsClient({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ delay: i * 0.05 }}
-                  className="group bg-white rounded-[20px] p-4 border border-gray-100 hover:border-[#f8bf51]/30 hover:shadow-lg hover:shadow-[#f8bf51]/5 transition-all duration-300 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden"
+                  className="group bg-white rounded-2xl sm:rounded-[20px] p-3 sm:p-4 border border-gray-100 hover:border-[#f8bf51]/30 hover:shadow-lg hover:shadow-[#f8bf51]/5 transition-all duration-300 flex flex-row items-center gap-3 sm:gap-6 relative overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                 >
                   {/* Decoration Line */}
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#234d1b] opacity-0 group-hover:opacity-100 transition-opacity" />
 
                   {/* Image */}
-                  <div className="w-full md:w-20 h-20 bg-[#ece0cc] rounded-2xl overflow-hidden flex-shrink-0 relative group-hover:scale-105 transition-transform duration-500">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#ece0cc] rounded-lg sm:rounded-2xl overflow-hidden flex-shrink-0 relative group-hover:scale-105 transition-transform duration-500">
                     {p.images?.[0] ? (
                       <Image
                         src={p.images[0]}
-                        className="w-full h-full object-cover"
+                        className="object-cover"
                         alt={p.name}
-                        fill
-                        sizes="80px"
+                        width={80}
+                        height={80}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-[#234d1b]/20">
-                        <Package size={24} />
+                        <Package size={20} className="sm:w-6 sm:h-6" />
                       </div>
                     )}
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-grow text-center md:text-left">
-                    <div className="flex flex-col md:flex-row md:items-center gap-2 mb-1">
-                      <h3 className="font-bold text-lg text-[#234d1b] leading-tight">
-                        {p.name}
-                      </h3>
-                      <span className="px-3 py-1 bg-[#ece0cc] text-[#234d1b]/60 text-[10px] font-black uppercase tracking-widest rounded-full w-fit mx-auto md:mx-0 border border-[#234d1b]/5">
-                        {p.category}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-center md:justify-start gap-4 text-xs font-medium text-gray-400">
-                      <span>SKU: {p._id.substring(0, 6).toUpperCase()}</span>
-                      <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                      <span>
-                        {p.variants?.length
-                          ? `${p.variants.length} Variants`
-                          : "Single Item"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Metrics Grid */}
-                  <div className="flex items-center gap-8 md:gap-12 w-full md:w-auto justify-between md:justify-end px-4 md:px-0 border-t md:border-none border-gray-50 pt-4 md:pt-0">
-                    {/* Price */}
-                    <div className="text-center md:text-right">
-                      <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">
-                        Price
-                      </p>
-                      <p className="text-lg font-serif font-black text-[#234d1b]">
-                        ₹{minPrice}
-                      </p>
-                    </div>
-
-                    {/* Stock Status */}
-                    <div className="text-center md:text-right min-w-[100px]">
-                      <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">
-                        Stock Level
-                      </p>
-                      <div className="flex items-center justify-center md:justify-end gap-2">
-                        <div
-                          className={`w-2 h-2 rounded-full ${status.color} animate-pulse`}
-                        />
-                        <span className={`font-bold text-sm ${status.text}`}>
-                          {status.value}
+                  {/* Body Content */}
+                  <div className="flex-grow flex flex-col md:flex-row md:items-center justify-between gap-4 min-w-0">
+                    {/* Info */}
+                    <div className="flex-grow min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 min-w-0">
+                        <h3 className="font-bold text-sm sm:text-lg text-[#234d1b] leading-tight truncate">
+                          {p.name}
+                        </h3>
+                        <span className="px-2 py-0.5 bg-[#ece0cc] text-[#234d1b]/60 text-[8px] sm:text-[10px] font-black uppercase tracking-widest rounded-full w-fit border border-[#234d1b]/5 shrink-0">
+                          {p.category}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 sm:gap-4 text-[9px] sm:text-xs font-medium text-gray-400">
+                        <span className="truncate">
+                          SKU: {p._id.substring(0, 6).toUpperCase()}
+                        </span>
+                        <span className="w-1 h-1 bg-gray-300 rounded-full shrink-0" />
+                        <span className="shrink-0">
+                          {p.variants?.length
+                            ? `${p.variants.length} Var`
+                            : "Single"}
                         </span>
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setEditingProduct(p);
-                          setIsModalOpen(true);
-                        }}
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:text-[#234d1b] hover:bg-[#ece0cc] transition-colors border border-transparent hover:border-gray-200"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button
-                        onClick={() => setDeleteId(p._id)}
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors border border-transparent hover:border-red-100" // Red action for delete needs to signal caution
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                    {/* Metrics & Actions */}
+                    <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-8 lg:gap-12 shrink-0 pr-1">
+                      {/* Price */}
+                      <div className="text-left sm:text-right">
+                        <p className="text-[8px] sm:text-[10px] font-black text-gray-300 uppercase tracking-widest mb-0.5 sm:mb-1">
+                          Price
+                        </p>
+                        <p className="text-sm sm:text-lg font-serif font-black text-[#234d1b] tabular-nums">
+                          ₹{minPrice}
+                        </p>
+                      </div>
+
+                      {/* Stock Status */}
+                      <div className="text-left sm:text-right min-w-[70px] sm:min-w-[100px]">
+                        <p className="text-[8px] sm:text-[10px] font-black text-gray-300 uppercase tracking-widest mb-0.5 sm:mb-1">
+                          Stock
+                        </p>
+                        <div className="flex items-center justify-start sm:justify-end gap-1.5 sm:gap-2">
+                          <div
+                            className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${status.color} animate-pulse`}
+                          />
+                          <span
+                            className={`font-bold text-[11px] sm:text-sm ${status.text}`}
+                          >
+                            {status.value}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-1 sm:gap-2 shrink-0">
+                        <button
+                          onClick={() => {
+                            setEditingProduct(p);
+                            setIsModalOpen(true);
+                          }}
+                          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-400 hover:text-[#234d1b] hover:bg-[#ece0cc] transition-colors border border-transparent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
+                        >
+                          <Edit2
+                            size={14}
+                            className="sm:w-[18px] sm:h-[18px]"
+                          />
+                        </button>
+                        <button
+                          onClick={() => setDeleteId(p._id)}
+                          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors border border-transparent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
+                        >
+                          <Trash2
+                            size={14}
+                            className="sm:w-[18px] sm:h-[18px]"
+                          />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </motion.div>

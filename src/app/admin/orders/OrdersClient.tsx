@@ -105,43 +105,6 @@ export default function OrdersClient({
     }
   };
 
-  const handlePaymentStatusChange = async (
-    orderId: string,
-    isPaid: boolean,
-  ) => {
-    const previousOrders = [...orders];
-    const updatedOrders = orders.map((o) =>
-      o._id === orderId
-        ? { ...o, isPaid, paidAt: isPaid ? new Date() : null }
-        : o,
-    );
-    setOrders(updatedOrders);
-
-    if (viewingOrder?._id === orderId) {
-      setViewingOrder({
-        ...viewingOrder,
-        isPaid,
-        paidAt: isPaid ? new Date() : null,
-      });
-    }
-
-    try {
-      const res = await fetch(`/api/admin/orders/${orderId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isPaid, paidAt: isPaid ? new Date() : null }),
-      });
-      if (!res.ok) throw new Error();
-      toast.success(`Payment status updated to ${isPaid ? "Paid" : "Unpaid"}`);
-    } catch (err) {
-      setOrders(previousOrders);
-      if (viewingOrder?._id === orderId) {
-        setViewingOrder(viewingOrder);
-      }
-      toast.error("Failed to update payment status");
-    }
-  };
-
   const handleBulkStatusChange = async (newStatus: string) => {
     if (selectedOrders.length === 0) return;
 
@@ -473,7 +436,6 @@ export default function OrdersClient({
                 <th className="px-6 py-5">Customer</th>
                 <th className="px-6 py-5">Items</th>
                 <th className="px-6 py-5">Amount</th>
-                <th className="px-6 py-5">Payment Status</th>
                 <th className="px-6 py-5">Order Status</th>
                 <th className="px-6 py-5 text-right">Actions</th>
               </tr>
@@ -580,39 +542,15 @@ export default function OrdersClient({
                     </td>
                     <td className="px-6 py-5">
                       <div className="flex flex-col gap-2">
-                        <div className="relative max-w-[140px]">
-                          <select
-                            value={order.isPaid ? "Paid" : "Unpaid"}
-                            onChange={(e) =>
-                              handlePaymentStatusChange(
-                                order._id,
-                                e.target.value === "Paid",
-                              )
-                            }
-                            className={`appearance-none w-full bg-[#ece0cc] border-none rounded-xl py-2.5 pl-3 pr-8 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-white transition-colors focus-visible:ring-2 focus-visible:ring-primary/20 touch-manipulation ${
-                              order.isPaid
-                                ? "text-green-600"
-                                : "text-orange-600"
-                            }`}
-                          >
-                            <option value="Paid">Paid</option>
-                            <option value="Unpaid">Unpaid</option>
-                          </select>
-                          <ChevronDown
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                            size={12}
-                          />
-                        </div>
                         <div className="flex items-center gap-1.5 text-[9px] text-gray-400">
-                          {order.paymentMethod === "COD" ? (
-                            <Wallet size={10} />
-                          ) : (
-                            <CreditCard size={10} />
-                          )}
+                          <CreditCard size={10} />
                           <span className="font-bold uppercase">
                             {order.paymentMethod}
                           </span>
                         </div>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2 py-0.5 rounded-md inline-block w-fit">
+                          Paid
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-5">
@@ -657,9 +595,17 @@ export default function OrdersClient({
                           href={`/orders/${order._id}/invoice?format=a4`}
                           target="_blank"
                           className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
-                          title="Print Invoice"
+                          title="Print A4 Invoice"
                         >
                           <Printer size={16} />
+                        </Link>
+                        <Link
+                          href={`/orders/${order._id}/invoice?format=thermal`}
+                          target="_blank"
+                          className="p-2.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
+                          title="Print Thermal Receipt"
+                        >
+                          <FileText size={16} />
                         </Link>
                       </div>
                     </td>
@@ -703,27 +649,9 @@ export default function OrdersClient({
                   <span className="text-base font-black text-primary-dark tabular-nums">
                     ₹{order.totalPrice.toFixed(2)}
                   </span>
-                  <div className="relative mt-1">
-                    <select
-                      value={order.isPaid ? "Paid" : "Unpaid"}
-                      onChange={(e) =>
-                        handlePaymentStatusChange(
-                          order._id,
-                          e.target.value === "Paid",
-                        )
-                      }
-                      className={`appearance-none bg-transparent border-none p-0 pr-4 text-[9px] font-black uppercase tracking-widest focus:ring-0 cursor-pointer transition-colors ${
-                        order.isPaid ? "text-green-600" : "text-orange-600"
-                      }`}
-                    >
-                      <option value="Paid">Paid</option>
-                      <option value="Unpaid">Unpaid</option>
-                    </select>
-                    <ChevronDown
-                      className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-40"
-                      size={8}
-                    />
-                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2 py-0.5 rounded-md mt-1">
+                    Paid
+                  </span>
                   <p className="text-[8px] font-bold text-gray-300 uppercase mt-0.5">
                     {order.paymentMethod}
                   </p>
@@ -785,8 +713,17 @@ export default function OrdersClient({
                     href={`/orders/${order._id}/invoice?format=a4`}
                     target="_blank"
                     className="p-3 bg-white border border-gray-100 rounded-xl text-blue-600 hover:bg-blue-50 transition-all shadow-sm"
+                    title="Print A4 Invoice"
                   >
                     <Printer size={18} />
+                  </Link>
+                  <Link
+                    href={`/orders/${order._id}/invoice?format=thermal`}
+                    target="_blank"
+                    className="p-3 bg-white border border-gray-100 rounded-xl text-green-600 hover:bg-green-50 transition-all shadow-sm"
+                    title="Print Thermal Receipt"
+                  >
+                    <FileText size={18} />
                   </Link>
                 </div>
               </div>
@@ -877,37 +814,16 @@ export default function OrdersClient({
 
                   <div className="bg-white p-4 sm:p-6 rounded-2xl border border-gray-100">
                     <div className="flex items-center gap-3 mb-2 sm:mb-3">
-                      {viewingOrder.paymentMethod === "COD" ? (
-                        <Wallet className="text-primary" size={18} />
-                      ) : (
-                        <CreditCard className="text-primary" size={18} />
-                      )}
+                      <CreditCard className="text-primary" size={18} />
                       <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400">
                         Payment Status
                       </span>
                     </div>
-                    <div className="relative">
-                      <select
-                        value={viewingOrder.isPaid ? "Paid" : "Unpaid"}
-                        onChange={(e) =>
-                          handlePaymentStatusChange(
-                            viewingOrder._id,
-                            e.target.value === "Paid",
-                          )
-                        }
-                        className={`appearance-none w-full bg-[#ece0cc] border-none rounded-xl py-3 pl-4 pr-10 text-xl font-black uppercase tracking-widest cursor-pointer hover:bg-white transition-all focus-visible:ring-2 focus-visible:ring-primary/20 ${
-                          viewingOrder.isPaid
-                            ? "text-green-600"
-                            : "text-orange-600"
-                        }`}
-                      >
-                        <option value="Paid">Paid</option>
-                        <option value="Unpaid">Unpaid</option>
-                      </select>
-                      <ChevronDown
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                        size={20}
-                      />
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="text-green-600" size={24} />
+                      <span className="text-xl sm:text-2xl font-black uppercase tracking-widest text-green-600">
+                        Paid
+                      </span>
                     </div>
                     <p className="text-[10px] sm:text-xs text-gray-400 mt-2 font-black uppercase tracking-widest ml-1">
                       via {viewingOrder.paymentMethod}
@@ -1065,7 +981,14 @@ export default function OrdersClient({
                     target="_blank"
                     className="flex-1 bg-primary text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black uppercase tracking-widest text-[9px] sm:text-[10px] flex items-center justify-center gap-2 sm:gap-3 shadow-xl hover:bg-primary-dark transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                   >
-                    <Printer size={16} /> Print Invoice
+                    <Printer size={16} /> Print A4 Invoice
+                  </Link>
+                  <Link
+                    href={`/orders/${viewingOrder._id}/invoice?format=thermal`}
+                    target="_blank"
+                    className="flex-1 bg-green-600 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black uppercase tracking-widest text-[9px] sm:text-[10px] flex items-center justify-center gap-2 sm:gap-3 shadow-xl hover:bg-green-700 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
+                  >
+                    <FileText size={16} /> Print Thermal
                   </Link>
                 </div>
               </div>

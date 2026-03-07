@@ -166,22 +166,22 @@ export default function HeroCarousel({
 
   return (
     <section
-      className="relative bg-[#234d1b] overflow-hidden"
+      className="relative bg-gradient-to-b from-[#f8bf51] via-[#ffd788] to-[#ece0cc] overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* ───── Decorative Background ───── */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage:
-              "radial-gradient(circle, #f8bf51 0.8px, transparent 0.8px)",
+              "radial-gradient(circle, #234d1b 0.8px, transparent 0.8px)",
             backgroundSize: "28px 28px",
           }}
         />
-        <div className="absolute -top-40 -right-40 w-[700px] h-[700px] bg-[#f8bf51]/[0.06] rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[100px]" />
+        <div className="absolute -top-40 -right-40 w-[700px] h-[700px] bg-[#234d1b]/[0.04] rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-white/[0.15] rounded-full blur-[100px]" />
       </div>
 
       {/* ───── Main Carousel Content ───── */}
@@ -200,26 +200,26 @@ export default function HeroCarousel({
               className="flex flex-col items-start justify-center"
             >
               {/* Tag */}
-              <div className="inline-flex items-center gap-2 bg-[#f8bf51]/15 border border-[#f8bf51]/25 rounded-full px-4 py-1.5 mb-6">
-                <Sparkles size={13} className="text-[#f8bf51]" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#f8bf51]">
+              <div className="inline-flex items-center gap-2 bg-white/20 border border-white/30 rounded-full px-4 py-1.5 mb-6">
+                <Sparkles size={13} className="text-[#234d1b]" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#234d1b]">
                   {slide.tag}
                 </span>
               </div>
 
               {/* Headline */}
-              <h1 className="text-[2.8rem] md:text-6xl lg:text-[4.2rem] font-serif font-black text-white leading-[1.08] tracking-tight mb-2">
+              <h1 className="text-[2.8rem] md:text-6xl lg:text-[4.2rem] font-serif font-black text-[#234d1b] leading-[1.08] tracking-tight mb-2">
                 {slide.title}
               </h1>
-              <h1 className="text-[2.8rem] md:text-6xl lg:text-[4.2rem] font-serif font-black text-[#f8bf51] italic leading-[1.08] tracking-tight mb-6">
+              <h1 className="text-[2.8rem] md:text-6xl lg:text-[4.2rem] font-serif font-black text-[#234d1b] italic leading-[1.08] tracking-tight mb-6">
                 {slide.titleAccent}
               </h1>
 
               {/* Gold divider */}
-              <div className="w-16 h-[2px] bg-gradient-to-r from-[#f8bf51] to-transparent mb-6" />
+              <div className="w-16 h-[2px] bg-gradient-to-r from-[#234d1b] to-transparent mb-6" />
 
               {/* Description */}
-              <p className="text-white/55 text-base md:text-[17px] leading-relaxed max-w-md mb-10 font-medium">
+              <p className="text-[#234d1b]/70 text-base md:text-[17px] leading-relaxed max-w-md mb-10 font-medium">
                 {slide.description}
               </p>
 
@@ -227,7 +227,7 @@ export default function HeroCarousel({
               <div className="flex flex-wrap items-center gap-5 mb-8">
                 <Link
                   href={slide.ctaLink}
-                  className="group bg-[#f8bf51] text-[#234d1b] px-9 py-4 rounded-full font-bold uppercase tracking-wider text-[11px] shadow-xl shadow-[#f8bf51]/20 hover:bg-[#d4b76e] hover:shadow-2xl transition-all active:scale-95 flex items-center gap-2.5"
+                  className="group bg-[#234d1b] text-white px-9 py-4 rounded-full font-bold uppercase tracking-wider text-[11px] shadow-xl shadow-[#234d1b]/20 hover:bg-[#3d7935] hover:shadow-2xl transition-all active:scale-95 flex items-center gap-2.5"
                 >
                   {slide.ctaText}
                   <ArrowRight
@@ -237,7 +237,7 @@ export default function HeroCarousel({
                 </Link>
                 <Link
                   href="/shop"
-                  className="text-white/60 hover:text-white text-xs font-bold uppercase tracking-widest border-b border-white/20 hover:border-white/60 pb-0.5 transition-all"
+                  className="text-[#234d1b]/70 hover:text-[#234d1b] text-xs font-bold uppercase tracking-widest border-b border-[#234d1b]/30 hover:border-[#234d1b] pb-0.5 transition-all"
                 >
                   View All →
                 </Link>
@@ -246,18 +246,18 @@ export default function HeroCarousel({
               {/* Bottom Badges */}
               <div className="flex gap-5">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-[#f8bf51]/15 flex items-center justify-center">
-                    <Leaf size={13} className="text-[#f8bf51]" />
+                  <div className="w-7 h-7 rounded-full bg-[#234d1b]/15 flex items-center justify-center">
+                    <Leaf size={13} className="text-[#234d1b]" />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#234d1b]/60">
                     {slide.badge1}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-[#f8bf51]/15 flex items-center justify-center">
-                    <Shield size={13} className="text-[#f8bf51]" />
+                  <div className="w-7 h-7 rounded-full bg-[#234d1b]/15 flex items-center justify-center">
+                    <Shield size={13} className="text-[#234d1b]" />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#234d1b]/60">
                     {slide.badge2}
                   </span>
                 </div>
@@ -286,12 +286,12 @@ export default function HeroCarousel({
                     priority
                     sizes="(max-width: 1024px) 100vw, 50vw"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#234d1b]/30 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#234d1b]/20 via-transparent to-transparent" />
                 </div>
 
                 {/* Floating decorative cards */}
-                <div className="absolute -top-6 -right-6 w-28 h-28 bg-[#f8bf51]/10 rounded-2xl border border-[#f8bf51]/15 -z-10 rotate-6" />
-                <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-white/5 rounded-xl border border-white/5 -z-10 -rotate-6" />
+                <div className="absolute -top-6 -right-6 w-28 h-28 bg-[#234d1b]/10 rounded-2xl border border-[#234d1b]/15 -z-10 rotate-6" />
+                <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-white/30 rounded-xl border border-white/20 -z-10 -rotate-6" />
               </div>
             </motion.div>
           </AnimatePresence>
@@ -303,7 +303,7 @@ export default function HeroCarousel({
         <>
           <button
             onClick={prev}
-            className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-black/40 flex items-center justify-center transition-all group"
+            className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/40 backdrop-blur-md border border-white/30 text-[#234d1b]/70 hover:text-[#234d1b] hover:bg-white/60 flex items-center justify-center transition-all group"
             aria-label="Previous slide"
           >
             <ChevronLeft
@@ -313,7 +313,7 @@ export default function HeroCarousel({
           </button>
           <button
             onClick={next}
-            className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-black/40 flex items-center justify-center transition-all group"
+            className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/40 backdrop-blur-md border border-white/30 text-[#234d1b]/70 hover:text-[#234d1b] hover:bg-white/60 flex items-center justify-center transition-all group"
             aria-label="Next slide"
           >
             <ChevronRight
@@ -333,8 +333,8 @@ export default function HeroCarousel({
             aria-label={`Go to slide ${i + 1}`}
             className={`rounded-full transition-all duration-300 ${
               i === currentSlide
-                ? "w-8 h-2.5 bg-[#f8bf51] shadow-lg shadow-[#f8bf51]/30"
-                : "w-2.5 h-2.5 bg-white/25 hover:bg-white/50"
+                ? "w-8 h-2.5 bg-[#234d1b] shadow-lg shadow-[#234d1b]/30"
+                : "w-2.5 h-2.5 bg-[#234d1b]/25 hover:bg-[#234d1b]/50"
             }`}
           />
         ))}

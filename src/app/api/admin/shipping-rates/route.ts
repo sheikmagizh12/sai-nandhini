@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 export async function GET() {
   try {
     await connectDB();
-    const rates = await ShippingRate.find().sort({ minAmount: 1 });
+    const rates = await ShippingRate.find().sort({ location: 1 });
     return NextResponse.json(rates);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -27,16 +27,49 @@ export async function POST(req: Request) {
     const body = await req.json();
     await connectDB();
 
-    // Ensure amounts are valid numbers
-    if (body.minAmount >= body.maxAmount) {
+    // Check if location already exists
+    const existingRate = await ShippingRate.findOne({ location: body.location });
+    if (existingRate) {
       return NextResponse.json(
-        { error: "Min amount must be less than max amount" },
+        { error: "Shipping rate for this location already exists" },
         { status: 400 },
       );
     }
 
     const rate = await ShippingRate.create(body);
     return NextResponse.json(rate, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session || (session.user as any).role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    await connectDB();
+
+    const rate = await ShippingRate.findByIdAndUpdate(
+      body._id,
+      {
+        rate: body.rate,
+        estimatedDelivery: body.estimatedDelivery,
+      },
+      { new: true }
+    );
+
+    if (!rate) {
+      return NextResponse.json({ error: "Shipping rate not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(rate);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -79,6 +79,14 @@ export default function InvoiceClient({
           <p className="font-bold">Customer:</p>
           <p>{order.shippingAddress.fullName}</p>
           <p>{order.shippingAddress.phone}</p>
+          <p className="text-[10px] mt-1">Delivery Address:</p>
+          <p className="text-[10px]">{order.shippingAddress.address}</p>
+          <p className="text-[10px]">
+            {order.shippingAddress.city} - {order.shippingAddress.pincode}
+          </p>
+          {order.shippingAddress.state && (
+            <p className="text-[10px]">{order.shippingAddress.state}</p>
+          )}
         </div>
 
         <div className="border-b border-black border-dashed mb-2" />
@@ -110,12 +118,6 @@ export default function InvoiceClient({
           <span>{order.itemsPrice.toFixed(2)}</span>
         </div>
         {order.taxPrice > 0 && (
-          <div className="flex justify-between">
-            <span>Tax (5%):</span>
-            <span>{order.taxPrice.toFixed(2)}</span>
-          </div>
-        )}
-        {order.shippingPrice > 0 && (
           <div className="flex justify-between">
             <span>Shipping:</span>
             <span>{order.shippingPrice.toFixed(2)}</span>
@@ -283,11 +285,6 @@ export default function InvoiceClient({
           <div className="flex justify-between text-gray-600">
             <span className="font-medium">Subtotal</span>
             <span>₹{order.itemsPrice.toFixed(2)}</span>
-          </div>
-          {/* Simplified Tax View */}
-          <div className="flex justify-between text-gray-600">
-            <span className="font-medium">Tax (5%)</span>
-            <span>₹{order.taxPrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-gray-600">
             <span className="font-medium">Shipping</span>

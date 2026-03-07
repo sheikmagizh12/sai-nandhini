@@ -25,6 +25,11 @@ export default {
           DEFAULT: "#f8bf51", // Golden CTA Buttons
           hover: "#ffd788",
         },
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
       },
       fontFamily: {
         sans: ["var(--font-poppins)", "sans-serif"],

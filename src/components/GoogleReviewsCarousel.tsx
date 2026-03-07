@@ -82,10 +82,10 @@ export default function GoogleReviewsCarousel() {
 
   if (loading) {
     return (
-      <section className="py-20 bg-[#234d1b]">
+      <section className="py-20 bg-gradient-to-b from-[#f8bf51] via-[#ffd788] to-[#ece0cc]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-12 h-12 text-[#f8bf51] animate-spin" />
+            <Loader2 className="w-12 h-12 text-[#234d1b] animate-spin" />
           </div>
         </div>
       </section>
@@ -110,14 +110,14 @@ export default function GoogleReviewsCarousel() {
   };
 
   return (
-    <section className="py-28 bg-[#234d1b] relative overflow-hidden">
+    <section className="py-28 bg-gradient-to-b from-[#f8bf51] via-[#ffd788] to-[#ece0cc] relative overflow-hidden">
       {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-[#f8bf51]/[0.04] rounded-full blur-[150px] -translate-y-1/3 translate-x-1/3 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-[#234d1b]/[0.03] rounded-full blur-[150px] -translate-y-1/3 translate-x-1/3 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-white/[0.15] rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
 
       {/* Large decorative quote mark */}
-      <div className="absolute top-20 left-10 lg:left-20 opacity-[0.04] pointer-events-none">
-        <Quote size={200} className="text-[#f8bf51]" />
+      <div className="absolute top-20 left-10 lg:left-20 opacity-[0.03] pointer-events-none">
+        <Quote size={200} className="text-[#234d1b]" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -131,7 +131,7 @@ export default function GoogleReviewsCarousel() {
         >
           {/* Google Badge */}
           <div className="flex justify-center mb-6">
-            <div className="inline-flex items-center gap-2.5 bg-white/10 backdrop-blur-sm px-5 py-2.5 rounded-full border border-white/10">
+            <div className="inline-flex items-center gap-2.5 bg-white/30 backdrop-blur-sm px-5 py-2.5 rounded-full border border-white/30">
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -150,25 +150,25 @@ export default function GoogleReviewsCarousel() {
                   fill="#EA4335"
                 />
               </svg>
-              <span className="text-white/80 font-semibold text-sm">
+              <span className="text-[#234d1b]/80 font-semibold text-sm">
                 Google Reviews
               </span>
             </div>
           </div>
 
-          <h2 className="text-4xl md:text-5xl font-serif font-black text-white tracking-tight mb-4">
-            Loved by <span className="text-[#f8bf51] italic">Thousands</span>
+          <h2 className="text-4xl md:text-5xl font-serif font-black text-[#234d1b] tracking-tight mb-4">
+            Loved by <span className="text-[#234d1b] italic">Thousands</span>
           </h2>
-          <p className="text-white/40 text-sm max-w-md mx-auto leading-relaxed">
+          <p className="text-[#234d1b]/60 text-sm max-w-md mx-auto leading-relaxed">
             Real experiences from people who love our authentic homemade
             products
           </p>
 
           {/* Rating Summary */}
           <div className="flex justify-center mt-8">
-            <div className="inline-flex items-center gap-6 bg-white/5 backdrop-blur-sm border border-white/10 px-8 py-5 rounded-2xl">
+            <div className="inline-flex items-center gap-6 bg-white/30 backdrop-blur-sm border border-white/30 px-8 py-5 rounded-2xl">
               <div className="text-center">
-                <div className="text-4xl font-serif font-black text-[#f8bf51] mb-1">
+                <div className="text-4xl font-serif font-black text-[#234d1b] mb-1">
                   {data.averageRating.toFixed(1)}
                 </div>
                 <div className="flex gap-0.5 mb-1.5 justify-center">
@@ -178,13 +178,13 @@ export default function GoogleReviewsCarousel() {
                       size={16}
                       className={
                         i < Math.round(data.averageRating)
-                          ? "text-[#f8bf51] fill-[#f8bf51]"
-                          : "text-white/20"
+                          ? "text-[#234d1b] fill-[#234d1b]"
+                          : "text-[#234d1b]/20"
                       }
                     />
                   ))}
                 </div>
-                <p className="text-white/40 text-xs font-medium">
+                <p className="text-[#234d1b]/60 text-xs font-medium">
                   {data.totalReviewCount} verified reviews
                 </p>
               </div>
@@ -201,7 +201,7 @@ export default function GoogleReviewsCarousel() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: cardIndex * 0.1, duration: 0.5 }}
-                className="bg-white/[0.07] backdrop-blur-sm border border-white/10 rounded-3xl p-7 relative group hover:bg-white/[0.12] transition-all duration-500"
+                className="bg-white/30 backdrop-blur-sm border border-white/30 rounded-3xl p-7 relative group hover:bg-white/40 transition-all duration-500"
               >
                 {/* Google icon */}
                 <button
@@ -211,7 +211,7 @@ export default function GoogleReviewsCarousel() {
                       "_blank",
                     )
                   }
-                  className="absolute top-5 right-5 opacity-40 hover:opacity-80 transition-opacity"
+                  className="absolute top-5 right-5 opacity-50 hover:opacity-80 transition-opacity"
                 >
                   <svg
                     className="h-4 w-4"
@@ -239,7 +239,7 @@ export default function GoogleReviewsCarousel() {
 
                 {/* Quote icon */}
                 <div className="mb-5">
-                  <Quote size={28} className="text-[#f8bf51]/30" />
+                  <Quote size={28} className="text-[#234d1b]/30" />
                 </div>
 
                 {/* Rating Stars */}
@@ -250,41 +250,41 @@ export default function GoogleReviewsCarousel() {
                       size={14}
                       className={
                         i < review.rating
-                          ? "text-[#f8bf51] fill-[#f8bf51]"
-                          : "text-white/20"
+                          ? "text-[#234d1b] fill-[#234d1b]"
+                          : "text-[#234d1b]/20"
                       }
                     />
                   ))}
                 </div>
 
                 {/* Comment */}
-                <p className="text-white/70 text-sm leading-relaxed mb-6 line-clamp-4">
+                <p className="text-[#234d1b]/70 text-sm leading-relaxed mb-6 line-clamp-4">
                   {review.comment || "Great experience! Amazing products."}
                 </p>
 
                 {/* User info */}
-                <div className="flex items-center gap-3 pt-5 border-t border-white/10">
+                <div className="flex items-center gap-3 pt-5 border-t border-[#234d1b]/10">
                   {review.userPhoto ? (
                     <Image
                       src={review.userPhoto}
                       alt={review.userName}
                       width={40}
                       height={40}
-                      className="rounded-full ring-2 ring-[#f8bf51]/20"
+                      className="rounded-full ring-2 ring-[#234d1b]/20"
                       unoptimized
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-[#f8bf51]/20 flex items-center justify-center ring-2 ring-[#f8bf51]/10">
-                      <span className="text-[#f8bf51] font-bold text-sm">
+                    <div className="w-10 h-10 rounded-full bg-[#234d1b]/20 flex items-center justify-center ring-2 ring-[#234d1b]/10">
+                      <span className="text-[#234d1b] font-bold text-sm">
                         {review.userName.charAt(0).toUpperCase()}
                       </span>
                     </div>
                   )}
                   <div>
-                    <span className="font-semibold text-sm text-white block">
+                    <span className="font-semibold text-sm text-[#234d1b] block">
                       {review.userName}
                     </span>
-                    <span className="text-xs text-white/30">
+                    <span className="text-xs text-[#234d1b]/40">
                       {new Date(review.createdAt).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -302,7 +302,7 @@ export default function GoogleReviewsCarousel() {
             <div className="flex items-center justify-center gap-4 mt-10">
               <button
                 onClick={goPrev}
-                className="w-11 h-11 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/60 hover:bg-white/20 hover:text-white transition-all"
+                className="w-11 h-11 rounded-full bg-white/30 border border-white/30 flex items-center justify-center text-[#234d1b]/70 hover:bg-white/50 hover:text-[#234d1b] transition-all"
               >
                 <ChevronLeft size={20} />
               </button>
@@ -315,8 +315,8 @@ export default function GoogleReviewsCarousel() {
                     onClick={() => goTo(i)}
                     className={`h-2 rounded-full transition-all duration-300 ${
                       i === activeIndex
-                        ? "w-6 bg-[#f8bf51]"
-                        : "w-2 bg-white/20 hover:bg-white/40"
+                        ? "w-6 bg-[#234d1b]"
+                        : "w-2 bg-[#234d1b]/20 hover:bg-[#234d1b]/40"
                     }`}
                   />
                 ))}
@@ -324,7 +324,7 @@ export default function GoogleReviewsCarousel() {
 
               <button
                 onClick={goNext}
-                className="w-11 h-11 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/60 hover:bg-white/20 hover:text-white transition-all"
+                className="w-11 h-11 rounded-full bg-white/30 border border-white/30 flex items-center justify-center text-[#234d1b]/70 hover:bg-white/50 hover:text-[#234d1b] transition-all"
               >
                 <ChevronRight size={20} />
               </button>
@@ -338,7 +338,7 @@ export default function GoogleReviewsCarousel() {
             href="https://www.google.com/search?q=sai+nandhini+tasty+world+madurai+reviews"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/25 text-white px-7 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs transition-all duration-300 backdrop-blur-sm"
+            className="inline-flex items-center gap-3 bg-white/30 hover:bg-white/40 border border-white/30 hover:border-white/40 text-[#234d1b] px-7 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs transition-all duration-300 backdrop-blur-sm"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path

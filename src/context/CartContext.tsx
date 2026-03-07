@@ -9,7 +9,6 @@ interface CartItem {
   image: string;
   qty: number;
   uom?: string;
-  isCodAvailable?: boolean;
 }
 
 interface CartContextType {

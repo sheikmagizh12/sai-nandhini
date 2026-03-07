@@ -5,6 +5,8 @@ import Image from "next/image";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Heart, ShieldCheck, Zap, Utensils } from "lucide-react";
+import { CometCard } from "@/components/ui/comet-card";
+import { cn } from "@/lib/utils";
 
 export default function AboutPage() {
   return (
@@ -57,47 +59,143 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Values */}
-      <section className="py-32 bg-primary-dark text-white rounded-[10rem] mx-4 md:mx-10 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-24">
-            <h2 className="text-4xl md:text-6xl font-serif font-bold mb-6">
-              Our Core Values
-            </h2>
-            <div className="w-24 h-1 bg-accent mx-auto" />
+      {/* Values Section - Professional Redesign */}
+      <section className="relative py-40 overflow-hidden bg-[#0a1a08]">
+        {/* Advanced Background Layering */}
+        <div className="absolute inset-0">
+          {/* Base deep green with very subtle noise texture placeholder */}
+          <div className="absolute inset-0 opacity-20 pointer-events-none"
+            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+          />
+
+          {/* Elegant Mesh Gradients */}
+          <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-primary/10 blur-[150px] rounded-full translate-x-1/4 -translate-y-1/4" />
+          <div className="absolute bottom-0 left-0 w-[50%] h-[50%] bg-accent/5 blur-[150px] rounded-full -translate-x-1/4 translate-y-1/4" />
+
+          {/* Subtle Geometric Overlay */}
+          <div className="absolute inset-0 opacity-[0.05]"
+            style={{ backgroundImage: 'radial-gradient(#ffffff 0.5px, transparent 0.5px)', backgroundSize: '30px 30px' }}
+          />
+        </div>
+
+        {/* Section Divider - Top Curve */}
+        <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] transform rotate-180">
+          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-[calc(100%+1.3px)] h-[80px] fill-white">
+            <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5,73.84-4.36,147.54,16.88,218.44,35.26,69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113,2,1200,60.29V0Z" />
+          </svg>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 relative z-10 text-white">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start mb-24">
+            <div className="lg:col-span-12 text-center">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-8 backdrop-blur-sm"
+              >
+                <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+                <span className="text-accent font-bold uppercase tracking-[0.4em] text-[10px]">
+                  Our Philosophy
+                </span>
+              </motion.div>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="text-5xl md:text-8xl font-serif font-black tracking-tight leading-[0.9] mb-10"
+              >
+                Crafting <span className="text-accent italic font-medium">Memories</span>,<br />
+                One Batch at a Time.
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+                className="text-gray-400 text-lg md:text-2xl font-medium max-w-3xl mx-auto leading-relaxed"
+              >
+                We don't just sell food; we serve the same love and purity
+                that defined the heritage of our family kitchens.
+              </motion.p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             {[
               {
                 title: "Pure Authenticity",
                 desc: "No artificial colors or preservatives. Just pure, home-made ingredients sourced directly from farmers.",
                 icon: ShieldCheck,
+                color: "from-emerald-600/20 to-transparent",
+                glow: "group-hover:shadow-[0_0_50px_rgba(16,185,129,0.1)]",
+                num: "01"
               },
               {
                 title: "Crafted with Love",
-                desc: "Every batch of our Sambar powder and sweets is hand-crafted to maintain that nostalgic homemade taste.",
+                desc: "Every batch is hand-crafted to maintain that nostalgic homemade taste that defines our heritage.",
                 icon: Heart,
+                color: "from-rose-600/20 to-transparent",
+                glow: "group-hover:shadow-[0_0_50px_rgba(244,63,94,0.1)]",
+                num: "02"
               },
               {
                 title: "Fast Tradition",
-                desc: "Traditional flavors delivered with modern speed. We ensure your favorites reach you as fresh as they were made.",
+                desc: "Traditional flavors delivered with modern speed. Freshly made and delivered directly to you.",
                 icon: Zap,
+                color: "from-amber-600/20 to-transparent",
+                glow: "group-hover:shadow-[0_0_50px_rgba(245,158,11,0.1)]",
+                num: "03"
               },
             ].map((val, i) => (
-              <div key={i} className="text-center group">
-                <div className="w-20 h-20 bg-white/10 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 group-hover:bg-accent group-hover:text-primary-dark transition-all duration-500 rotate-45">
-                  <val.icon size={32} className="-rotate-45" />
-                </div>
-                <h3 className="text-2xl font-serif font-bold mb-4">
-                  {val.title}
-                </h3>
-                <p className="text-primary-light font-medium leading-relaxed">
-                  {val.desc}
-                </p>
-              </div>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+              >
+                <CometCard className="h-full">
+                  <div className={cn(
+                    "group relative p-10 rounded-[3rem] bg-white/[0.03] border border-white/10 backdrop-blur-xl h-full flex flex-col items-start transition-all duration-500 hover:bg-white/[0.06] hover:border-white/20",
+                    val.glow
+                  )}>
+                    {/* Floating Counter */}
+                    <div className="absolute top-8 right-10 text-5xl font-serif font-black text-white/[0.05] group-hover:text-accent/10 transition-colors duration-500">
+                      {val.num}
+                    </div>
+
+                    <div className={cn(
+                      "w-16 h-16 rounded-2xl flex items-center justify-center mb-10 bg-gradient-to-br border border-white/10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500",
+                      val.color
+                    )}>
+                      <val.icon size={30} className="text-white" />
+                    </div>
+
+                    <h3 className="text-2xl font-serif font-black mb-4 tracking-tight group-hover:text-accent transition-colors duration-300">
+                      {val.title}
+                    </h3>
+                    <p className="text-gray-400 text-base leading-relaxed font-medium group-hover:text-white/80 transition-colors duration-300">
+                      {val.desc}
+                    </p>
+
+                    {/* Micro-Interaction Line */}
+                    <div className="mt-8 w-12 h-1 bg-white/10 rounded-full group-hover:w-full group-hover:bg-accent/30 transition-all duration-700" />
+                  </div>
+                </CometCard>
+              </motion.div>
             ))}
           </div>
+        </div>
+
+        {/* Section Divider - Bottom Curve */}
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0]">
+          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-[calc(100%+1.3px)] h-[80px] fill-white">
+            <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5,73.84-4.36,147.54,16.88,218.44,35.26,69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113,2,1200,60.29V0Z" />
+          </svg>
         </div>
       </section>
 

@@ -1,24 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Truck, Plus, Trash2, Save, Loader2, Package } from "lucide-react";
+import { Truck, Plus, Trash2, Save, Loader2, Package, MapPin, Edit2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface ShippingRate {
   _id?: string;
-  minAmount: number;
-  maxAmount: number;
+  location: string;
   rate: number;
+  estimatedDelivery: string;
 }
+
+const LOCATIONS = ["Tamil Nadu", "Puducherry", "Other States"];
 
 export default function ShippingManagementPage() {
   const [rates, setRates] = useState<ShippingRate[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [migrating, setMigrating] = useState(false);
   const [newRate, setNewRate] = useState<ShippingRate>({
-    minAmount: 0,
-    maxAmount: 0,
+    location: "",
     rate: 0,
+    estimatedDelivery: "",
   });
 
   useEffect(() => {
@@ -29,7 +33,14 @@ export default function ShippingManagementPage() {
     try {
       const res = await fetch("/api/admin/shipping-rates");
       const data = await res.json();
-      setRates(data);
+      
+      // Check if we got an error (old schema)
+      if (data.error) {
+        toast.error("Old shipping data detected. Please click 'Migrate to New System' button.");
+        setRates([]);
+      } else {
+        setRates(data);
+      }
     } catch (error) {
       toast.error("Failed to load shipping rates");
     } finally {
@@ -37,13 +48,51 @@ export default function ShippingManagementPage() {
     }
   };
 
-  const addRate = async () => {
-    if (newRate.minAmount >= newRate.maxAmount) {
-      toast.error("Min amount must be less than max amount");
+  const migrateToNewSystem = async () => {
+    if (!confirm("This will clear all old shipping rates. You'll need to add new location-based rates. Continue?")) {
       return;
     }
-    if (newRate.rate <= 0) {
-      toast.error("Rate must be greater than 0");
+
+    setMigrating(true);
+    try {
+      const res = await fetch("/api/admin/shipping-rates/migrate", {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(data.message);
+        // Reload the page to clear any cached models
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        const error = await res.json();
+        toast.error(error.error || "Migration failed");
+        setMigrating(false);
+      }
+    } catch (error) {
+      toast.error("Failed to migrate shipping system");
+      setMigrating(false);
+    }
+  };
+
+  const getAvailableLocations = () => {
+    const usedLocations = rates.map((r) => r.location);
+    return LOCATIONS.filter((loc) => !usedLocations.includes(loc));
+  };
+
+  const addRate = async () => {
+    if (!newRate.location) {
+      toast.error("Please select a location");
+      return;
+    }
+    if (newRate.rate < 0) {
+      toast.error("Rate cannot be negative");
+      return;
+    }
+    if (!newRate.estimatedDelivery.trim()) {
+      toast.error("Please enter estimated delivery time");
       return;
     }
 
@@ -57,7 +106,7 @@ export default function ShippingManagementPage() {
 
       if (res.ok) {
         toast.success("Shipping rate added successfully");
-        setNewRate({ minAmount: 0, maxAmount: 0, rate: 0 });
+        setNewRate({ location: "", rate: 0, estimatedDelivery: "" });
         fetchRates();
       } else {
         const error = await res.json();
@@ -65,6 +114,39 @@ export default function ShippingManagementPage() {
       }
     } catch (error) {
       toast.error("Failed to add shipping rate");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateRate = async (rate: ShippingRate) => {
+    if (rate.rate < 0) {
+      toast.error("Rate cannot be negative");
+      return;
+    }
+    if (!rate.estimatedDelivery.trim()) {
+      toast.error("Please enter estimated delivery time");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/shipping-rates", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(rate),
+      });
+
+      if (res.ok) {
+        toast.success("Shipping rate updated successfully");
+        setEditingId(null);
+        fetchRates();
+      } else {
+        const error = await res.json();
+        toast.error(error.error || "Failed to update rate");
+      }
+    } catch (error) {
+      toast.error("Failed to update shipping rate");
     } finally {
       setSaving(false);
     }
@@ -97,6 +179,8 @@ export default function ShippingManagementPage() {
     );
   }
 
+  const availableLocations = getAvailableLocations();
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="mx-auto">
@@ -108,101 +192,128 @@ export default function ShippingManagementPage() {
             </div>
             <div className="min-w-0">
               <h1 className="text-xl sm:text-3xl font-serif font-black text-primary-dark leading-none">
-                Shipping Manager
+                Shipping Rules
               </h1>
               <p className="text-gray-400 mt-2 font-medium text-[10px] sm:text-sm truncate">
-                Set and maintain amount-based delivery rates.
+                Configure location-based shipping charges and delivery times.
               </p>
             </div>
           </div>
+          <button
+            onClick={migrateToNewSystem}
+            disabled={migrating}
+            className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg transition-all disabled:opacity-50 flex items-center gap-2"
+          >
+            {migrating ? (
+              <>
+                <Loader2 className="animate-spin" size={16} />
+                Migrating...
+              </>
+            ) : (
+              <>
+                <Package size={16} />
+                Migrate to New System
+              </>
+            )}
+          </button>
         </div>
 
         {/* Add New Rate Card */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 sm:p-8 mb-6">
-          <h2 className="text-lg sm:text-xl font-serif font-black text-primary-dark mb-6 flex items-center gap-2">
-            <Plus size={20} className="text-primary" />
-            Add New Shipping Rate
-          </h2>
+        {availableLocations.length > 0 && (
+          <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 sm:p-8 mb-6">
+            <h2 className="text-lg sm:text-xl font-serif font-black text-primary-dark mb-6 flex items-center gap-2">
+              <Plus size={20} className="text-primary" />
+              Add New Location
+            </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2 px-1">
-                Min Amount (₹)
-              </label>
-              <input
-                type="number"
-                step="1"
-                value={newRate.minAmount}
-                onChange={(e) =>
-                  setNewRate({
-                    ...newRate,
-                    minAmount: parseFloat(e.target.value) || 0,
-                  })
-                }
-                className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base tabular-nums focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
-              />
-            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2 px-1">
+                  Location
+                </label>
+                <select
+                  value={newRate.location}
+                  onChange={(e) =>
+                    setNewRate({ ...newRate, location: e.target.value })
+                  }
+                  className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
+                >
+                  <option value="">Select location</option>
+                  {availableLocations.map((loc) => (
+                    <option key={loc} value={loc}>
+                      {loc}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2 px-1">
-                Max Amount (₹)
-              </label>
-              <input
-                type="number"
-                step="1"
-                value={newRate.maxAmount}
-                onChange={(e) =>
-                  setNewRate({
-                    ...newRate,
-                    maxAmount: parseFloat(e.target.value) || 0,
-                  })
-                }
-                className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base tabular-nums focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
-              />
-            </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2 px-1">
+                  Shipping Charge (₹)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={newRate.rate}
+                  onChange={(e) =>
+                    setNewRate({
+                      ...newRate,
+                      rate: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  placeholder="Enter 0 for free"
+                  className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base tabular-nums focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
+                />
+              </div>
 
-            <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2 px-1">
-                Rate (₹)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={newRate.rate}
-                onChange={(e) =>
-                  setNewRate({
-                    ...newRate,
-                    rate: parseFloat(e.target.value) || 0,
-                  })
-                }
-                className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base tabular-nums focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
-              />
-            </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2 px-1">
+                  Estimated Delivery Time
+                </label>
+                <input
+                  type="text"
+                  value={newRate.estimatedDelivery}
+                  onChange={(e) =>
+                    setNewRate({
+                      ...newRate,
+                      estimatedDelivery: e.target.value,
+                    })
+                  }
+                  placeholder="e.g., 2-3 days"
+                  className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
+                />
+              </div>
 
-            <div className="flex items-end">
-              <button
-                onClick={addRate}
-                disabled={saving}
-                className="w-full bg-primary hover:bg-primary-dark text-white py-3.5 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation text-xs uppercase tracking-widest"
-              >
-                {saving ? (
-                  <Loader2 className="animate-spin" size={18} />
-                ) : (
-                  <>
-                    <Plus size={18} />
-                    Add Rate
-                  </>
-                )}
-              </button>
+              <div className="flex items-end">
+                <button
+                  onClick={addRate}
+                  disabled={saving}
+                  className="w-full bg-primary hover:bg-primary-dark text-white py-3.5 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation text-xs uppercase tracking-widest"
+                >
+                  {saving ? (
+                    <Loader2 className="animate-spin" size={18} />
+                  ) : (
+                    <>
+                      <Save size={18} />
+                      Save
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
+            <p className="text-xs text-gray-500 mt-4 flex items-center gap-2">
+              <Package size={12} />
+              Tip: Enter 0 for free delivery to that location
+            </p>
           </div>
-        </div>
+        )}
 
         {/* Existing Rates */}
         <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 sm:p-8">
           <h2 className="text-lg sm:text-xl font-serif font-black text-primary-dark mb-6 flex items-center gap-2">
             <Package size={20} className="text-primary" />
-            Current Shipping Rates
+            Current Shipping Rules
           </h2>
 
           {rates.length === 0 ? (
@@ -217,32 +328,129 @@ export default function ShippingManagementPage() {
                   key={rate._id}
                   className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 border border-gray-100 rounded-2xl hover:border-primary/30 transition-all gap-4"
                 >
-                  <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full sm:w-auto">
-                    <div className="min-w-0">
-                      <p className="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black tracking-widest mb-1.5 leading-none">
-                        Order Range
-                      </p>
-                      <p className="text-[13px] sm:text-lg font-black text-primary-dark tabular-nums truncate">
-                        ₹{rate.minAmount} - ₹{rate.maxAmount}
-                      </p>
-                    </div>
-                    <div className="hidden sm:block h-10 w-px bg-gray-50" />
-                    <div className="min-w-0">
-                      <p className="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black tracking-widest mb-1.5 leading-none">
-                        Ship Rate
-                      </p>
-                      <p className="text-lg sm:text-2xl font-serif font-black text-primary tabular-nums">
-                        ₹{rate.rate}
-                      </p>
-                    </div>
-                  </div>
+                  {editingId === rate._id ? (
+                    <>
+                      <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black tracking-widest mb-1.5 leading-none">
+                            Location
+                          </p>
+                          <p className="text-[13px] sm:text-lg font-black text-primary-dark">
+                            {rate.location}
+                          </p>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black tracking-widest mb-1.5 leading-none">
+                            Shipping Charge (₹)
+                          </p>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={rate.rate}
+                            onChange={(e) =>
+                              setRates(
+                                rates.map((r) =>
+                                  r._id === rate._id
+                                    ? { ...r, rate: parseFloat(e.target.value) || 0 }
+                                    : r
+                                )
+                              )
+                            }
+                            placeholder="Enter 0 for free"
+                            className="w-full bg-gray-50 border border-gray-200 focus:border-primary/20 rounded-xl py-2 px-3 outline-none transition-all shadow-sm font-black text-base tabular-nums focus:bg-white focus:ring-2 focus:ring-primary/5"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black tracking-widest mb-1.5 leading-none">
+                            Estimated Delivery
+                          </p>
+                          <input
+                            type="text"
+                            value={rate.estimatedDelivery}
+                            onChange={(e) =>
+                              setRates(
+                                rates.map((r) =>
+                                  r._id === rate._id
+                                    ? { ...r, estimatedDelivery: e.target.value }
+                                    : r
+                                )
+                              )
+                            }
+                            className="w-full bg-gray-50 border border-gray-200 focus:border-primary/20 rounded-xl py-2 px-3 outline-none transition-all shadow-sm font-black text-base focus:bg-white focus:ring-2 focus:ring-primary/5"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => updateRate(rate)}
+                          disabled={saving}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50 p-2.5 sm:p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500 focus-visible:outline-none touch-manipulation"
+                        >
+                          <Save size={18} />
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="text-gray-500 hover:text-gray-700 hover:bg-gray-50 p-2.5 sm:p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-500 focus-visible:outline-none touch-manipulation"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full sm:w-auto">
+                        <div className="min-w-0">
+                          <p className="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black tracking-widest mb-1.5 leading-none">
+                            Location
+                          </p>
+                          <p className="text-[13px] sm:text-lg font-black text-primary-dark truncate flex items-center gap-2">
+                            <MapPin size={16} className="text-primary" />
+                            {rate.location}
+                          </p>
+                        </div>
+                        <div className="hidden sm:block h-10 w-px bg-gray-50" />
+                        <div className="min-w-0">
+                          <p className="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black tracking-widest mb-1.5 leading-none">
+                            Shipping Charge
+                          </p>
+                          <p className="text-lg sm:text-2xl font-serif font-black text-primary tabular-nums">
+                            {rate.rate === 0 ? (
+                              <span className="text-green-600 flex items-center gap-1">
+                                FREE
+                              </span>
+                            ) : (
+                              `₹${rate.rate}`
+                            )}
+                          </p>
+                        </div>
+                        <div className="hidden sm:block h-10 w-px bg-gray-50" />
+                        <div className="min-w-0">
+                          <p className="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black tracking-widest mb-1.5 leading-none">
+                            Estimated Delivery
+                          </p>
+                          <p className="text-sm sm:text-base font-bold text-gray-700">
+                            {rate.estimatedDelivery}
+                          </p>
+                        </div>
+                      </div>
 
-                  <button
-                    onClick={() => deleteRate(rate._id!)}
-                    className="self-end sm:self-auto text-red-500 hover:text-red-700 hover:bg-red-50 p-2.5 sm:p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-500 focus-visible:outline-none touch-manipulation"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                      <div className="flex gap-2 self-end sm:self-auto">
+                        <button
+                          onClick={() => setEditingId(rate._id!)}
+                          className="text-primary hover:text-primary-dark hover:bg-primary/5 p-2.5 sm:p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary focus-visible:outline-none touch-manipulation"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button
+                          onClick={() => deleteRate(rate._id!)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2.5 sm:p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-500 focus-visible:outline-none touch-manipulation"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>

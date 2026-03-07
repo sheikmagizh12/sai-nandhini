@@ -47,18 +47,6 @@ export default function CheckoutClient({
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("prepaid");
   const [showSummary, setShowSummary] = useState(false);
-  const [taxRate] = useState(() => {
-    if (initialSettings.taxRates && initialSettings.taxRates.length > 0) {
-      const defaultTax =
-        initialSettings.taxRates.find((t: any) => t.isDefault) ||
-        initialSettings.taxRates[0];
-      return defaultTax.rate / 100;
-    }
-    return 0.05;
-  });
-  const isCodAvailable = cartItems.every(
-    (item) => item.isCodAvailable !== false,
-  );
 
   const [address, setAddress] = useState({
     fullName: "",
@@ -67,6 +55,7 @@ export default function CheckoutClient({
     street: "",
     city: "",
     pincode: "",
+    state: "", // Add state field for location-based shipping
   });
 
   const [appliedCoupon, setAppliedCoupon] = useState<{
@@ -92,32 +81,70 @@ export default function CheckoutClient({
   }, [session, status, router]);
 
   const itemsPrice = cartTotal;
-  const taxPrice = itemsPrice * taxRate;
 
-  // Dynamic Shipping Price Logic
+  // Get estimated delivery time for selected location
+  const getEstimatedDelivery = () => {
+    if (!initialShippingRates || !address.state) return null;
+    
+    let shippingLocation = "Other States";
+    if (address.state === "Tamil Nadu") {
+      shippingLocation = "Tamil Nadu";
+    } else if (address.state === "Puducherry") {
+      shippingLocation = "Puducherry";
+    }
+
+    const applicableRate = initialShippingRates.find(
+      (rate) => rate.location === shippingLocation
+    );
+    
+    return applicableRate?.estimatedDelivery || null;
+  };
+
+  // Dynamic Shipping Price Logic - Location Based
   const calculateShipping = () => {
     if (appliedCoupon?.isFreeDelivery) return 0;
 
-    // 1. Check if we have dynamic shipping slabs configured in Admin > Shipping
-    if (initialShippingRates && initialShippingRates.length > 0) {
+    // Check if we have location-based shipping configured
+    if (initialShippingRates && initialShippingRates.length > 0 && address.state) {
+      // Map state to shipping location
+      let shippingLocation = "Other States";
+      if (address.state === "Tamil Nadu") {
+        shippingLocation = "Tamil Nadu";
+      } else if (address.state === "Puducherry") {
+        shippingLocation = "Puducherry";
+      }
+
       const applicableRate = initialShippingRates.find(
-        (rate) => itemsPrice >= rate.minAmount && itemsPrice < rate.maxAmount,
+        (rate) => rate.location === shippingLocation
       );
+      
+      // If rate found for this location, return it
       if (applicableRate) return applicableRate.rate;
+      
+      // If no rate found for this specific location, return null to indicate unavailable
+      return null;
     }
 
-    // 2. Fallback to Global Settings (Free threshold)
-    const freeShippingThreshold = initialSettings.freeShippingThreshold ?? 500;
-    const standardShippingFee = initialSettings.shippingFee ?? 50;
+    // Fallback to Global Settings only if no state is selected
+    if (!address.state) {
+      const freeShippingThreshold = initialSettings.freeShippingThreshold ?? 500;
+      const standardShippingFee = initialSettings.shippingFee ?? 50;
+      return itemsPrice >= freeShippingThreshold ? 0 : standardShippingFee;
+    }
 
-    return itemsPrice >= freeShippingThreshold ? 0 : standardShippingFee;
+    return null;
   };
 
   const shippingPrice = calculateShipping();
   const discountAmount = appliedCoupon?.discount || 0;
+  const estimatedDelivery = getEstimatedDelivery();
+  
+  // Check if shipping is available for selected location
+  const isShippingAvailable = shippingPrice !== null;
+  
   const totalPrice = Math.max(
     0,
-    itemsPrice + taxPrice + shippingPrice - discountAmount,
+    itemsPrice + (shippingPrice || 0) - discountAmount,
   );
 
   const applyCouponCode = async (code: string) => {
@@ -161,9 +188,16 @@ export default function CheckoutClient({
       !address.phone ||
       !address.street ||
       !address.city ||
-      !address.pincode
+      !address.pincode ||
+      !address.state
     ) {
       toast.error("Please fill in all delivery details.");
+      return;
+    }
+
+    // Check if shipping is available for selected location
+    if (!isShippingAvailable) {
+      toast.error(`Sorry, we don't deliver to ${address.state} yet. Please select a different state or contact us.`);
       return;
     }
 
@@ -189,11 +223,11 @@ export default function CheckoutClient({
             address: address.street,
             city: address.city,
             pincode: address.pincode,
+            state: address.state,
           },
-          paymentMethod:
-            paymentMethod === "cod" ? "Cash on Delivery" : "Razorpay",
+          paymentMethod: "Razorpay",
           itemsPrice,
-          taxPrice,
+          taxPrice: 0,
           shippingPrice,
           discountPrice: discountAmount,
           totalPrice,
@@ -205,18 +239,7 @@ export default function CheckoutClient({
       if (!orderRes.ok)
         throw new Error(dbOrder.error || "Order creation failed");
 
-      // Handle COD Order
-      if (paymentMethod === "cod") {
-        if (dbOrder._id) {
-          clearCart();
-          window.location.href = "/orders/success";
-          return;
-        } else {
-          throw new Error("Order ID not returned for COD");
-        }
-      }
-
-      // 2. Create Razorpay order (Prepaid)
+      // Create Razorpay order
       const payRes = await fetch("/api/payments/razorpay", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -522,6 +545,62 @@ export default function CheckoutClient({
                       />
                     </div>
                   </div>
+
+                  {/* State */}
+                  <div className="md:col-span-2">
+                    <label className="text-sm font-semibold text-gray-700 block mb-2">
+                      State <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <select
+                        required
+                        value={address.state}
+                        onChange={(e) =>
+                          setAddress({ ...address, state: e.target.value })
+                        }
+                        className="w-full border-2 border-gray-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white appearance-none"
+                      >
+                        <option value="">Select State</option>
+                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        <option value="Assam">Assam</option>
+                        <option value="Bihar">Bihar</option>
+                        <option value="Chhattisgarh">Chhattisgarh</option>
+                        <option value="Goa">Goa</option>
+                        <option value="Gujarat">Gujarat</option>
+                        <option value="Haryana">Haryana</option>
+                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                        <option value="Jharkhand">Jharkhand</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Manipur">Manipur</option>
+                        <option value="Meghalaya">Meghalaya</option>
+                        <option value="Mizoram">Mizoram</option>
+                        <option value="Nagaland">Nagaland</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Rajasthan">Rajasthan</option>
+                        <option value="Sikkim">Sikkim</option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Telangana">Telangana</option>
+                        <option value="Tripura">Tripura</option>
+                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option value="Uttarakhand">Uttarakhand</option>
+                        <option value="West Bengal">West Bengal</option>
+                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                        <option value="Chandigarh">Chandigarh</option>
+                        <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                        <option value="Ladakh">Ladakh</option>
+                        <option value="Lakshadweep">Lakshadweep</option>
+                        <option value="Puducherry">Puducherry</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </form>
             </motion.div>
@@ -608,58 +687,7 @@ export default function CheckoutClient({
                   />
                 </label>
 
-                {/* Cash on Delivery Option */}
-                <label
-                  className={`group flex items-start gap-4 p-6 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === "cod"
-                      ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/20"
-                      : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                  } ${!isCodAvailable ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  <div className="flex items-center h-6">
-                    <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                        paymentMethod === "cod"
-                          ? "border-primary bg-primary"
-                          : "border-gray-300 group-hover:border-gray-400"
-                      }`}
-                    >
-                      {paymentMethod === "cod" && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="w-3 h-3 rounded-full bg-white"
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex-grow">
-                    <div className="flex items-center gap-2 mb-1.5 md:mb-2 text-wrap">
-                      <IndianRupee className="h-5 w-5 text-primary flex-shrink-0" />
-                      <p className="font-bold text-primary-dark text-base md:text-lg">
-                        Cash on Delivery
-                      </p>
-                    </div>
-                    <p className="text-xs md:text-sm text-gray-600">
-                      {isCodAvailable
-                        ? "Pay with cash when your order arrives"
-                        : "Not available for selected items"}
-                    </p>
-                    {!isCodAvailable && (
-                      <p className="text-[10px] md:text-xs text-amber-600 mt-2 bg-amber-50 px-3 py-1.5 rounded-lg inline-block">
-                        ⚠️ Some items in your cart don't support COD
-                      </p>
-                    )}
-                  </div>
-                  <input
-                    type="radio"
-                    name="payment"
-                    className="hidden"
-                    checked={paymentMethod === "cod"}
-                    onChange={() => isCodAvailable && setPaymentMethod("cod")}
-                    disabled={!isCodAvailable}
-                  />
-                </label>
+
               </div>
             </motion.div>
 
@@ -817,34 +845,47 @@ export default function CheckoutClient({
 
                   <div className="flex justify-between text-sm items-center">
                     <span className="text-gray-600 flex items-center gap-2">
-                      <Ticket size={16} className="text-gray-400" />
-                      Tax & Packaging
-                    </span>
-                    <span className="font-semibold text-primary-dark">
-                      ₹{taxPrice.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm items-center">
-                    <span className="text-gray-600 flex items-center gap-2">
                       <MapPin size={16} className="text-gray-400" />
                       Shipping
                     </span>
-                    <span
-                      className={`font-semibold ${
-                        shippingPrice === 0
-                          ? "text-green-600"
-                          : "text-primary-dark"
-                      }`}
-                    >
-                      {shippingPrice === 0 ? (
-                        <span className="flex items-center gap-1">
-                          <CheckCircle2 size={14} /> FREE
-                        </span>
-                      ) : (
-                        `₹${shippingPrice}`
-                      )}
-                    </span>
+                    {shippingPrice === null ? (
+                      <span className="text-red-500 font-semibold text-xs">
+                        Not Available
+                      </span>
+                    ) : (
+                      <span
+                        className={`font-semibold ${
+                          shippingPrice === 0
+                            ? "text-green-600"
+                            : "text-primary-dark"
+                        }`}
+                      >
+                        {shippingPrice === 0 ? (
+                          <span className="flex items-center gap-1">
+                            <CheckCircle2 size={14} /> FREE
+                          </span>
+                        ) : (
+                          `₹${shippingPrice}`
+                        )}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Show delivery estimate if available */}
+                  {estimatedDelivery && shippingPrice !== null && (
+                    <div className="flex justify-between text-xs text-gray-500 -mt-2">
+                      <span>Estimated Delivery</span>
+                      <span className="font-medium">{estimatedDelivery}</span>
+                    </div>
+                  )}
+
+                  {/* Show warning if shipping not available */}
+                  {shippingPrice === null && address.state && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-700">
+                      <p className="font-semibold mb-1">⚠️ Delivery Not Available</p>
+                      <p>We don't deliver to {address.state} yet. Please select a different state or contact us.</p>
+                    </div>
+                  )}
 
                   {/* Coupon Section */}
                   <div className="pt-4 border-t border-gray-200 space-y-4">
@@ -945,13 +986,17 @@ export default function CheckoutClient({
                   {/* CTA Button */}
                   <button
                     onClick={makePayment}
-                    disabled={loading}
+                    disabled={loading || !isShippingAvailable}
                     className="w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white py-4 rounded-xl flex items-center justify-center gap-3 font-bold text-base transition-all shadow-lg hover:shadow-xl active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed group"
                   >
                     {loading ? (
                       <>
                         <Loader2 className="animate-spin" size={20} />
                         Processing...
+                      </>
+                    ) : !isShippingAvailable ? (
+                      <>
+                        Delivery Not Available
                       </>
                     ) : (
                       <>
@@ -1001,11 +1046,15 @@ export default function CheckoutClient({
 
           <button
             onClick={makePayment}
-            disabled={loading}
+            disabled={loading || !isShippingAvailable}
             className="w-full bg-primary text-white py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="animate-spin" size={20} />
+            ) : !isShippingAvailable ? (
+              <>
+                Delivery Not Available
+              </>
             ) : paymentMethod === "cod" ? (
               <>
                 Confirm COD Order <ChevronRight size={18} />
@@ -1046,7 +1095,7 @@ export default function CheckoutClient({
                       ₹{itemsPrice.toLocaleString()}
                     </span>
                   </div>
-                  {shippingPrice > 0 && (
+                  {shippingPrice !== null && shippingPrice > 0 && (
                     <div className="flex justify-between text-xs">
                       <span className="text-gray-400">Shipping</span>
                       <span className="font-bold">
@@ -1054,14 +1103,18 @@ export default function CheckoutClient({
                       </span>
                     </div>
                   )}
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-400 text-wrap">
-                      GST ({(taxRate * 100).toFixed(0)}%)
-                    </span>
-                    <span className="font-bold">
-                      ₹{taxPrice.toLocaleString()}
-                    </span>
-                  </div>
+                  {shippingPrice === 0 && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-400">Shipping</span>
+                      <span className="font-bold text-green-600">FREE</span>
+                    </div>
+                  )}
+                  {shippingPrice === null && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-400">Shipping</span>
+                      <span className="font-bold text-red-500">Not Available</span>
+                    </div>
+                  )}
                   {discountAmount > 0 && (
                     <div className="flex justify-between text-xs text-green-600">
                       <span>Discount</span>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
+import { Lock, Loader2, ArrowRight, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function AdminLoginPage() {
@@ -12,6 +12,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -109,13 +110,20 @@ export default function AdminLoginPage() {
                   size={18}
                 />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#fcf9f4] border-2 border-transparent focus:border-[#556B2F]/10 focus:bg-white rounded-2xl py-4 pl-14 pr-6 outline-none transition-all font-bold text-[#556B2F]"
+                  className="w-full bg-[#fcf9f4] border-2 border-transparent focus:border-[#556B2F]/10 focus:bg-white rounded-2xl py-4 pl-14 pr-14 outline-none transition-all font-bold text-[#556B2F]"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-[#556B2F] transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 

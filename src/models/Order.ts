@@ -24,6 +24,7 @@ const OrderSchema = new Schema(
       address: { type: String, required: true },
       city: { type: String, required: true },
       pincode: { type: String, required: true },
+      state: { type: String },
     },
     paymentMethod: { type: String, required: true },
     paymentResult: {

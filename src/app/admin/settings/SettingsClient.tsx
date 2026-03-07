@@ -32,7 +32,6 @@ import toast from "react-hot-toast";
 // Tab configuration
 const TABS = [
   { id: "brand", label: "Brand Identity", icon: Store },
-  { id: "tax", label: "Tax & Pricing", icon: CreditCard },
   { id: "payment", label: "Payment Gateway", icon: CreditCard },
   { id: "email", label: "Email Config", icon: Mail },
   { id: "seo", label: "SEO & Metadata", icon: Search },
@@ -146,14 +145,12 @@ export default function SettingsClient({
     seo: initialSettings?.seo || {},
     socialMedia: initialSettings?.socialMedia || {},
     googleMyBusiness: initialSettings?.googleMyBusiness || {},
-    taxRates: initialSettings?.taxRates || [],
   }));
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [showRzpSecret, setShowRzpSecret] = useState(false);
   const [showSmtpPass, setShowSmtpPass] = useState(false);
-  const [newTaxRate, setNewTaxRate] = useState({ name: "", rate: "" });
 
   // Sync settings when initialSettings prop changes
   useEffect(() => {
@@ -164,7 +161,6 @@ export default function SettingsClient({
       seo: initialSettings?.seo || {},
       socialMedia: initialSettings?.socialMedia || {},
       googleMyBusiness: initialSettings?.googleMyBusiness || {},
-      taxRates: initialSettings?.taxRates || [],
     });
   }, [initialSettings]);
 
@@ -176,45 +172,6 @@ export default function SettingsClient({
     } catch (e) {
       console.error(e);
     }
-  };
-
-  const addTaxRate = () => {
-    if (!newTaxRate.name || !newTaxRate.rate) {
-      toast.error("Please enter tax name and rate");
-      return;
-    }
-    const updated = [
-      ...(settings.taxRates || []),
-      {
-        name: newTaxRate.name,
-        rate: Number(newTaxRate.rate),
-        isDefault: (settings.taxRates || []).length === 0, // First tax is default
-      },
-    ];
-    setSettings({ ...settings, taxRates: updated });
-    setNewTaxRate({ name: "", rate: "" });
-    toast.success("Tax rate added");
-  };
-
-  const removeTaxRate = (index: number) => {
-    const updated = settings.taxRates.filter(
-      (_: any, i: number) => i !== index,
-    );
-    // If we removed the default, make the first one default
-    if (settings.taxRates[index].isDefault && updated.length > 0) {
-      updated[0].isDefault = true;
-    }
-    setSettings({ ...settings, taxRates: updated });
-    toast.success("Tax rate removed");
-  };
-
-  const setDefaultTax = (index: number) => {
-    const updated = settings.taxRates.map((t: any, i: number) => ({
-      ...t,
-      isDefault: i === index,
-    }));
-    setSettings({ ...settings, taxRates: updated });
-    toast.success("Default tax rate updated");
   };
 
   const handleSave = async () => {
@@ -536,192 +493,6 @@ export default function SettingsClient({
                   <p className="text-xs text-gray-500 mt-1.5">
                     This message will appear at the top of your website
                   </p>
-                </div>
-              </div>
-            </SettingsCard>
-          )}
-
-          {/* Tax & Pricing Tab */}
-          {activeTab === "tax" && (
-            <SettingsCard>
-              <CardHeader
-                icon={<CreditCard size={20} />}
-                title="Tax "
-                description="Configure tax rates and pricing settings for your store"
-              />
-              <div className="space-y-8">
-                {/* Tax Rates Section */}
-                <div className="border-t-2 border-gray-100 pt-8">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-2">
-                      <Receipt size={18} className="text-[#234d1b]" />
-                      <h3 className="text-sm font-black uppercase tracking-widest text-[#234d1b]">
-                        Tax Rates
-                      </h3>
-                    </div>
-                    <span className="text-xs font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full">
-                      {settings.taxRates?.length || 0} Configured
-                    </span>
-                  </div>
-
-                  {/* Tax Rates List */}
-                  <div className="space-y-3 mb-6">
-                    {settings.taxRates && settings.taxRates.length > 0 ? (
-                      settings.taxRates.map((tax: any, index: number) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          className={`group relative overflow-hidden rounded-2xl border-2 transition-colors ${
-                            tax.isDefault
-                              ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-md"
-                              : "bg-white border-gray-100 hover:border-[#f8bf51]/30 hover:shadow-md"
-                          }`}
-                        >
-                          {/* Default Badge Ribbon */}
-                          {tax.isDefault && (
-                            <div className="absolute top-0 right-0">
-                              <div className="bg-green-500 text-white text-[9px] font-black uppercase tracking-wider px-4 py-1 transform rotate-45 translate-x-6 translate-y-2 shadow-lg">
-                                Default
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="flex items-center justify-between p-5">
-                            <div className="flex items-center gap-4">
-                              {/* Tax Icon */}
-                              <div
-                                className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                                  tax.isDefault
-                                    ? "bg-green-100"
-                                    : "bg-[#ece0cc]"
-                                }`}
-                              >
-                                <Receipt
-                                  size={20}
-                                  className={
-                                    tax.isDefault
-                                      ? "text-green-600"
-                                      : "text-[#234d1b]"
-                                  }
-                                />
-                              </div>
-
-                              {/* Tax Details */}
-                              <div>
-                                <h4 className="font-bold text-lg text-[#234d1b] mb-0.5">
-                                  {tax.name}
-                                </h4>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-2xl font-black text-[#f8bf51]">
-                                    {tax.rate}%
-                                  </span>
-                                  {tax.isDefault && (
-                                    <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-wider">
-                                      Active
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex items-center gap-2">
-                              {!tax.isDefault && (
-                                <button
-                                  type="button"
-                                  onClick={() => setDefaultTax(index)}
-                                  className="px-4 py-2 bg-white text-[#234d1b] text-xs font-bold rounded-xl border-2 border-gray-200 hover:border-[#234d1b] hover:bg-[#234d1b] hover:text-white transition-colors uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
-                                >
-                                  Set Default
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => removeTaxRate(index)}
-                                className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 border-2 border-transparent hover:border-red-200 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
-                              >
-                                <Trash2 size={18} />
-                              </button>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))
-                    ) : (
-                      <div className="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                        <Receipt
-                          size={48}
-                          className="text-gray-300 mx-auto mb-4"
-                        />
-                        <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">
-                          No tax rates configured
-                        </p>
-                        <p className="text-xs text-gray-400 mt-2">
-                          Add your first tax rate below
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Add New Tax Rate */}
-                  <div className="bg-gradient-to-br from-[#f8bf51]/10 to-[#f8bf51]/5 p-6 rounded-2xl border-2 border-[#f8bf51]/20">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Plus size={16} className="text-[#234d1b]" />
-                      <h4 className="text-xs font-black uppercase tracking-widest text-[#234d1b]">
-                        Add New Tax Rate
-                      </h4>
-                    </div>
-                    <div className="flex flex-col md:flex-row gap-3">
-                      <div className="flex-1">
-                        <input
-                          type="text"
-                          className="w-full bg-white border-2 border-gray-200 focus:border-[#f8bf51] rounded-xl py-3 px-4 outline-none transition-shadow font-bold text-[#234d1b] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
-                          placeholder="Tax Name (e.g., GST, VAT, Sales Tax)"
-                          value={newTaxRate.name}
-                          onChange={(e) =>
-                            setNewTaxRate({
-                              ...newTaxRate,
-                              name: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="w-full md:w-40">
-                        <div className="relative">
-                          <input
-                            type="number"
-                            step="0.01"
-                            className="w-full bg-white border-2 border-gray-200 focus:border-[#f8bf51] rounded-xl py-3 pl-4 pr-10 outline-none transition-shadow font-bold text-[#234d1b] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
-                            placeholder="Rate"
-                            value={newTaxRate.rate}
-                            onChange={(e) =>
-                              setNewTaxRate({
-                                ...newTaxRate,
-                                rate: e.target.value,
-                              })
-                            }
-                          />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">
-                            %
-                          </span>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={addTaxRate}
-                        className="px-8 py-3 bg-[#234d1b] text-white rounded-xl font-black hover:bg-[#1a3a14] transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-sm shadow-lg hover:shadow-xl active:scale-95 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
-                      >
-                        <Plus size={18} strokeWidth={3} />
-                        Add Tax
-                      </button>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-3 flex items-center gap-2">
-                      <AlertCircle size={12} />
-                      The first tax rate added will be set as default
-                      automatically
-                    </p>
-                  </div>
                 </div>
               </div>
             </SettingsCard>

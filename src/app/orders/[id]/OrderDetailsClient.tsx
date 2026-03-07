@@ -205,12 +205,6 @@ export default function OrderDetailsClient({
                     {order.shippingPrice ? `₹${order.shippingPrice}` : "FREE"}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>GST (5%)</span>
-                  <span className="font-bold">
-                    ₹{order.taxPrice?.toFixed(2) || "0.00"}
-                  </span>
-                </div>
                 {order.discount > 0 && (
                   <div className="flex justify-between text-sm text-green-600">
                     <span>Discount</span>

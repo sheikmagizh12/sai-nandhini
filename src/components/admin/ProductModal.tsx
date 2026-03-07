@@ -29,7 +29,6 @@ export default function ProductModal({
     stock: "" as any,
     badge: "",
     isFeatured: false,
-    isCodAvailable: true,
     variants: [] as any[],
     images: [] as any[], // Allow strings or Files
     seo: {
@@ -110,7 +109,6 @@ export default function ProductModal({
         stock: product.stock || "",
         badge: product.badge || "",
         isFeatured: product.isFeatured || false,
-        isCodAvailable: product.isCodAvailable !== false,
         variants: product.variants || [],
         images: product.images || [],
         seo: product.seo || {
@@ -130,7 +128,6 @@ export default function ProductModal({
         stock: "",
         badge: "",
         isFeatured: false,
-        isCodAvailable: true,
         variants: [],
         images: [],
         seo: {
@@ -416,30 +413,6 @@ export default function ProductModal({
                         />
                         <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider group-hover:text-[#234d1b] transition-colors">
                           Featured
-                        </span>
-                      </label>
-
-                      <label className="flex items-center gap-3 cursor-pointer group p-2 rounded-xl hover:bg-[#ece0cc] transition-colors">
-                        <div
-                          className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${formData.isCodAvailable ? "bg-[#234d1b] border-[#234d1b]" : "border-gray-300 group-hover:border-[#234d1b]"}`}
-                        >
-                          {formData.isCodAvailable && (
-                            <Check size={12} className="text-white" />
-                          )}
-                        </div>
-                        <input
-                          type="checkbox"
-                          className="hidden"
-                          checked={formData.isCodAvailable}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              isCodAvailable: e.target.checked,
-                            })
-                          }
-                        />
-                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider group-hover:text-[#234d1b] transition-colors">
-                          COD Available
                         </span>
                       </label>
                     </div>

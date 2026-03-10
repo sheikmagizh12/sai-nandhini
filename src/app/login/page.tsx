@@ -149,6 +149,17 @@ export default function LoginPage() {
                 </>
               )}
             </button>
+
+            <Link
+              href="/checkout"
+              className="w-full bg-white border-2 border-primary/20 text-primary py-4 rounded-2xl font-bold text-lg hover:bg-primary/5 transition-all shadow-sm flex items-center justify-center gap-2 group active:scale-95 text-center mt-4"
+            >
+              Continue as Guest{" "}
+              <ArrowRight
+                className="group-hover:translate-x-1 transition-transform"
+                size={20}
+              />
+            </Link>
           </form>
 
           <div className="mt-8">

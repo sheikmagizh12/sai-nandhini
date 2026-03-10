@@ -2,7 +2,7 @@ import mongoose, { Schema, model, models } from "mongoose";
 
 const OrderSchema = new Schema(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: false },
     orderItems: [
       {
         name: { type: String, required: true },

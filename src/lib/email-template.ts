@@ -39,6 +39,7 @@ export interface ShippingAddress {
   address: string;
   city: string;
   pincode: string;
+  email: string;
   state?: string;
 }
 
@@ -55,6 +56,7 @@ export interface Order {
   awbNumber?: string;
   cancelReason?: string;
   deliveredAt?: string | Date;
+  user?: any;
 }
 
 export interface ShopSettings {
@@ -811,7 +813,9 @@ export function getEmailTemplate(
   const date = formatDate(order.createdAt, locale);
   const total = fmt(order.totalPrice);
   const domain = resolved.domain;
-  const orderUrl = `${domain}/profile/orders`;
+  const orderUrl = order.user
+    ? `${domain}/profile/orders`
+    : `${domain}/track?orderId=${order._id.toString()}&email=${encodeURIComponent(order.shippingAddress.email)}`;
 
   const cfg = buildStatusConfig(
     order.status,
@@ -910,11 +914,10 @@ export function getEmailTemplate(
 
 
           <!-- ── PROGRESS BAR ───────────────────────────────────── -->
-          ${
-            buildProgressBar(cfg).trim()
-              ? `<tr><td style="padding:0;">${buildProgressBar(cfg)}</td></tr>`
-              : ""
-          }
+          ${buildProgressBar(cfg).trim()
+      ? `<tr><td style="padding:0;">${buildProgressBar(cfg)}</td></tr>`
+      : ""
+    }
 
 
           <!-- ── ZIGZAG header → white ──────────────────────────── -->
@@ -946,12 +949,11 @@ export function getEmailTemplate(
                 <!-- Items or refund breakdown -->
                 <tr>
                   <td>
-                    ${
-                      isCancelled
-                        ? buildRefundBreakdown(order, fmt)
-                        : buildItemsSection(order, domain, fmt, itemsLabel) +
-                          buildTotals(order, fmt)
-                    }
+                    ${isCancelled
+      ? buildRefundBreakdown(order, fmt)
+      : buildItemsSection(order, domain, fmt, itemsLabel) +
+      buildTotals(order, fmt)
+    }
                   </td>
                 </tr>
 

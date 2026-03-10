@@ -68,9 +68,6 @@ export default function CheckoutClient({
   } | null>(null);
 
   useEffect(() => {
-    if (!status && !session) {
-      router.push("/login?callbackUrl=/checkout");
-    }
     if (session?.user) {
       setAddress((prev) => ({
         ...prev,
@@ -78,14 +75,14 @@ export default function CheckoutClient({
         email: session.user?.email || "",
       }));
     }
-  }, [session, status, router]);
+  }, [session, status]);
 
   const itemsPrice = cartTotal;
 
   // Get estimated delivery time for selected location
   const getEstimatedDelivery = () => {
     if (!initialShippingRates || !address.state) return null;
-    
+
     let shippingLocation = "Other States";
     if (address.state === "Tamil Nadu") {
       shippingLocation = "Tamil Nadu";
@@ -96,7 +93,7 @@ export default function CheckoutClient({
     const applicableRate = initialShippingRates.find(
       (rate) => rate.location === shippingLocation
     );
-    
+
     return applicableRate?.estimatedDelivery || null;
   };
 
@@ -117,10 +114,10 @@ export default function CheckoutClient({
       const applicableRate = initialShippingRates.find(
         (rate) => rate.location === shippingLocation
       );
-      
+
       // If rate found for this location, return it
       if (applicableRate) return applicableRate.rate;
-      
+
       // If no rate found for this specific location, return null to indicate unavailable
       return null;
     }
@@ -138,10 +135,10 @@ export default function CheckoutClient({
   const shippingPrice = calculateShipping();
   const discountAmount = appliedCoupon?.discount || 0;
   const estimatedDelivery = getEstimatedDelivery();
-  
+
   // Check if shipping is available for selected location
   const isShippingAvailable = shippingPrice !== null;
-  
+
   const totalPrice = Math.max(
     0,
     itemsPrice + (shippingPrice || 0) - discountAmount,
@@ -627,19 +624,17 @@ export default function CheckoutClient({
               <div className="p-5 md:p-8 space-y-4">
                 {/* Online Payment Option */}
                 <label
-                  className={`group flex items-start gap-4 p-6 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === "prepaid"
+                  className={`group flex items-start gap-4 p-6 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === "prepaid"
                       ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/20"
                       : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center h-6">
                     <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                        paymentMethod === "prepaid"
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${paymentMethod === "prepaid"
                           ? "border-primary bg-primary"
                           : "border-gray-300 group-hover:border-gray-400"
-                      }`}
+                        }`}
                     >
                       {paymentMethod === "prepaid" && (
                         <motion.div
@@ -816,7 +811,7 @@ export default function CheckoutClient({
                               (itemsPrice /
                                 (initialSettings.freeShippingThreshold ||
                                   500)) *
-                                100,
+                              100,
                             ),
                           )}
                           %
@@ -833,13 +828,13 @@ export default function CheckoutClient({
                       </div>
                       {itemsPrice <
                         (initialSettings.freeShippingThreshold || 500) && (
-                        <p className="text-[10px] text-primary font-medium text-center">
-                          Shop for ₹
-                          {(initialSettings.freeShippingThreshold || 500) -
-                            itemsPrice}{" "}
-                          more to get FREE shipping!
-                        </p>
-                      )}
+                          <p className="text-[10px] text-primary font-medium text-center">
+                            Shop for ₹
+                            {(initialSettings.freeShippingThreshold || 500) -
+                              itemsPrice}{" "}
+                            more to get FREE shipping!
+                          </p>
+                        )}
                     </div>
                   )}
 
@@ -854,11 +849,10 @@ export default function CheckoutClient({
                       </span>
                     ) : (
                       <span
-                        className={`font-semibold ${
-                          shippingPrice === 0
+                        className={`font-semibold ${shippingPrice === 0
                             ? "text-green-600"
                             : "text-primary-dark"
-                        }`}
+                          }`}
                       >
                         {shippingPrice === 0 ? (
                           <span className="flex items-center gap-1">

@@ -26,10 +26,6 @@ export async function POST(req: Request) {
       headers: await headers(),
     });
 
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     await connectDB();
     const { orderId } = await req.json();
 
@@ -45,12 +41,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Verify order belongs to user
-    if (order.user.toString() !== session.user.id) {
-      return NextResponse.json(
-        { error: "Unauthorized access to order" },
-        { status: 403 },
-      );
+    // Verify order ownership
+    if (order.user) {
+      // If order belongs to a user, they must be logged in and be the owner (or admin)
+      if (!session || (order.user.toString() !== session.user.id && (session.user as any).role !== "admin")) {
+        return NextResponse.json(
+          { error: "Unauthorized access to order" },
+          { status: 403 },
+        );
+      }
+    } else {
+      // It's a guest order. For now, we allow payment if you have the ID.
+      // In a more secure implementation, we could verify the email here as well.
     }
 
     // Get decrypted payment config (exact ref repo pattern)

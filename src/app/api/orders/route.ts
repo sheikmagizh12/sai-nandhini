@@ -17,10 +17,6 @@ export async function POST(req: Request) {
       headers: await headers(),
     });
 
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const {
       orderItems,
       shippingAddress,
@@ -100,15 +96,15 @@ export async function POST(req: Request) {
     }
 
     // Fix for "admin-fallback" or missing user ID
-    let userId = session.user.id;
+    let userId = session?.user?.id || null;
 
     // Allow admins to create orders for other customers
-    if (customerId && (session.user as any).role === "admin") {
+    if (customerId && session && (session.user as any).role === "admin") {
       userId = customerId;
     }
 
     // If still fallback or invalid (only for admin context logic if needed), try to find a root admin or use a specific system user
-    if (userId === "admin-fallback" && (session.user as any).role === "admin") {
+    if (userId === "admin-fallback" && session && (session.user as any).role === "admin") {
       const adminUser = await User.findOne({ role: "admin" });
       if (adminUser) userId = adminUser._id.toString();
       else
@@ -141,30 +137,32 @@ export async function POST(req: Request) {
     // If coupon was used, increment usage count and track per-user usage
     if (couponCode) {
       const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
-      
+
       if (coupon) {
         // Increment total usage count
         coupon.usedCount = (coupon.usedCount || 0) + 1;
 
-        // Track per-user usage
-        const userUsageIndex = coupon.usedByUsers?.findIndex(
-          (u: any) => u.userId.toString() === userId
-        );
+        // Track per-user usage only if user is logged in
+        if (userId) {
+          const userUsageIndex = coupon.usedByUsers?.findIndex(
+            (u: any) => u.userId.toString() === userId
+          );
 
-        if (userUsageIndex !== undefined && userUsageIndex >= 0) {
-          // User has used this coupon before, increment their count
-          coupon.usedByUsers[userUsageIndex].count += 1;
-          coupon.usedByUsers[userUsageIndex].lastUsedAt = new Date();
-        } else {
-          // First time user is using this coupon
-          if (!coupon.usedByUsers) {
-            coupon.usedByUsers = [];
+          if (userUsageIndex !== undefined && userUsageIndex >= 0) {
+            // User has used this coupon before, increment their count
+            coupon.usedByUsers[userUsageIndex].count += 1;
+            coupon.usedByUsers[userUsageIndex].lastUsedAt = new Date();
+          } else {
+            // First time user is using this coupon
+            if (!coupon.usedByUsers) {
+              coupon.usedByUsers = [];
+            }
+            coupon.usedByUsers.push({
+              userId: userId,
+              count: 1,
+              lastUsedAt: new Date(),
+            });
           }
-          coupon.usedByUsers.push({
-            userId: userId,
-            count: 1,
-            lastUsedAt: new Date(),
-          });
         }
 
         await coupon.save();

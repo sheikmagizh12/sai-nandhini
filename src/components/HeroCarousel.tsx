@@ -289,9 +289,7 @@ export default function HeroCarousel({
                   <div className="absolute inset-0 bg-gradient-to-t from-[#234d1b]/20 via-transparent to-transparent" />
                 </div>
 
-                {/* Floating decorative cards */}
-                <div className="absolute -top-6 -right-6 w-28 h-28 bg-[#234d1b]/10 rounded-2xl border border-[#234d1b]/15 -z-10 rotate-6" />
-                <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-white/30 rounded-xl border border-white/20 -z-10 -rotate-6" />
+
               </div>
             </motion.div>
           </AnimatePresence>

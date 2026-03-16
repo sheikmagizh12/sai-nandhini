@@ -148,7 +148,7 @@ export default function Footer() {
               </h4>
               <ul className="space-y-3">
                 {[
-                  { name: "Track Your Order", link: "/order" },
+                  { name: "Track Your Order", link: "/track" },
                   { name: "About Us", link: "/about" },
                   { name: "Contact Us", link: "/contact" },
                   { name: "Combos", link: "/shop" },

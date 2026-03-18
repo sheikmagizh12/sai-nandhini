@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 
 interface CartItem {
   _id: string;
@@ -25,6 +26,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const isInitialLoad = useRef(true);
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -36,30 +38,37 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         console.error("Failed to parse cart", err);
       }
     }
+    isInitialLoad.current = false;
   }, []);
 
-  // Save cart to localStorage on change
+  // Save cart to localStorage on change (but not on initial load)
   useEffect(() => {
-    localStorage.setItem("sai_nandhini_cart", JSON.stringify(cartItems));
+    if (!isInitialLoad.current) {
+      localStorage.setItem("sai_nandhini_cart", JSON.stringify(cartItems));
+    }
   }, [cartItems]);
 
   const addToCart = (product: any, qty: number) => {
-    setCartItems((prev) => {
-      const existing = prev.find(
-        (item) => item._id === product._id && item.uom === product.uom,
-      );
-      if (existing) {
-        return prev.map((item) =>
+    const existing = cartItems.find(
+      (item) => item._id === product._id && item.uom === product.uom,
+    );
+    
+    if (existing) {
+      setCartItems((prev) =>
+        prev.map((item) =>
           item._id === product._id && item.uom === product.uom
             ? { ...item, qty: item.qty + qty }
             : item,
-        );
-      }
-      return [
+        )
+      );
+    } else {
+      setCartItems((prev) => [
         ...prev,
         { ...product, qty, image: product.images?.[0] || product.image || "" },
-      ];
-    });
+      ]);
+    }
+    
+    toast.success(`${qty} item(s) added to cart!`);
   };
 
   const removeFromCart = (id: string, uom?: string) => {

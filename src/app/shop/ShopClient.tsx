@@ -8,7 +8,6 @@ import {
   ChevronDown,
   Star,
   ShoppingCart,
-  Eye,
   Loader2,
   Heart,
   CheckCircle2,
@@ -424,80 +423,76 @@ export default function ShopClient({
                             className={`h-full bg-white rounded-[2rem] p-2.5 md:p-4 border border-primary/5 hover:border-accent/30 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col ${isOutOfStock ? "opacity-70 grayscale-[0.5]" : ""}`}
                           >
                             {/* Product Image Wrapper */}
-                            <div className="relative aspect-[4/5] rounded-[1.5rem] overflow-hidden bg-secondary/10 mb-4">
-                              <Image
-                                src={
-                                  p.images?.[0] ||
-                                  "https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=800"
-                                }
-                                alt={p.name}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                fill
-                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                                priority={idx < 4}
-                              />
+                            <Link href={`/shop/${p.slug || p._id}`} className="block">
+                              <div className="relative aspect-[4/5] rounded-[1.5rem] overflow-hidden bg-secondary/10 mb-4">
+                                <Image
+                                  src={
+                                    p.images?.[0] ||
+                                    "https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=800"
+                                  }
+                                  alt={p.name}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                  fill
+                                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                                  priority={idx < 4}
+                                />
 
-                              {/* Hover Actions: Quick View & Wishlist */}
-                              <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+                                {/* Badges */}
+                                {p.badge && (
+                                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-primary-dark px-2.5 py-1 rounded-lg text-[9px] font-sans font-black uppercase tracking-widest shadow-sm">
+                                    {p.badge}
+                                  </div>
+                                )}
+
+                                {/* Wishlist Button */}
                                 <button 
                                   onClick={(e) => {
                                     e.preventDefault();
+                                    e.stopPropagation();
                                     if (isInWishlist(p._id)) {
                                       removeFromWishlist(p._id);
                                     } else {
                                       addToWishlist(p);
                                     }
                                   }}
-                                  className={`w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl transition-all transform active:scale-90 ${
+                                  className={`absolute top-4 right-4 w-8 h-8 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all transform hover:scale-110 ${
                                     isInWishlist(p._id)
                                       ? 'bg-red-500 text-white hover:bg-red-600'
-                                      : 'bg-white/90 text-primary-dark hover:bg-primary-dark hover:text-white'
+                                      : 'bg-white/90 text-primary-dark hover:bg-red-500 hover:text-white'
                                   }`}
                                 >
-                                  <Heart size={16} fill={isInWishlist(p._id) ? 'currentColor' : 'none'} />
+                                  <Heart size={14} fill={isInWishlist(p._id) ? 'currentColor' : 'none'} />
                                 </button>
-                                <Link
-                                  href={`/shop/${p.slug || p._id}`}
-                                  className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-primary-dark shadow-xl hover:bg-primary-dark hover:text-white transition-all transform active:scale-90"
-                                >
-                                  <Eye size={16} />
-                                </Link>
-                              </div>
 
-                              {/* Badges */}
-                              {p.badge && (
-                                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-primary-dark px-2.5 py-1 rounded-lg text-[9px] font-sans font-black uppercase tracking-widest shadow-sm">
-                                  {p.badge}
-                                </div>
-                              )}
-                              {isOutOfStock && (
-                                <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
-                                  <span className="bg-primary-dark text-white px-4 py-2 rounded-full text-[10px] font-sans font-black uppercase tracking-widest shadow-xl">
-                                    Sold Out
-                                  </span>
-                                </div>
-                              )}
-                            </div>
+                                {isOutOfStock && (
+                                  <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+                                    <span className="bg-primary-dark text-white px-4 py-2 rounded-full text-[10px] font-sans font-black uppercase tracking-widest shadow-xl">
+                                      Sold Out
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </Link>
 
                             {/* Product Details */}
                             <div className="flex-grow flex flex-col px-1 pb-1">
-                              <div className="flex justify-between items-start mb-2">
-                                <p className="text-[10px] font-sans font-black text-primary/60 uppercase tracking-widest truncate">
-                                  {p.category}
-                                </p>
-                                <div className="flex items-center gap-1 text-accent">
-                                  <Star size={10} fill="currentColor" />
-                                  <span className="text-[10px] font-sans font-bold text-primary-dark">
-                                    {p.rating || 4.5}
-                                  </span>
+                              <Link href={`/shop/${p.slug || p._id}`} className="block">
+                                <div className="flex justify-between items-start mb-2">
+                                  <p className="text-[10px] font-sans font-black text-primary/60 uppercase tracking-widest truncate">
+                                    {p.category}
+                                  </p>
+                                  <div className="flex items-center gap-1 text-accent">
+                                    <Star size={10} fill="currentColor" />
+                                    <span className="text-[10px] font-sans font-bold text-primary-dark">
+                                      {p.rating || 4.5}
+                                    </span>
+                                  </div>
                                 </div>
-                              </div>
-                              <h3 className="text-sm font-serif font-black text-primary-dark line-clamp-2 min-h-[2.5rem] leading-snug group-hover:text-primary transition-colors">
-                                {p.name}
-                              </h3>
+                                <h3 className="text-sm font-serif font-black text-primary-dark line-clamp-2 min-h-[2.5rem] leading-snug group-hover:text-primary transition-colors mb-4">
+                                  {p.name}
+                                </h3>
 
-                              <div className="mt-4 flex flex-col gap-3">
-                                <div className="flex items-baseline gap-2">
+                                <div className="flex items-baseline gap-2 mb-4">
                                   <p className="text-xl font-sans font-black text-brown">
                                     ₹{p.price}
                                   </p>
@@ -507,41 +502,43 @@ export default function ShopClient({
                                     </span>
                                   )}
                                 </div>
+                              </Link>
 
-                                {/* Primary Action Button */}
-                                <button
-                                  onClick={() => {
-                                    if (isOutOfStock) return;
-                                    if (p.variants && p.variants.length > 0) {
-                                      // Find first in-stock variant, or default to first if none found (fallback)
-                                      const bestVariant =
-                                        p.variants.find(
-                                          (v: any) =>
-                                            !manageInventory || v.stock > 0,
-                                        ) || p.variants[0];
-                                      addToCart(
-                                        {
-                                          ...p,
-                                          price: bestVariant.price,
-                                          uom: bestVariant.uom,
-                                        },
-                                        1,
-                                      );
-                                    } else {
-                                      addToCart(p, 1);
-                                    }
-                                  }}
-                                  disabled={isOutOfStock}
-                                  className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl flex items-center justify-center gap-2 transition-all active:scale-95 ${
-                                    isOutOfStock
-                                      ? "bg-gray-100 text-gray-300 cursor-not-allowed"
-                                      : "bg-primary text-white hover:bg-primary-dark"
-                                  }`}
-                                >
-                                  <ShoppingCart size={14} />
-                                  {isOutOfStock ? "Sold Out" : "Add to Basket"}
-                                </button>
-                              </div>
+                              {/* Add to Cart Button - Outside Link to prevent nested links */}
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (isOutOfStock) return;
+                                  if (p.variants && p.variants.length > 0) {
+                                    // Find first in-stock variant, or default to first if none found (fallback)
+                                    const bestVariant =
+                                      p.variants.find(
+                                        (v: any) =>
+                                          !manageInventory || v.stock > 0,
+                                      ) || p.variants[0];
+                                    addToCart(
+                                      {
+                                        ...p,
+                                        price: bestVariant.price,
+                                        uom: bestVariant.uom,
+                                      },
+                                      1,
+                                    );
+                                  } else {
+                                    addToCart(p, 1);
+                                  }
+                                }}
+                                disabled={isOutOfStock}
+                                className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                                  isOutOfStock
+                                    ? "bg-gray-100 text-gray-300 cursor-not-allowed"
+                                    : "bg-primary text-white hover:bg-primary-dark"
+                                }`}
+                              >
+                                <ShoppingCart size={14} />
+                                {isOutOfStock ? "Sold Out" : "Add to Basket"}
+                              </button>
                             </div>
                           </div>
                         </motion.div>

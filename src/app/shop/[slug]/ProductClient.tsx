@@ -406,7 +406,6 @@ export default function ProductClient({
                         { ...product, price: price, uom: currentUom },
                         qty,
                       );
-                      toast.success(`${qty} item(s) added to cart!`);
                     }
                   }}
                   disabled={isOutOfStock}
@@ -861,7 +860,6 @@ export default function ProductClient({
             onClick={() => {
               if (!isOutOfStock) {
                 addToCart({ ...product, price: price, uom: currentUom }, qty);
-                toast.success(`${qty} item(s) added to cart!`);
               }
             }}
             disabled={isOutOfStock}

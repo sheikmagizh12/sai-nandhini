@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import {
   Filter,
@@ -23,6 +23,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { useSearchParams } from "next/navigation";
 
 export default function ShopClient({
@@ -36,14 +37,16 @@ export default function ShopClient({
 }) {
   const searchParams = useSearchParams();
   const urlSearch = searchParams.get("search") || "";
+  const urlCategory = searchParams.get("category") || "All";
   const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const [products] = useState<any[]>(initialProducts);
   const [categories] = useState<any[]>(initialCategories);
   const [loading] = useState(false);
 
   // Filters & Sorting
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeCategory, setActiveCategory] = useState(urlCategory);
   const [searchQuery, setSearchQuery] = useState(urlSearch);
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [minRating, setMinRating] = useState(0);
@@ -53,6 +56,15 @@ export default function ShopClient({
   const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const itemsPerPage = 8;
+
+  // Handle URL parameter changes
+  useEffect(() => {
+    const urlCategory = searchParams.get("category") || "All";
+    const urlSearch = searchParams.get("search") || "";
+    
+    setActiveCategory(urlCategory);
+    setSearchQuery(urlSearch);
+  }, [searchParams]);
 
   const filteredProducts = useMemo(() => {
     return products
@@ -427,8 +439,22 @@ export default function ShopClient({
 
                               {/* Hover Actions: Quick View & Wishlist */}
                               <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                                <button className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-primary-dark shadow-xl hover:bg-primary-dark hover:text-white transition-all transform active:scale-90">
-                                  <Heart size={16} />
+                                <button 
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    if (isInWishlist(p._id)) {
+                                      removeFromWishlist(p._id);
+                                    } else {
+                                      addToWishlist(p);
+                                    }
+                                  }}
+                                  className={`w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl transition-all transform active:scale-90 ${
+                                    isInWishlist(p._id)
+                                      ? 'bg-red-500 text-white hover:bg-red-600'
+                                      : 'bg-white/90 text-primary-dark hover:bg-primary-dark hover:text-white'
+                                  }`}
+                                >
+                                  <Heart size={16} fill={isInWishlist(p._id) ? 'currentColor' : 'none'} />
                                 </button>
                                 <Link
                                   href={`/shop/${p.slug || p._id}`}

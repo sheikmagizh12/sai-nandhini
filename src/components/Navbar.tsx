@@ -14,17 +14,20 @@ import {
   Facebook,
   Instagram,
   Twitter,
+  Heart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import CartDrawer from "./CartDrawer";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 
 export default function Navbar() {
   const { data: session } = authClient.useSession();
   const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
   const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -270,6 +273,17 @@ export default function Navbar() {
                     <User size={20} />
                   </Link>
                 )}
+                <Link
+                  href="/wishlist"
+                  className="p-2 text-white/70 hover:text-[#f8bf51] relative group transition-colors"
+                >
+                  <Heart size={20} />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-[#f8bf51] text-[#234d1b] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
                 <button
                   onClick={() => setIsCartOpen(true)}
                   className="p-2 text-white/70 hover:text-[#f8bf51] relative group transition-colors"
@@ -419,6 +433,18 @@ export default function Navbar() {
                       ? "Admin Dashboard"
                       : "My Profile"
                     : "Login / Register"}
+                </Link>
+                <Link
+                  href="/wishlist"
+                  className="flex items-center gap-3 text-[#234d1b] font-bold"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Heart size={20} /> My Wishlist
+                  {wishlistCount > 0 && (
+                    <span className="bg-[#f8bf51] text-[#234d1b] text-xs font-bold px-2 py-1 rounded-full">
+                      {wishlistCount}
+                    </span>
+                  )}
                 </Link>
                 <Link
                   href="/checkout"

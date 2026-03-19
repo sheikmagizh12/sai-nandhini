@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Copy, Loader2, Save, FileText } from "lucide-react";
-import { motion } from "framer-motion";
+import { Loader2, Save, FileText } from "lucide-react";
 import toast from "react-hot-toast";
+import TiptapEditor from "@/components/admin/TiptapEditor";
 
 export default function AdminLegalPages() {
   const [selectedPage, setSelectedPage] = useState<string>("terms");
@@ -70,7 +70,7 @@ export default function AdminLegalPages() {
             Legal Pages
           </h1>
           <p className="text-gray-400 mt-2 font-medium text-[10px] sm:text-sm">
-            Edit Terms, Privacy, and other mandatory legal policies.
+            Edit Terms, Privacy, and other mandatory legal policies with rich text formatting.
           </p>
         </div>
       </div>
@@ -120,17 +120,15 @@ export default function AdminLegalPages() {
 
               <div>
                 <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
-                  Content (Markdown / HTML)
+                  Content
                 </label>
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="w-full h-[350px] sm:h-[400px] p-5 sm:p-6 bg-gray-50 rounded-2xl border border-transparent focus:bg-white focus:border-primary/20 outline-none transition-all font-mono text-[13px] sm:text-sm leading-relaxed resize-none shadow-inner"
-                  placeholder="Start typing your policy content here..."
+                <TiptapEditor
+                  content={content}
+                  onChange={setContent}
+                  placeholder="Start writing your legal policy content here..."
                 />
                 <p className="text-[10px] text-gray-400 mt-2 font-medium">
-                  Tip: You can use basic HTML tags for formatting (e.g.,
-                  &lt;b&gt;, &lt;h2&gt;, &lt;ul&gt;).
+                  Use the toolbar above to format your content with headings, lists, links, and more.
                 </p>
               </div>
 

@@ -115,20 +115,14 @@ export default function CheckoutClient({
         (rate) => rate.location === shippingLocation
       );
 
-      // If rate found for this location, return it
+      // If rate found for this location, return it (0 means free delivery)
       if (applicableRate) return applicableRate.rate;
 
       // If no rate found for this specific location, return null to indicate unavailable
       return null;
     }
 
-    // Fallback to Global Settings only if no state is selected
-    if (!address.state) {
-      const freeShippingThreshold = initialSettings.freeShippingThreshold ?? 500;
-      const standardShippingFee = initialSettings.shippingFee ?? 50;
-      return itemsPrice >= freeShippingThreshold ? 0 : standardShippingFee;
-    }
-
+    // If no state is selected, return null (shipping not calculated yet)
     return null;
   };
 
@@ -817,24 +811,6 @@ export default function CheckoutClient({
                           %
                         </span>
                       </div>
-                      <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{
-                            width: `${Math.min(100, (itemsPrice / (initialSettings.freeShippingThreshold || 500)) * 100)}%`,
-                          }}
-                          className="h-full bg-primary"
-                        />
-                      </div>
-                      {itemsPrice <
-                        (initialSettings.freeShippingThreshold || 500) && (
-                          <p className="text-[10px] text-primary font-medium text-center">
-                            Shop for ₹
-                            {(initialSettings.freeShippingThreshold || 500) -
-                              itemsPrice}{" "}
-                            more to get FREE shipping!
-                          </p>
-                        )}
                     </div>
                   )}
 
@@ -845,7 +821,7 @@ export default function CheckoutClient({
                     </span>
                     {shippingPrice === null ? (
                       <span className="text-red-500 font-semibold text-xs">
-                        Not Available
+                        {address.state ? "Not Available" : "Select State"}
                       </span>
                     ) : (
                       <span

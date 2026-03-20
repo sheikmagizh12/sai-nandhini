@@ -488,7 +488,7 @@ export default function SettingsClient({
                     onChange={(e) =>
                       setSettings({ ...settings, announcement: e.target.value })
                     }
-                    placeholder="e.g., Free shipping on orders above ₹500!"
+                    placeholder="e.g., Welcome to our store!"
                   />
                   <p className="text-xs text-gray-500 mt-1.5">
                     This message will appear at the top of your website

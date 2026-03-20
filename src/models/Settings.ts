@@ -17,11 +17,9 @@ const SettingsSchema = new Schema(
         isDefault: { type: Boolean, default: false },
       },
     ],
-    freeShippingThreshold: { type: Number, default: 500 },
-    shippingFee: { type: Number, default: 50 },
     announcement: {
       type: String,
-      default: "Free delivery on orders above ₹500!",
+      default: "Welcome to our store!",
     },
     minOrderValue: { type: Number, default: 0 },
     lowStockThreshold: { type: Number, default: 10 },

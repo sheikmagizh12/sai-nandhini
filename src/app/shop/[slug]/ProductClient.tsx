@@ -469,7 +469,7 @@ export default function ProductClient({
                   {
                     icon: Truck,
                     label: "Free Delivery",
-                    sublabel: "On orders above ₹500",
+                    sublabel: "On select locations",
                   },
                   {
                     icon: Award,

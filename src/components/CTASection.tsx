@@ -93,7 +93,7 @@ export default function CTASection() {
                 },
                 {
                   title: "Free Delivery",
-                  desc: "Applies to all orders above ₹500 instantly.",
+                  desc: "Available on select locations.",
                 },
               ].map((item, index) => (
                 <div key={index} className="flex items-start gap-4">

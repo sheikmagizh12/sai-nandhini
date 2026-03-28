@@ -17,6 +17,9 @@ export const metadata = {
     "Experience the tradition of handcrafted sweets and snacks from Sai Nandhini. Made with love and the finest ingredients.",
 };
 
+// Revalidate every 60 seconds (ISR)
+export const revalidate = 60;
+
 export default async function Home() {
   const [heroSlides, categories, products] = await Promise.all([
     getHeroSlides(),

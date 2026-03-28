@@ -82,7 +82,7 @@ export default function ProductModal({
           );
           if (cat) {
             const res = await fetch(
-              `/api/admin/subcategories?category=${cat._id}`,
+              `/api/admin/subcategories?categoryId=${cat._id}`,
             );
             const subs = await res.json();
             setSubCategories(subs);

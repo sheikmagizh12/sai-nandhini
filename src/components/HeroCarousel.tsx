@@ -30,6 +30,23 @@ interface Slide {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   Helper function to convert Cloudinary public ID to full URL
+   ═══════════════════════════════════════════════════════════════ */
+function getImageUrl(image: string): string {
+  if (!image) return "";
+  // If it's already a full URL, return as is
+  if (image.startsWith("http://") || image.startsWith("https://")) {
+    return image;
+  }
+  // If it's a Cloudinary public ID, convert to full URL
+  if (image.includes("/")) {
+    return `https://res.cloudinary.com/dn4qntb9r/image/upload/${image}`;
+  }
+  // Fallback
+  return image;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Fallback slides (used only while API is loading)
    ═══════════════════════════════════════════════════════════════ */
 const fallbackSlides: Slide[] = [
@@ -279,7 +296,7 @@ export default function HeroCarousel({
               <div className="relative w-full max-w-lg lg:max-w-xl mx-auto">
                 <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl shadow-black/40 border border-white/5 group">
                   <Image
-                    src={slide.image}
+                    src={getImageUrl(slide.image)}
                     alt={`${slide.title} ${slide.titleAccent}`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
                     fill

@@ -4,6 +4,7 @@ import Product from "@/models/Product";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { revalidatePath } from "next/cache";
 
 export async function GET(req: Request) {
   try {
@@ -102,6 +103,11 @@ export async function POST(req: Request) {
 
       body.images = [...(body.images || []), ...uploadedUrls];
       const product = await Product.create(body);
+
+      // Revalidate affected pages
+      revalidatePath("/");
+      revalidatePath("/shop");
+      revalidatePath("/shop/[slug]", "page");
 
       return NextResponse.json(product, { status: 201 });
     }

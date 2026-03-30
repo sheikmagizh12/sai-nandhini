@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb";
 import ShippingRate from "@/models/ShippingRate";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 export async function GET() {
   try {
@@ -37,6 +38,10 @@ export async function POST(req: Request) {
     }
 
     const rate = await ShippingRate.create(body);
+    
+    // Revalidate checkout page to show new shipping rate immediately
+    revalidatePath("/checkout");
+    
     return NextResponse.json(rate, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -68,6 +73,9 @@ export async function PUT(req: Request) {
     if (!rate) {
       return NextResponse.json({ error: "Shipping rate not found" }, { status: 404 });
     }
+
+    // Revalidate checkout page to show updated shipping rate immediately
+    revalidatePath("/checkout");
 
     return NextResponse.json(rate);
   } catch (error: any) {

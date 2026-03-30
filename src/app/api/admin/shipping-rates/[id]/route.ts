@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb";
 import ShippingRate from "@/models/ShippingRate";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 export async function DELETE(
   req: Request,
@@ -20,6 +21,9 @@ export async function DELETE(
 
     await connectDB();
     await ShippingRate.findByIdAndDelete(id);
+
+    // Revalidate checkout page to remove deleted shipping rate immediately
+    revalidatePath("/checkout");
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

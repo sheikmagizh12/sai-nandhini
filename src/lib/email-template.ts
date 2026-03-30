@@ -21,6 +21,7 @@
 export type OrderStatus =
   | "Pending"
   | "Processing"
+  | "Shipping"
   | "Shipped"
   | "OutForDelivery"
   | "Delivered"
@@ -167,6 +168,7 @@ function buildStatusConfig(
         step2State: "inactive",
       };
 
+    case "Shipping":
     case "Shipped":
       return {
         ...base,

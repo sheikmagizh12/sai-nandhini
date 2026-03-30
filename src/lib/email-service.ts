@@ -145,7 +145,7 @@ export const sendStatusUpdateEmail = async (order: any) => {
     let statusMessage = "The status of your order has been updated.";
     if (order.status === "Processing") {
       statusMessage = "We are currently processing your order.";
-    } else if (order.status === "Shipped") {
+    } else if (order.status === "Shipping" || order.status === "Shipped") {
       statusMessage = `Your order has been shipped!${order.awbNumber ? ` Tracking Number: <strong>${order.awbNumber}</strong>` : ""}`;
     } else if (order.status === "Delivered") {
       statusMessage =

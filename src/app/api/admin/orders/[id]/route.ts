@@ -30,10 +30,13 @@ export async function PUT(
     // We only allow updating delivery or payment status manually for admin (though payment should usually be automated)
     const updateData: any = {};
     let statusChanged = false;
+    
     // Updatable fields
     if (body.status && body.status !== existingOrder.status) {
       statusChanged = true;
       updateData.status = body.status;
+      
+      // Automatically sync isDelivered and deliveredAt based on status
       if (body.status === "Delivered") {
         updateData.isDelivered = true;
         updateData.deliveredAt = Date.now();
@@ -47,11 +50,16 @@ export async function PUT(
       updateData.awbNumber = body.awbNumber;
     }
 
-    if (body.isDelivered !== undefined) {
+    // Only allow manual isDelivered/isPaid updates if status wasn't explicitly changed
+    if (body.isDelivered !== undefined && !body.status) {
       updateData.isDelivered = body.isDelivered;
       updateData.deliveredAt = body.isDelivered ? Date.now() : null;
-      if (body.isDelivered) updateData.status = "Delivered";
+      if (body.isDelivered) {
+        updateData.status = "Delivered";
+        statusChanged = true;
+      }
     }
+    
     if (body.isPaid !== undefined) {
       updateData.isPaid = body.isPaid;
       updateData.paidAt = body.isPaid ? Date.now() : null;

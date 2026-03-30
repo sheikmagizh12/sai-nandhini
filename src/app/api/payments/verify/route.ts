@@ -90,36 +90,42 @@ export async function POST(req: Request) {
           `✅ Payment verified for order ${order._id}. Webhook will handle invoice email.`,
         );
       } else {
-        // No webhook configured - send email immediately
+        // No webhook configured - send email asynchronously (fire and forget)
         console.log(
-          `⚠️ No webhook configured. Sending invoice email immediately for order ${order._id}...`,
+          `⚠️ No webhook configured. Sending invoice email asynchronously for order ${order._id}...`,
         );
 
         if (!order.invoiceEmailSent) {
-          try {
-            const populatedOrder =
-              await Order.findById(orderId).populate("user");
-            console.log(
-              `📧 Generating invoice and sending confirmation email for order ${order._id}...`,
-            );
-            const invoiceHTML = await generateInvoiceHTML(populatedOrder);
-            const pdfBuffer = await generatePDFFromHTML(invoiceHTML);
-            await sendOrderConfirmationEmail(populatedOrder, pdfBuffer);
+          // Fire and forget - don't await this
+          (async () => {
+            try {
+              const populatedOrder =
+                await Order.findById(orderId).populate("user");
+              console.log(
+                `📧 Generating invoice and sending confirmation email for order ${order._id}...`,
+              );
+              const invoiceHTML = await generateInvoiceHTML(populatedOrder);
+              const pdfBuffer = await generatePDFFromHTML(invoiceHTML);
+              await sendOrderConfirmationEmail(populatedOrder, pdfBuffer);
 
-            // Mark email as sent
-            order.invoiceEmailSent = true;
-            order.invoiceEmailSentAt = new Date();
-            await order.save();
+              // Mark email as sent
+              const orderToUpdate = await Order.findById(orderId);
+              if (orderToUpdate) {
+                orderToUpdate.invoiceEmailSent = true;
+                orderToUpdate.invoiceEmailSentAt = new Date();
+                await orderToUpdate.save();
+              }
 
-            console.log(
-              `✅ Invoice generated and email sent for order ${order._id}`,
-            );
-          } catch (emailError) {
-            console.error(
-              "❌ Failed to send order confirmation email:",
-              emailError,
-            );
-          }
+              console.log(
+                `✅ Invoice generated and email sent for order ${order._id}`,
+              );
+            } catch (emailError) {
+              console.error(
+                "❌ Failed to send order confirmation email:",
+                emailError,
+              );
+            }
+          })();
         } else {
           console.log(
             `ℹ️ Invoice email already sent for order ${order._id}, skipping.`,
@@ -127,6 +133,7 @@ export async function POST(req: Request) {
         }
       }
 
+      // Return immediately without waiting for email
       return NextResponse.json({
         success: true,
         message: "Payment verified successfully",

@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { getCouponsData } from "@/lib/admin-data";
 import connectDB from "@/lib/mongodb";
 import Coupon from "@/models/Coupon";
+import { revalidatePath } from "next/cache";
 
 export async function GET() {
   try {
@@ -80,6 +81,10 @@ export async function POST(req: Request) {
       code: body.code.toUpperCase(),
       createdBy: (session.user as any).id,
     });
+    
+    // Revalidate checkout page to show new coupon immediately
+    revalidatePath("/checkout");
+    
     return NextResponse.json(coupon, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

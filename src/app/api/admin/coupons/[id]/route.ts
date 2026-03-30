@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb";
 import Coupon from "@/models/Coupon";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 export async function PUT(
   req: Request,
@@ -25,6 +26,9 @@ export async function PUT(
     });
     if (!coupon)
       return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
+
+    // Revalidate checkout page to show updated coupon immediately
+    revalidatePath("/checkout");
 
     return NextResponse.json(coupon);
   } catch (error: any) {
@@ -51,6 +55,9 @@ export async function DELETE(
 
     if (!coupon)
       return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
+
+    // Revalidate checkout page to remove deleted coupon immediately
+    revalidatePath("/checkout");
 
     return NextResponse.json({ message: "Coupon deleted successfully" });
   } catch (error: any) {

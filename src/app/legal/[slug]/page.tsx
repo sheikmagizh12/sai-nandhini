@@ -6,6 +6,9 @@ import Footer from "@/components/Footer";
 import { notFound } from "next/navigation";
 import { Calendar, FileText, Shield } from "lucide-react";
 
+// Force dynamic rendering to avoid build-time database timeouts
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

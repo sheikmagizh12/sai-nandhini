@@ -17,7 +17,6 @@ import {
   AlertTriangle,
   Layers,
   DollarSign,
-  LayoutGrid,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductModal from "@/components/admin/ProductModal";
@@ -35,7 +34,6 @@ export default function ProductsClient({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [threshold] = useState(initialSettings.lowStockThreshold || 10);
   const [manageInventory] = useState(initialSettings.manageInventory ?? true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -312,17 +310,6 @@ export default function ProductsClient({
           >
             <Package size={14} /> Units
           </Link>
-
-          <button
-            onClick={() => setViewMode(viewMode === "list" ? "grid" : "list")}
-            className="w-12 h-12 sm:w-14 sm:h-14 bg-white border border-gray-100 rounded-xl sm:rounded-2xl flex items-center justify-center text-gray-400 hover:text-[#234d1b] transition-all shadow-sm shrink-0"
-          >
-            {viewMode === "list" ? (
-              <LayoutGrid size={18} />
-            ) : (
-              <Filter size={18} />
-            )}
-          </button>
         </div>
       </div>
 

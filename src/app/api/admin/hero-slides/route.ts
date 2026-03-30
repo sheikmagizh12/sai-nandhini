@@ -4,6 +4,7 @@ import HeroSlide from "@/models/HeroSlide";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { uploadToCloudinary, getUrlFromPublicId } from "@/lib/cloudinary";
+import { revalidatePath } from "next/cache";
 
 /* ────────── Seed defaults if collection is empty ────────── */
 let seedingPromise: Promise<void> | null = null;
@@ -121,6 +122,10 @@ export async function POST(req: Request) {
     });
 
     await slide.save();
+    
+    // Revalidate home page to show new banner immediately
+    revalidatePath("/");
+    
     return NextResponse.json({
       success: true,
       data: {

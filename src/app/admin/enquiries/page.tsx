@@ -22,6 +22,7 @@ export default function AdminEnquiriesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
 
   useEffect(() => {
     const fetchEnquiries = async () => {
@@ -50,8 +51,9 @@ export default function AdminEnquiriesPage() {
       enq.company?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesFilter = filter === "All" || enq.type === filter;
+    const matchesStatus = statusFilter === "All" || enq.status === statusFilter;
 
-    return matchesSearch && matchesFilter;
+    return matchesSearch && matchesFilter && matchesStatus;
   });
 
   const updateStatus = async (id: string, newStatus: string) => {
@@ -143,6 +145,24 @@ export default function AdminEnquiriesPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent focus:border-primary/20 rounded-2xl text-[13px] font-bold text-primary-dark outline-none transition-all placeholder:text-gray-300 focus:bg-white touch-manipulation shadow-sm"
+            />
+          </div>
+
+          {/* Status Filter Dropdown */}
+          <div className="relative">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="appearance-none bg-white border border-gray-200 text-gray-700 text-[11px] font-bold uppercase tracking-widest rounded-2xl px-4 py-3 pr-10 outline-none transition-all hover:border-gray-300 focus:border-primary/20 focus:ring-4 focus:ring-primary/10 cursor-pointer shadow-sm min-w-[160px]"
+            >
+              <option value="All">All Status</option>
+              <option value="New">New</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+            <ChevronDown
+              size={16}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
             />
           </div>
         </div>

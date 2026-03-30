@@ -252,22 +252,73 @@ export default function ShopClient({
               <h3 className="text-[11px] font-sans font-black text-primary-dark uppercase tracking-widest mb-4">
                 Price Range
               </h3>
-              <div className="px-2">
-                <input
-                  type="range"
-                  min="0"
-                  max="2000"
-                  value={priceRange[1]}
-                  onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
-                  className="w-full accent-primary h-1.5 bg-secondary border border-primary/10 rounded-lg appearance-none cursor-pointer"
-                />
-                <div className="flex justify-between mt-3">
-                  <span className="text-[10px] font-sans font-bold text-gray-400">
-                    ₹0
-                  </span>
-                  <span className="text-[10px] font-sans font-black text-primary-dark">
-                    Up to ₹{priceRange[1]}
-                  </span>
+              <div className="space-y-4">
+                {/* Price Input Fields */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[9px] font-sans font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">
+                      Min
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                        ₹
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        max={priceRange[1]}
+                        value={priceRange[0]}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 0;
+                          setPriceRange([Math.min(val, priceRange[1]), priceRange[1]]);
+                        }}
+                        className="w-full pl-7 pr-3 py-2 border border-gray-200 rounded-lg text-xs font-bold text-primary-dark focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-sans font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">
+                      Max
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                        ₹
+                      </span>
+                      <input
+                        type="number"
+                        min={priceRange[0]}
+                        max="10000"
+                        value={priceRange[1]}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 2000;
+                          setPriceRange([priceRange[0], Math.max(val, priceRange[0])]);
+                        }}
+                        className="w-full pl-7 pr-3 py-2 border border-gray-200 rounded-lg text-xs font-bold text-primary-dark focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all"
+                        placeholder="2000"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Price Range Slider */}
+                <div className="px-2">
+                  <input
+                    type="range"
+                    min="0"
+                    max="10000"
+                    value={priceRange[1]}
+                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                    className="w-full accent-primary h-1.5 bg-secondary border border-primary/10 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between mt-2">
+                    <span className="text-[10px] font-sans font-bold text-gray-400">
+                      ₹{priceRange[0]}
+                    </span>
+                    <span className="text-[10px] font-sans font-black text-primary-dark">
+                      ₹{priceRange[1]}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

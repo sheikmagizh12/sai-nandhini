@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Gift, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 /*
@@ -56,16 +56,6 @@ export default function CTASection() {
                     size={18}
                     className="group-hover:translate-x-1 transition-transform duration-300"
                   />
-                </Link>
-                <Link
-                  href="/shop?category=combos"
-                  className="group bg-transparent hover:bg-white/5 border border-white/20 hover:border-white/40 text-white px-8 py-4 rounded-xl font-bold uppercase tracking-wider text-sm transition-all duration-300 flex items-center justify-center gap-3 w-full sm:w-auto"
-                >
-                  <Gift
-                    size={18}
-                    className="text-white/70 group-hover:text-white"
-                  />
-                  Gift Hampers
                 </Link>
               </div>
             </motion.div>

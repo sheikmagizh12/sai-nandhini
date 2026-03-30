@@ -29,7 +29,8 @@ export default function CustomersClient({
   const filtered = customers.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase()),
+      c.email.toLowerCase().includes(search.toLowerCase()) ||
+      (c.phone && c.phone.includes(search)),
   );
 
   if (loading)
@@ -126,7 +127,7 @@ export default function CustomersClient({
             <button
               onClick={() =>
                 router.push(
-                  `/admin/orders?search=${encodeURIComponent(customer.name)}`,
+                  `/admin/orders?search=${encodeURIComponent(customer.email)}`,
                 )
               }
               className="w-full mt-auto py-3.5 sm:py-4 bg-gray-50 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2 group active:scale-[0.98] active:bg-primary-dark focus-visible:ring-4 focus-visible:ring-primary/10"

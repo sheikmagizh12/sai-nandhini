@@ -185,7 +185,7 @@ export async function POST(req: Request) {
       })();
     }
 
-    return NextResponse.json(createdOrder, { status: 201 });
+    return NextResponse.json(JSON.parse(JSON.stringify(createdOrder)), { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -210,7 +210,7 @@ export async function GET(req: Request) {
       .sort({
         createdAt: -1,
       });
-    return NextResponse.json(orders);
+    return NextResponse.json(JSON.parse(JSON.stringify(orders)));
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

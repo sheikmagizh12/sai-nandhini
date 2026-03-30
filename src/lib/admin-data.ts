@@ -85,13 +85,23 @@ export async function getCustomersWithStats() {
   // Get order stats for each customer
   const customersWithStats = await Promise.all(
     customers.map(async (customer) => {
-      const orders = await Order.find({ user: customer._id });
+      const orders = await Order.find({
+        $or: [
+          { user: customer._id },
+          { "shippingAddress.email": customer.email }
+        ]
+      }).sort({ createdAt: -1 });
+
       const totalSpent = orders.reduce(
         (sum, order) => sum + (order.isPaid ? order.totalPrice : 0),
         0,
       );
+
+      const phone = customer.phone || (orders.length > 0 ? orders[0].shippingAddress?.phone : undefined);
+
       return {
         ...customer.toObject(),
+        phone,
         _id: customer._id.toString(), // Convert ObjectId to string for serialization
         orderCount: orders.length,
         totalSpent,

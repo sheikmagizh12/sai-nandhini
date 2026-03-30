@@ -153,6 +153,12 @@ export default function OrdersClient({
         order.shippingAddress.fullName
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
+        (order.shippingAddress.email &&
+          order.shippingAddress.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (order.user?.email &&
+          order.user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (order.user?.name &&
+          order.user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (order.shippingAddress.phone &&
           order.shippingAddress.phone.includes(searchTerm));
 

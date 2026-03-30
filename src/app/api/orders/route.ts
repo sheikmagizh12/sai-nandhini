@@ -4,18 +4,42 @@ import Order from "@/models/Order";
 import User from "@/models/User";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { generateInvoiceHTML } from "@/lib/invoice-generator";
-import { generatePDFFromHTML } from "@/lib/pdf-generator";
-import { sendOrderConfirmationEmail } from "@/lib/email-service";
 import Product from "@/models/Product";
 import Settings from "@/models/Settings";
 import Coupon from "@/models/Coupon";
 
-export async function POST(req: Request) {
+// Lazy load these to avoid build errors
+async function getEmailHelpers() {
   try {
+    const [invoiceModule, pdfModule, emailModule] = await Promise.all([
+      import("@/lib/invoice-generator"),
+      import("@/lib/pdf-generator"),
+      import("@/lib/email-service"),
+    ]);
+    return {
+      generateInvoiceHTML: invoiceModule.generateInvoiceHTML,
+      generatePDFFromHTML: pdfModule.generatePDFFromHTML,
+      sendOrderConfirmationEmail: emailModule.sendOrderConfirmationEmail,
+    };
+  } catch (error) {
+    console.error("Failed to load email helpers:", error);
+    return null;
+  }
+}
+
+export async function POST(req: Request) {
+  // Wrap everything in try-catch to ensure JSON response
+  try {
+    console.log("Order creation started");
+    
     const session = await auth.api.getSession({
       headers: await headers(),
     });
+
+    console.log("Session retrieved:", session?.user?.id);
+
+    const body = await req.json();
+    console.log("Request body parsed");
 
     const {
       orderItems,
@@ -29,15 +53,20 @@ export async function POST(req: Request) {
       couponCode,
       discount,
       customerId,
-    } = await req.json();
+    } = body;
 
     if (!orderItems || orderItems.length === 0) {
       return NextResponse.json({ error: "No order items" }, { status: 400 });
     }
 
+    console.log("Connecting to database");
     await connectDB();
+    
+    console.log("Fetching settings");
     const settings = await Settings.findOne();
     const manageInventory = settings?.manageInventory ?? true;
+
+    console.log("Inventory management:", manageInventory);
 
     // Check and reduce stock if inventory management is enabled
     if (manageInventory) {
@@ -90,6 +119,7 @@ export async function POST(req: Request) {
       }
 
       // 2. Saving Loop (Only run if all items validated)
+      console.log("Updating product stock");
       for (const product of productsToUpdate) {
         await product.save();
       }
@@ -114,6 +144,7 @@ export async function POST(req: Request) {
         );
     }
 
+    console.log("Creating order");
     const order = new Order({
       orderItems: orderItems.map((x: any) => ({
         ...x,
@@ -133,10 +164,12 @@ export async function POST(req: Request) {
     });
 
     const createdOrder = await order.save();
+    console.log("Order created:", createdOrder._id);
 
     // If coupon was used, increment usage count and track per-user usage
     if (couponCode) {
       try {
+        console.log("Updating coupon usage");
         const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
 
         if (coupon) {
@@ -167,6 +200,7 @@ export async function POST(req: Request) {
           }
 
           await coupon.save();
+          console.log("Coupon usage updated");
         }
       } catch (couponError) {
         console.error("Failed to update coupon usage:", couponError);
@@ -174,28 +208,22 @@ export async function POST(req: Request) {
       }
     }
 
-    // If it's Cash on Delivery, send the email immediately
-    if (paymentMethod === "Cash on Delivery") {
-      // Send email asynchronously without blocking the response
-      (async () => {
-        try {
-          const populatedOrder = await Order.findById(
-            createdOrder._id,
-          ).populate("user");
-          const invoiceHTML = await generateInvoiceHTML(populatedOrder);
-          const pdfBuffer = await generatePDFFromHTML(invoiceHTML);
-          await sendOrderConfirmationEmail(populatedOrder, pdfBuffer);
-        } catch (emailError) {
-          console.error("Failed to send COD order confirmation email:", emailError);
-          // Don't fail the order if email fails
-        }
-      })();
-    }
+    // Skip email sending for now to avoid Puppeteer issues in production
+    // Email will be sent after payment confirmation via webhook
+    console.log("Order creation completed successfully");
 
     return NextResponse.json(JSON.parse(JSON.stringify(createdOrder)), { status: 201 });
   } catch (error: any) {
     console.error("Order creation error:", error);
-    return NextResponse.json({ error: error.message || "Failed to create order" }, { status: 500 });
+    console.error("Error stack:", error.stack);
+    // Ensure we always return JSON
+    return NextResponse.json(
+      { 
+        error: error.message || "Failed to create order",
+        details: process.env.NODE_ENV === "development" ? error.stack : undefined
+      }, 
+      { status: 500 }
+    );
   }
 }
 

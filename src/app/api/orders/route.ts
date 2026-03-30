@@ -136,41 +136,47 @@ export async function POST(req: Request) {
 
     // If coupon was used, increment usage count and track per-user usage
     if (couponCode) {
-      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
+      try {
+        const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
 
-      if (coupon) {
-        // Increment total usage count
-        coupon.usedCount = (coupon.usedCount || 0) + 1;
+        if (coupon) {
+          // Increment total usage count
+          coupon.usedCount = (coupon.usedCount || 0) + 1;
 
-        // Track per-user usage only if user is logged in
-        if (userId) {
-          const userUsageIndex = coupon.usedByUsers?.findIndex(
-            (u: any) => u.userId.toString() === userId
-          );
+          // Track per-user usage only if user is logged in
+          if (userId) {
+            const userUsageIndex = coupon.usedByUsers?.findIndex(
+              (u: any) => u.userId.toString() === userId
+            );
 
-          if (userUsageIndex !== undefined && userUsageIndex >= 0) {
-            // User has used this coupon before, increment their count
-            coupon.usedByUsers[userUsageIndex].count += 1;
-            coupon.usedByUsers[userUsageIndex].lastUsedAt = new Date();
-          } else {
-            // First time user is using this coupon
-            if (!coupon.usedByUsers) {
-              coupon.usedByUsers = [];
+            if (userUsageIndex !== undefined && userUsageIndex >= 0) {
+              // User has used this coupon before, increment their count
+              coupon.usedByUsers[userUsageIndex].count += 1;
+              coupon.usedByUsers[userUsageIndex].lastUsedAt = new Date();
+            } else {
+              // First time user is using this coupon
+              if (!coupon.usedByUsers) {
+                coupon.usedByUsers = [];
+              }
+              coupon.usedByUsers.push({
+                userId: userId,
+                count: 1,
+                lastUsedAt: new Date(),
+              });
             }
-            coupon.usedByUsers.push({
-              userId: userId,
-              count: 1,
-              lastUsedAt: new Date(),
-            });
           }
-        }
 
-        await coupon.save();
+          await coupon.save();
+        }
+      } catch (couponError) {
+        console.error("Failed to update coupon usage:", couponError);
+        // Don't fail the order if coupon update fails
       }
     }
 
     // If it's Cash on Delivery, send the email immediately
     if (paymentMethod === "Cash on Delivery") {
+      // Send email asynchronously without blocking the response
       (async () => {
         try {
           const populatedOrder = await Order.findById(
@@ -179,15 +185,17 @@ export async function POST(req: Request) {
           const invoiceHTML = await generateInvoiceHTML(populatedOrder);
           const pdfBuffer = await generatePDFFromHTML(invoiceHTML);
           await sendOrderConfirmationEmail(populatedOrder, pdfBuffer);
-        } catch (err) {
-          console.error("Failed to send COD order confirmation email:", err);
+        } catch (emailError) {
+          console.error("Failed to send COD order confirmation email:", emailError);
+          // Don't fail the order if email fails
         }
       })();
     }
 
     return NextResponse.json(JSON.parse(JSON.stringify(createdOrder)), { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Order creation error:", error);
+    return NextResponse.json({ error: error.message || "Failed to create order" }, { status: 500 });
   }
 }
 

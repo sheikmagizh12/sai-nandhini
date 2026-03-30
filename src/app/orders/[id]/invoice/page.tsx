@@ -23,24 +23,32 @@ export default async function InvoicePage(props: {
     headers: await headers(),
   });
 
-  if (!session) {
-    redirect("/login?callbackUrl=/orders/" + id + "/invoice");
-  }
-
   await connectDB();
   const order = await Order.findById(id).populate({
     path: "orderItems.product",
     select: "slug name",
   });
 
-  if (
-    !order ||
-    (order.user.toString() !== session.user.id &&
-      (session.user as any).role !== "admin")
-  ) {
+  if (!order) {
     return (
       <div className="p-10 text-center font-bold text-red-500">
-        Order not found or unauthorized
+        Order not found
+      </div>
+    );
+  }
+
+  // Authorization check:
+  // 1. If user is admin, allow access
+  // 2. If order has a user and session exists, check if they match
+  // 3. If order is a guest order (no user), allow access (invoice link sent via email)
+  const isAdmin = session && (session.user as any).role === "admin";
+  const isOrderOwner = order.user && session && order.user.toString() === session.user.id;
+  const isGuestOrder = !order.user;
+
+  if (!isAdmin && !isOrderOwner && !isGuestOrder) {
+    return (
+      <div className="p-10 text-center font-bold text-red-500">
+        Unauthorized access
       </div>
     );
   }

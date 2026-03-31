@@ -4,6 +4,8 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { validateForm, loginSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -13,12 +15,21 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    const validation = validateForm(loginSchema, { email, password });
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      setLoading(false);
+      return;
+    }
+    setFieldErrors({});
 
     await authClient.signIn.email(
       {
@@ -90,11 +101,15 @@ export default function LoginPage() {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/50 border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all shadow-sm"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setFieldErrors(prev => ({ ...prev, email: "" }));
+                  }}
+                  className={`w-full bg-white/50 border ${fieldErrors.email ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all shadow-sm`}
                   placeholder="name@example.com"
                 />
               </div>
+              <FormError message={fieldErrors.email} />
             </div>
 
             <div className="space-y-2">
@@ -118,8 +133,11 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/50 border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-12 outline-none transition-all shadow-sm"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setFieldErrors(prev => ({ ...prev, password: "" }));
+                  }}
+                  className={`w-full bg-white/50 border ${fieldErrors.password ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-12 outline-none transition-all shadow-sm`}
                   placeholder="••••••••"
                 />
                 <button
@@ -130,6 +148,7 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              <FormError message={fieldErrors.password} />
             </div>
 
             <button

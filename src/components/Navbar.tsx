@@ -21,6 +21,7 @@ import { authClient } from "@/lib/auth-client";
 import CartDrawer from "./CartDrawer";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useNavbarData } from "@/context/NavbarDataContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -28,17 +29,14 @@ export default function Navbar() {
   const { data: session } = authClient.useSession();
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
+  const { settings, categories } = useNavbarData();
   const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [categories, setCategories] = useState<
-    { _id: string; name: string; slug: string }[]
-  >([]);
-
-  const [settings, setSettings] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
 
   // Helper function to check if a link is active
   const isActive = (path: string) => {
@@ -47,31 +45,9 @@ export default function Navbar() {
   };
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
-
-    const fetchData = async () => {
-      try {
-        const [catRes, setRes] = await Promise.all([
-          fetch("/api/categories"),
-          fetch("/api/admin/settings"),
-        ]);
-
-        if (catRes.ok) {
-          const data = await catRes.json();
-          if (Array.isArray(data)) setCategories(data);
-        }
-
-        if (setRes.ok) {
-          const sData = await setRes.json();
-          setSettings(sData);
-        }
-      } catch (error) {
-        console.error("Failed to fetch data", error);
-      }
-    };
-    fetchData();
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -278,7 +254,7 @@ export default function Navbar() {
                   className="p-2 text-white/70 hover:text-[#f8bf51] relative group transition-colors"
                 >
                   <Heart size={20} />
-                  {wishlistCount > 0 && (
+                  {mounted && wishlistCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-[#f8bf51] text-[#234d1b] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                       {wishlistCount}
                     </span>
@@ -289,7 +265,7 @@ export default function Navbar() {
                   className="p-2 text-white/70 hover:text-[#f8bf51] relative group transition-colors"
                 >
                   <ShoppingCart size={20} />
-                  {cartCount > 0 && (
+                  {mounted && cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-[#f8bf51] text-[#234d1b] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                       {cartCount}
                     </span>
@@ -440,7 +416,7 @@ export default function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Heart size={20} /> My Wishlist
-                  {wishlistCount > 0 && (
+                  {mounted && wishlistCount > 0 && (
                     <span className="bg-[#f8bf51] text-[#234d1b] text-xs font-bold px-2 py-1 rounded-full">
                       {wishlistCount}
                     </span>

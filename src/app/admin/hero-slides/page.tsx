@@ -21,6 +21,8 @@ import Link from "next/link";
 import ImageUpload from "@/components/admin/ImageUpload";
 import toast from "react-hot-toast";
 import ConfirmationModal from "@/components/admin/ConfirmationModal";
+import { validateForm, heroSlideSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 /* ────────────────────────────────────────────── */
 /*  Types                                         */
@@ -70,6 +72,7 @@ export default function HeroSlidesPage() {
   const [message, setMessage] = useState("");
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   /* ── Fetch Slides ── */
   useEffect(() => {
@@ -94,6 +97,7 @@ export default function HeroSlidesPage() {
 
   /* ── Open editor for new or existing slide ── */
   const openEditor = (slide?: HeroSlide) => {
+    setFieldErrors({});
     if (slide) {
       setEditingSlide({ ...slide });
     } else {
@@ -108,10 +112,15 @@ export default function HeroSlidesPage() {
   /* ── Save (Create or Update) ── */
   const handleSave = async () => {
     if (!editingSlide) return;
-    if (!editingSlide.title || !editingSlide.image) {
-      toast.error("Title and Image are required");
+    const validation = validateForm(heroSlideSchema, {
+      title: editingSlide?.title || "",
+      image: editingSlide?.image || "",
+    });
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
       return;
     }
+    setFieldErrors({});
 
     setSaving("save");
     try {
@@ -403,6 +412,7 @@ export default function HeroSlidesPage() {
                       setEditingSlide({ ...editingSlide, image: val as any })
                     }
                   />
+                  {!editingSlide.image && <FormError message={fieldErrors.image} />}
 
                   {/* Title + Title Accent */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -420,8 +430,9 @@ export default function HeroSlidesPage() {
                           })
                         }
                         placeholder="e.g. Authentic South Indian"
-                        className={INPUT_CLASS}
+                        className={`${INPUT_CLASS} ${fieldErrors.title ? "border-red-400 focus:border-red-400 focus:ring-red-200" : ""}`}
                       />
+                      <FormError message={fieldErrors.title} />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">

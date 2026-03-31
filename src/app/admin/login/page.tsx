@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Loader2, ArrowRight, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { validateForm, adminLoginSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -13,12 +15,21 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    const validation = validateForm(adminLoginSchema, { email, password });
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      setLoading(false);
+      return;
+    }
+    setFieldErrors({});
 
     await authClient.signIn.email(
       {
@@ -94,10 +105,11 @@ export default function AdminLoginPage() {
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#fcf9f4] border-2 border-transparent focus:border-[#556B2F]/10 focus:bg-white rounded-2xl py-4 px-6 outline-none transition-all font-bold text-[#556B2F]"
+                onChange={(e) => { setEmail(e.target.value); setFieldErrors(prev => ({ ...prev, email: "" })); }}
+                className={`w-full bg-[#fcf9f4] border-2 ${fieldErrors.email ? "border-red-300" : "border-transparent"} focus:border-[#556B2F]/10 focus:bg-white rounded-2xl py-4 px-6 outline-none transition-all font-bold text-[#556B2F]`}
                 placeholder="admin@sainandhini.com"
               />
+              <FormError message={fieldErrors.email} />
             </div>
 
             <div className="space-y-1.5">
@@ -113,8 +125,8 @@ export default function AdminLoginPage() {
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#fcf9f4] border-2 border-transparent focus:border-[#556B2F]/10 focus:bg-white rounded-2xl py-4 pl-14 pr-14 outline-none transition-all font-bold text-[#556B2F]"
+                  onChange={(e) => { setPassword(e.target.value); setFieldErrors(prev => ({ ...prev, password: "" })); }}
+                  className={`w-full bg-[#fcf9f4] border-2 ${fieldErrors.password ? "border-red-300" : "border-transparent"} focus:border-[#556B2F]/10 focus:bg-white rounded-2xl py-4 pl-14 pr-14 outline-none transition-all font-bold text-[#556B2F]`}
                   placeholder="••••••••"
                 />
                 <button
@@ -125,6 +137,7 @@ export default function AdminLoginPage() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              <FormError message={fieldErrors.password} />
             </div>
 
             <button

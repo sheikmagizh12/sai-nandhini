@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb";
 import Order from "@/models/Order";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 export async function GET(req: Request) {
   try {
@@ -49,6 +50,7 @@ export async function PUT(req: Request) {
 
     await Order.updateMany({ _id: { $in: orderIds } }, { $set: updateData });
 
+    revalidatePath("/orders");
     return NextResponse.json({ message: "Orders updated successfully" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

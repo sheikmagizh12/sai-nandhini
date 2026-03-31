@@ -12,6 +12,11 @@ if (!cached) {
     cached = (global as any).mongoose = { conn: null, promise: null };
 }
 
+// Connection event handlers (MongoDB skill guideline)
+mongoose.connection.on("connected", () => console.log("MongoDB connected"));
+mongoose.connection.on("error", (err) => console.error("MongoDB error:", err));
+mongoose.connection.on("disconnected", () => console.log("MongoDB disconnected"));
+
 async function connectDB() {
     if (cached.conn) {
         return cached.conn;
@@ -20,6 +25,12 @@ async function connectDB() {
     if (!cached.promise) {
         const opts = {
             bufferCommands: false,
+            maxPoolSize: 10,
+            minPoolSize: 2,
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+            connectTimeoutMS: 10000,
+            compressors: "zlib" as any,
         };
 
         cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {

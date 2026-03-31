@@ -4,6 +4,7 @@ import Review from "@/models/Review";
 import Product from "@/models/Product";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { revalidatePublicData, CACHE_KEYS } from "@/lib/cache";
 
 // GET all reviews for admin (pending and approved)
 export async function GET(req: NextRequest) {
@@ -112,6 +113,7 @@ export async function PUT(req: NextRequest) {
       });
     }
 
+    revalidatePublicData([CACHE_KEYS.PRODUCTS, CACHE_KEYS.PRODUCT_SLUG]);
     return NextResponse.json(review);
   } catch (error) {
     console.error("PUT admin reviews error:", error);
@@ -165,6 +167,7 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
+    revalidatePublicData([CACHE_KEYS.PRODUCTS, CACHE_KEYS.PRODUCT_SLUG]);
     return NextResponse.json({ message: "Review deleted successfully" });
   } catch (error) {
     console.error("DELETE admin reviews error:", error);

@@ -11,6 +11,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { validateForm, corporateEnquirySchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 export default function CorporateEnquiry() {
   const [formData, setFormData] = useState({
@@ -23,10 +25,19 @@ export default function CorporateEnquiry() {
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    const validation = validateForm(corporateEnquirySchema, formData);
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      setLoading(false);
+      return;
+    }
+    setFieldErrors({});
 
     try {
       const res = await fetch("/api/enquiry", {
@@ -46,6 +57,7 @@ export default function CorporateEnquiry() {
           message: "",
           date: "",
         });
+        setFieldErrors({});
       } else {
         toast.error("Failed to send enquiry. Please try again.");
       }
@@ -191,12 +203,14 @@ export default function CorporateEnquiry() {
                     type="text"
                     required
                     value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className={inputClass}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      setFieldErrors(prev => ({ ...prev, name: "" }));
+                    }}
+                    className={`${inputClass} ${fieldErrors.name ? "border-red-300" : ""}`}
                     placeholder="John Doe"
                   />
+                  <FormError message={fieldErrors.name} />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-[#234d1b]/40 mb-1.5 block uppercase tracking-wide">
@@ -218,12 +232,14 @@ export default function CorporateEnquiry() {
                   type="email"
                   required
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className={inputClass}
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    setFieldErrors(prev => ({ ...prev, email: "" }));
+                  }}
+                  className={`${inputClass} ${fieldErrors.email ? "border-red-300" : ""}`}
                   placeholder="john@company.com"
                 />
+                <FormError message={fieldErrors.email} />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -235,12 +251,14 @@ export default function CorporateEnquiry() {
                     type="tel"
                     required
                     value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className={inputClass}
+                    onChange={(e) => {
+                      setFormData({ ...formData, phone: e.target.value });
+                      setFieldErrors(prev => ({ ...prev, phone: "" }));
+                    }}
+                    className={`${inputClass} ${fieldErrors.phone ? "border-red-300" : ""}`}
                     placeholder="+91 98765 43210"
                   />
+                  <FormError message={fieldErrors.phone} />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-[#234d1b]/40 mb-1.5 block uppercase tracking-wide">
@@ -248,16 +266,18 @@ export default function CorporateEnquiry() {
                   </label>
                   <select
                     value={formData.type}
-                    onChange={(e) =>
-                      setFormData({ ...formData, type: e.target.value })
-                    }
-                    className={`${inputClass} appearance-none cursor-pointer`}
+                    onChange={(e) => {
+                      setFormData({ ...formData, type: e.target.value });
+                      setFieldErrors(prev => ({ ...prev, type: "" }));
+                    }}
+                    className={`${inputClass} appearance-none cursor-pointer ${fieldErrors.type ? "border-red-300" : ""}`}
                   >
                     <option>Corporate Booking</option>
                     <option>Event Catering</option>
                     <option>Bulk Order</option>
                     <option>Other</option>
                   </select>
+                  <FormError message={fieldErrors.type} />
                 </div>
               </div>
 
@@ -268,12 +288,14 @@ export default function CorporateEnquiry() {
                 <textarea
                   required
                   value={formData.message}
-                  onChange={(e) =>
-                    setFormData({ ...formData, message: e.target.value })
-                  }
-                  className={`${inputClass} min-h-[120px] resize-none`}
+                  onChange={(e) => {
+                    setFormData({ ...formData, message: e.target.value });
+                    setFieldErrors(prev => ({ ...prev, message: "" }));
+                  }}
+                  className={`${inputClass} min-h-[120px] resize-none ${fieldErrors.message ? "border-red-300" : ""}`}
                   placeholder="Tell us about the event..."
                 />
+                <FormError message={fieldErrors.message} />
               </div>
 
               <button

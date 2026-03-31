@@ -17,6 +17,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import ConfirmationModal from "@/components/admin/ConfirmationModal";
+import { validateForm, uomSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 export default function UOMPage() {
   const [uoms, setUoms] = useState<any[]>([]);
@@ -34,6 +36,7 @@ export default function UOMPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   useEffect(() => {
     fetchUoms();
@@ -62,6 +65,7 @@ export default function UOMPage() {
       setFormData({ name: "", code: "", isActive: true });
     }
     setError("");
+    setFieldErrors({});
     setIsModalOpen(true);
   };
 
@@ -69,6 +73,14 @@ export default function UOMPage() {
     e.preventDefault();
     setSaving(true);
     setError("");
+
+    const validation = validateForm(uomSchema, { name: formData.name });
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      setSaving(false);
+      return;
+    }
+    setFieldErrors({});
 
     try {
       const url = editingUom
@@ -293,11 +305,13 @@ export default function UOMPage() {
                     type="text"
                     placeholder="e.g. Kilogram, Box, Piece"
                     value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl px-4 py-3 outline-none transition-shadow font-medium focus-visible:ring-2 focus-visible:ring-primary/20 touch-manipulation"
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      setFieldErrors((prev) => ({ ...prev, name: "" }));
+                    }}
+                    className={`w-full bg-gray-50 border ${fieldErrors.name ? "border-red-300" : "border-transparent"} focus:border-primary/20 rounded-xl px-4 py-3 outline-none transition-shadow font-medium focus-visible:ring-2 focus-visible:ring-primary/20 touch-manipulation`}
                   />
+                  <FormError message={fieldErrors.name} />
                 </div>
 
                 <div className="space-y-2">

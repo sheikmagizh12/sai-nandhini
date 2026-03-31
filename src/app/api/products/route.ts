@@ -4,7 +4,7 @@ import Product from "@/models/Product";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { uploadToCloudinary } from "@/lib/cloudinary";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicData, CACHE_KEYS } from "@/lib/cache";
 
 export async function GET(req: Request) {
   try {
@@ -105,9 +105,10 @@ export async function POST(req: Request) {
       const product = await Product.create(body);
 
       // Revalidate affected pages
-      revalidatePath("/");
-      revalidatePath("/shop");
-      revalidatePath("/shop/[slug]", "page");
+      revalidatePublicData(
+        [CACHE_KEYS.PRODUCTS, CACHE_KEYS.FEATURED, CACHE_KEYS.PRODUCT_SLUG],
+        ["/", "/shop"],
+      );
 
       return NextResponse.json(product, { status: 201 });
     }

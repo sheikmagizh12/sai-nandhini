@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb";
 import Page from "@/models/Page";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 // GET /api/admin/page?slug=terms-of-service
 export async function GET(req: Request) {
@@ -59,9 +60,11 @@ export async function POST(req: Request) {
       page.content = content;
       page.lastUpdated = Date.now();
       await page.save();
+      revalidatePath(`/legal/${slug}`);
       return NextResponse.json({ message: "Page updated successfully", page });
     } else {
       page = await Page.create({ slug, title, content });
+      revalidatePath(`/legal/${slug}`);
       return NextResponse.json(
         { message: "Page created successfully", page },
         { status: 201 },

@@ -22,6 +22,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import ConfirmationModal from "@/components/admin/ConfirmationModal";
+import { validateForm, couponSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 export default function CouponsClient({ initialData }: { initialData: any[] }) {
   const [coupons, setCoupons] = useState<any[]>(initialData);
@@ -37,6 +39,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const [currentCoupon, setCurrentCoupon] = useState<{
     _id?: string;
@@ -113,6 +116,20 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
 
   const handleSaveCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validation = validateForm(couponSchema, {
+      code: currentCoupon.code,
+      discountType: currentCoupon.discountType,
+      discountValue: currentCoupon.discountValue,
+      minOrderValue: currentCoupon.minOrderValue,
+      description: currentCoupon.description,
+    });
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      return;
+    }
+    setFieldErrors({});
+
     setIsActionLoading(true);
     try {
       const url = currentCoupon._id
@@ -230,6 +247,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
       perUserLimit: undefined,
       expiresAt: "",
     });
+    setFieldErrors({});
     setIsDialogOpen(true);
   };
 
@@ -250,6 +268,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
         ? new Date(coupon.expiresAt).toISOString().split("T")[0]
         : "",
     });
+    setFieldErrors({});
     setIsDialogOpen(true);
   };
 
@@ -546,12 +565,13 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                           type="text"
                           required
                           value={currentCoupon.code}
-                          onChange={(e) =>
+                          onChange={(e) => {
                             setCurrentCoupon({
                               ...currentCoupon,
                               code: e.target.value.toUpperCase(),
-                            })
-                          }
+                            });
+                            setFieldErrors((prev) => ({ ...prev, code: "" }));
+                          }}
                           className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-shadow font-black text-lg uppercase tracking-wider text-primary-dark placeholder:text-gray-300"
                           placeholder="SUMMER2026"
                         />
@@ -560,6 +580,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                           size={20}
                         />
                       </div>
+                      <FormError message={fieldErrors.code} />
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
@@ -600,16 +621,18 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                               type="number"
                               required
                               value={currentCoupon.discountValue || ""}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 setCurrentCoupon({
                                   ...currentCoupon,
                                   discountValue: Number(e.target.value),
-                                })
-                              }
+                                });
+                                setFieldErrors((prev) => ({ ...prev, discountValue: "" }));
+                              }}
                               className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-shadow font-bold text-gray-700"
                               placeholder="20"
                             />
                           </div>
+                          <FormError message={fieldErrors.discountValue} />
                         </div>
                       )}
                     </div>

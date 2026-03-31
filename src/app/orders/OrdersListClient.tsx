@@ -6,6 +6,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Pagination, { usePagination } from "@/components/Pagination";
 import {
   ShoppingBag,
   Package,
@@ -71,6 +72,15 @@ export default function OrdersListClient({
 
     setFilteredOrders(filtered);
   }, [searchQuery, statusFilter, orders]);
+
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedOrders,
+    setCurrentPage,
+    totalItems,
+    itemsPerPage,
+  } = usePagination(filteredOrders, 10);
 
   const getStatusConfig = (order: any) => {
     const status =
@@ -259,7 +269,7 @@ export default function OrdersListClient({
         ) : (
           <div className="space-y-6">
             <AnimatePresence mode="popLayout">
-              {filteredOrders.map((order, i) => {
+              {paginatedOrders.map((order, i) => {
                 const statusConfig = getStatusConfig(order);
                 const StatusIcon = statusConfig.icon;
 
@@ -422,6 +432,15 @@ export default function OrdersListClient({
                 );
               })}
             </AnimatePresence>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+            />
           </div>
         )}
       </div>

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, User, Phone, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { validateForm, registerSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 import { motion } from "framer-motion";
 
 export default function RegisterPage() {
@@ -14,6 +16,7 @@ export default function RegisterPage() {
     phone: "",
   });
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -22,6 +25,14 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    const validation = validateForm(registerSchema, formData);
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      setLoading(false);
+      return;
+    }
+    setFieldErrors({});
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -96,13 +107,15 @@ export default function RegisterPage() {
                   type="text"
                   required
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full bg-white/50 border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all shadow-sm"
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    setFieldErrors(prev => ({ ...prev, name: "" }));
+                  }}
+                  className={`w-full bg-white/50 border ${fieldErrors.name ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all shadow-sm`}
                   placeholder="John Doe"
                 />
               </div>
+              <FormError message={fieldErrors.name} />
             </div>
 
             <div className="space-y-1">
@@ -118,13 +131,15 @@ export default function RegisterPage() {
                   type="email"
                   required
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full bg-white/50 border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all shadow-sm"
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    setFieldErrors(prev => ({ ...prev, email: "" }));
+                  }}
+                  className={`w-full bg-white/50 border ${fieldErrors.email ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all shadow-sm`}
                   placeholder="name@example.com"
                 />
               </div>
+              <FormError message={fieldErrors.email} />
             </div>
 
             <div className="space-y-1">
@@ -140,13 +155,15 @@ export default function RegisterPage() {
                   type="tel"
                   required
                   value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                  className="w-full bg-white/50 border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all shadow-sm"
+                  onChange={(e) => {
+                    setFormData({ ...formData, phone: e.target.value });
+                    setFieldErrors(prev => ({ ...prev, phone: "" }));
+                  }}
+                  className={`w-full bg-white/50 border ${fieldErrors.phone ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all shadow-sm`}
                   placeholder="+91 98765 43210"
                 />
               </div>
+              <FormError message={fieldErrors.phone} />
             </div>
 
             <div className="space-y-1">
@@ -162,10 +179,11 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className="w-full bg-white/50 border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-12 outline-none transition-all shadow-sm"
+                  onChange={(e) => {
+                    setFormData({ ...formData, password: e.target.value });
+                    setFieldErrors(prev => ({ ...prev, password: "" }));
+                  }}
+                  className={`w-full bg-white/50 border ${fieldErrors.password ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-12 outline-none transition-all shadow-sm`}
                   placeholder="••••••••"
                 />
                 <button
@@ -176,6 +194,7 @@ export default function RegisterPage() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              <FormError message={fieldErrors.password} />
             </div>
 
             <button

@@ -3,17 +3,23 @@
 import { motion } from "framer-motion";
 import { Mail, Send } from "lucide-react";
 import { useState } from "react";
+import { validateForm, newsletterSchema, FieldErrors } from "@/lib/validations";
 
 export default function Newsletter() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      setSubscribed(true);
-      setEmail("");
+    const validation = validateForm(newsletterSchema, { email });
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      return;
     }
+    setFieldErrors({});
+    setSubscribed(true);
+    setEmail("");
   };
 
   return (
@@ -57,10 +63,14 @@ export default function Newsletter() {
                     placeholder="Enter your email address..."
                     className="w-full bg-transparent outline-none font-medium text-sm text-white placeholder:text-white/30 px-4 py-3"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setFieldErrors(prev => ({ ...prev, email: "" }));
+                    }}
                     required
                   />
                 </div>
+                {fieldErrors.email && <p className="text-red-300 text-xs font-semibold mt-2 ml-1">{fieldErrors.email}</p>}
                 <button
                   type="submit"
                   className="bg-[#f8bf51] text-[#234d1b] px-8 py-4 rounded-xl font-bold uppercase tracking-wider text-[11px] hover:bg-[#d4b76e] transition-all shadow-xl shadow-[#f8bf51]/15 flex items-center justify-center gap-2.5 active:scale-95 group shrink-0"

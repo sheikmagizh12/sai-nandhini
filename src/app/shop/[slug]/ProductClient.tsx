@@ -28,9 +28,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
+import { useNavbarData } from "@/context/NavbarDataContext";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
+import { validateForm, reviewSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 interface ReviewData {
   _id: string;
@@ -61,7 +64,8 @@ export default function ProductClient({
   const [qty, setQty] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [price, setPrice] = useState(0);
-  const [manageInventory, setManageInventory] = useState(true);
+  const { settings: navSettings } = useNavbarData();
+  const [manageInventory] = useState(true);
   const [pincode, setPincode] = useState("");
   const [pincodeStatus, setPincodeStatus] = useState<
     "idle" | "checking" | "valid" | "invalid"
@@ -84,19 +88,9 @@ export default function ProductClient({
   const [newReviewRating, setNewReviewRating] = useState(5);
   const [newReviewComment, setNewReviewComment] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewFieldErrors, setReviewFieldErrors] = useState<FieldErrors>({});
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const res = await fetch("/api/admin/settings");
-        const data = await res.json();
-        setManageInventory(data.manageInventory ?? true);
-      } catch (err) {
-        console.error("Failed to fetch settings", err);
-      }
-    };
-    fetchSettings();
-
     if (product) {
       if (product.variants && product.variants.length > 0) {
         // Find first in-stock variant if managing inventory
@@ -141,14 +135,12 @@ export default function ProductClient({
       toast.error("Please login to submit a review");
       return;
     }
-    if (newReviewRating < 1 || newReviewRating > 5) {
-      toast.error("Please select a valid rating");
+    const validation = validateForm(reviewSchema, { rating: newReviewRating, comment: newReviewComment });
+    if (!validation.success) {
+      setReviewFieldErrors(validation.errors);
       return;
     }
-    if (!newReviewComment.trim()) {
-      toast.error("Please enter a review comment");
-      return;
-    }
+    setReviewFieldErrors({});
 
     setIsSubmittingReview(true);
     try {
@@ -168,6 +160,7 @@ export default function ProductClient({
         setIsReviewFormOpen(false);
         setNewReviewComment("");
         setNewReviewRating(5);
+        setReviewFieldErrors({});
       } else {
         toast.error(data.error || "Failed to submit review");
       }
@@ -652,11 +645,12 @@ export default function ProductClient({
                         <textarea
                           required
                           value={newReviewComment}
-                          onChange={(e) => setNewReviewComment(e.target.value)}
+                          onChange={(e) => { setNewReviewComment(e.target.value); setReviewFieldErrors(prev => ({ ...prev, comment: "" })); }}
                           placeholder="What did you like or dislike?"
                           rows={4}
                           className="w-full bg-white border border-gray-300 focus:border-primary rounded-xl px-4 py-3 outline-none transition-colors"
                         />
+                        <FormError message={reviewFieldErrors.comment} />
                       </div>
                       <div className="flex justify-end gap-3 pt-2">
                         <button

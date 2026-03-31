@@ -18,6 +18,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import ImageUpload from "@/components/admin/ImageUpload";
 import toast from "react-hot-toast";
 import ConfirmationModal from "@/components/admin/ConfirmationModal";
+import { validateForm, categorySchema, subCategorySchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 export default function CategoriesClient({
   initialData,
@@ -34,6 +36,7 @@ export default function CategoriesClient({
     name: "",
     parentId: "",
   });
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [deleteCatId, setDeleteCatId] = useState<string | null>(null);
   const [deleteSubId, setDeleteSubId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -79,6 +82,10 @@ export default function CategoriesClient({
   };
 
   const handleAddCategory = async () => {
+    const validation = validateForm(categorySchema, { name: newCategory });
+    if (!validation.success) { setFieldErrors(validation.errors); return; }
+    setFieldErrors({});
+
     if (!newCategory || !newCategoryImage) {
       return;
     }
@@ -146,6 +153,10 @@ export default function CategoriesClient({
   };
 
   const handleAddSubCategory = async () => {
+    const validation = validateForm(subCategorySchema, newSubCategory);
+    if (!validation.success) { setFieldErrors(validation.errors); return; }
+    setFieldErrors({});
+
     if (!newSubCategory.name || !newSubCategory.parentId) return;
     try {
       const res = await fetch("/api/admin/subcategories", {
@@ -326,6 +337,7 @@ export default function CategoriesClient({
                       <Plus size={20} />
                     </button>
                   </div>
+                  <FormError message={fieldErrors.name} />
 
                   {/* Image Upload Area */}
                   <ImageUpload
@@ -465,6 +477,8 @@ export default function CategoriesClient({
                           Add Item
                         </button>
                       </div>
+                      <FormError message={fieldErrors.name} />
+                      <FormError message={fieldErrors.parentId} />
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         {subCategories.length === 0 ? (

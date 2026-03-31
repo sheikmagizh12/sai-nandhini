@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { cache } from "react";
 import connectDB from "@/lib/mongodb";
 import Page from "@/models/Page";
 import Navbar from "@/components/Navbar";
@@ -13,11 +14,12 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-async function getPageData(slug: string) {
+// React cache() deduplicates across generateMetadata + page render
+const getPageData = cache(async (slug: string) => {
   await connectDB();
-  const page = await Page.findOne({ slug });
+  const page = await Page.findOne({ slug }).lean();
   return page ? JSON.parse(JSON.stringify(page)) : null;
-}
+});
 
 export async function generateMetadata({
   params,

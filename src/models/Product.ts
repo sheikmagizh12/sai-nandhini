@@ -29,6 +29,12 @@ const ProductSchema = new Schema({
     timestamps: true,
 });
 
+// Indexes for fast queries on Atlas
+ProductSchema.index({ isActive: 1, createdAt: -1 });
+ProductSchema.index({ stock: 1 });
+ProductSchema.index({ category: 1 });
+ProductSchema.index({ isFeatured: 1 });
+
 const Product = models.Product || model("Product", ProductSchema);
 
 export default Product;

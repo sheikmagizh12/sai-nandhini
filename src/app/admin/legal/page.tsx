@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Loader2, Save, FileText } from "lucide-react";
 import toast from "react-hot-toast";
 import TiptapEditor from "@/components/admin/TiptapEditor";
+import { validateForm, legalPageSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 export default function AdminLegalPages() {
   const [selectedPage, setSelectedPage] = useState<string>("terms");
@@ -11,6 +13,7 @@ export default function AdminLegalPages() {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   useEffect(() => {
     fetchPage();
@@ -32,7 +35,12 @@ export default function AdminLegalPages() {
   };
 
   const handleSave = async () => {
-    if (!title.trim() || !content.trim()) return;
+    const validation = validateForm(legalPageSchema, { title, content });
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      return;
+    }
+    setFieldErrors({});
     setSaving(true);
     try {
       const res = await fetch("/api/admin/page", {
@@ -112,10 +120,14 @@ export default function AdminLegalPages() {
                 <input
                   type="text"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full text-lg sm:text-xl font-serif font-black text-primary-dark p-4 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-primary/20 outline-none transition-all placeholder:text-gray-200"
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    setFieldErrors((prev) => ({ ...prev, title: "" }));
+                  }}
+                  className={`w-full text-lg sm:text-xl font-serif font-black text-primary-dark p-4 bg-gray-50 rounded-xl border ${fieldErrors.title ? "border-red-300" : "border-transparent"} focus:bg-white focus:border-primary/20 outline-none transition-all placeholder:text-gray-200`}
                   placeholder="Enter Page Title"
                 />
+                <FormError message={fieldErrors.title} />
               </div>
 
               <div>
@@ -127,6 +139,7 @@ export default function AdminLegalPages() {
                   onChange={setContent}
                   placeholder="Start writing your legal policy content here..."
                 />
+                <FormError message={fieldErrors.content} />
                 <p className="text-[10px] text-gray-400 mt-2 font-medium">
                   Use the toolbar above to format your content with headings, lists, links, and more.
                 </p>

@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import Product from "@/models/Product";
 import Settings from "@/models/Settings";
 import Coupon from "@/models/Coupon";
+import { invalidateCache, CACHE_KEYS } from "@/lib/cache";
 
 // Lazy load these to avoid build errors
 async function getEmailHelpers() {
@@ -212,6 +213,8 @@ export async function POST(req: Request) {
     // Email will be sent after payment confirmation via webhook
     console.log("Order creation completed successfully");
 
+    // Invalidate product cache since stock changed
+    invalidateCache(CACHE_KEYS.PRODUCTS, CACHE_KEYS.FEATURED, CACHE_KEYS.PRODUCT_SLUG);
     return NextResponse.json(JSON.parse(JSON.stringify(createdOrder)), { status: 201 });
   } catch (error: any) {
     console.error("Order creation error:", error);

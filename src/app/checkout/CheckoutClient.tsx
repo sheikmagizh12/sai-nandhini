@@ -31,6 +31,8 @@ import toast from "react-hot-toast";
 import { useCart } from "@/context/CartContext";
 import CouponInput from "@/components/CouponInput";
 import Link from "next/link";
+import { validateForm, checkoutSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 export default function CheckoutClient({
   initialSettings,
@@ -57,6 +59,8 @@ export default function CheckoutClient({
     pincode: "",
     state: "", // Add state field for location-based shipping
   });
+
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const [appliedCoupon, setAppliedCoupon] = useState<{
     code: string;
@@ -173,18 +177,13 @@ export default function CheckoutClient({
   };
 
   const makePayment = async () => {
-    if (
-      !address.fullName ||
-      !address.email ||
-      !address.phone ||
-      !address.street ||
-      !address.city ||
-      !address.pincode ||
-      !address.state
-    ) {
-      toast.error("Please fill in all delivery details.");
+    const validation = validateForm(checkoutSchema, address);
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      toast.error("Please fix the errors in the delivery form.");
       return;
     }
+    setFieldErrors({});
 
     // Check if shipping is available for selected location
     if (!isShippingAvailable) {
@@ -428,12 +427,14 @@ export default function CheckoutClient({
                         type="text"
                         required
                         value={address.fullName}
-                        onChange={(e) =>
-                          setAddress({ ...address, fullName: e.target.value })
-                        }
+                        onChange={(e) => {
+                          setAddress({ ...address, fullName: e.target.value });
+                          setFieldErrors((prev) => ({ ...prev, fullName: "" }));
+                        }}
                         placeholder="Enter your full name"
-                        className="w-full border-2 border-gray-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white"
+                        className={`w-full border-2 ${fieldErrors.fullName ? "border-red-300" : "border-gray-200"} rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white`}
                       />
+                      <FormError message={fieldErrors.fullName} />
                     </div>
                   </div>
 
@@ -448,12 +449,14 @@ export default function CheckoutClient({
                         type="email"
                         required
                         value={address.email}
-                        onChange={(e) =>
-                          setAddress({ ...address, email: e.target.value })
-                        }
+                        onChange={(e) => {
+                          setAddress({ ...address, email: e.target.value });
+                          setFieldErrors((prev) => ({ ...prev, email: "" }));
+                        }}
                         placeholder="your@email.com"
-                        className="w-full border-2 border-gray-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white"
+                        className={`w-full border-2 ${fieldErrors.email ? "border-red-300" : "border-gray-200"} rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white`}
                       />
+                      <FormError message={fieldErrors.email} />
                     </div>
                   </div>
 
@@ -468,12 +471,14 @@ export default function CheckoutClient({
                         type="tel"
                         required
                         value={address.phone}
-                        onChange={(e) =>
-                          setAddress({ ...address, phone: e.target.value })
-                        }
+                        onChange={(e) => {
+                          setAddress({ ...address, phone: e.target.value });
+                          setFieldErrors((prev) => ({ ...prev, phone: "" }));
+                        }}
                         placeholder="+91 XXXXX XXXXX"
-                        className="w-full border-2 border-gray-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white"
+                        className={`w-full border-2 ${fieldErrors.phone ? "border-red-300" : "border-gray-200"} rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white`}
                       />
+                      <FormError message={fieldErrors.phone} />
                     </div>
                   </div>
 
@@ -488,12 +493,14 @@ export default function CheckoutClient({
                         rows={3}
                         required
                         value={address.street}
-                        onChange={(e) =>
-                          setAddress({ ...address, street: e.target.value })
-                        }
+                        onChange={(e) => {
+                          setAddress({ ...address, street: e.target.value });
+                          setFieldErrors((prev) => ({ ...prev, street: "" }));
+                        }}
                         placeholder="House number, building name, street name"
-                        className="w-full border-2 border-gray-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm resize-none bg-gray-50 focus:bg-white"
+                        className={`w-full border-2 ${fieldErrors.street ? "border-red-300" : "border-gray-200"} rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm resize-none bg-gray-50 focus:bg-white`}
                       />
+                      <FormError message={fieldErrors.street} />
                     </div>
                   </div>
 
@@ -508,12 +515,14 @@ export default function CheckoutClient({
                         type="text"
                         required
                         value={address.city}
-                        onChange={(e) =>
-                          setAddress({ ...address, city: e.target.value })
-                        }
+                        onChange={(e) => {
+                          setAddress({ ...address, city: e.target.value });
+                          setFieldErrors((prev) => ({ ...prev, city: "" }));
+                        }}
                         placeholder="Enter city"
-                        className="w-full border-2 border-gray-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white"
+                        className={`w-full border-2 ${fieldErrors.city ? "border-red-300" : "border-gray-200"} rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white`}
                       />
+                      <FormError message={fieldErrors.city} />
                     </div>
                   </div>
 
@@ -528,12 +537,14 @@ export default function CheckoutClient({
                         type="text"
                         required
                         value={address.pincode}
-                        onChange={(e) =>
-                          setAddress({ ...address, pincode: e.target.value })
-                        }
+                        onChange={(e) => {
+                          setAddress({ ...address, pincode: e.target.value });
+                          setFieldErrors((prev) => ({ ...prev, pincode: "" }));
+                        }}
                         placeholder="6-digit pincode"
-                        className="w-full border-2 border-gray-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white"
+                        className={`w-full border-2 ${fieldErrors.pincode ? "border-red-300" : "border-gray-200"} rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white`}
                       />
+                      <FormError message={fieldErrors.pincode} />
                     </div>
                   </div>
 
@@ -547,10 +558,11 @@ export default function CheckoutClient({
                       <select
                         required
                         value={address.state}
-                        onChange={(e) =>
-                          setAddress({ ...address, state: e.target.value })
-                        }
-                        className="w-full border-2 border-gray-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white appearance-none"
+                        onChange={(e) => {
+                          setAddress({ ...address, state: e.target.value });
+                          setFieldErrors((prev) => ({ ...prev, state: "" }));
+                        }}
+                        className={`w-full border-2 ${fieldErrors.state ? "border-red-300" : "border-gray-200"} rounded-xl py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm bg-gray-50 focus:bg-white appearance-none`}
                       >
                         <option value="">Select State</option>
                         <option value="Andhra Pradesh">Andhra Pradesh</option>
@@ -590,6 +602,7 @@ export default function CheckoutClient({
                         <option value="Lakshadweep">Lakshadweep</option>
                         <option value="Puducherry">Puducherry</option>
                       </select>
+                      <FormError message={fieldErrors.state} />
                     </div>
                   </div>
                 </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
+import Pagination, { usePagination } from "@/components/Pagination";
 import {
   Search,
   Eye,
@@ -210,6 +211,15 @@ export default function OrdersClient({
       totalOrders: orders.length,
     };
   }, [orders]);
+
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedOrders,
+    setCurrentPage,
+    totalItems,
+    itemsPerPage,
+  } = usePagination(filteredOrders, 15);
 
   return (
     <div className="space-y-6 pb-20">
@@ -469,7 +479,7 @@ export default function OrdersClient({
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((order) => (
+                paginatedOrders.map((order) => (
                   <motion.tr
                     key={order._id}
                     layout
@@ -624,7 +634,7 @@ export default function OrdersClient({
 
         {/* Mobile Grid/List View */}
         <div className="lg:hidden divide-y divide-gray-100">
-          {filteredOrders.map((order, i) => (
+          {paginatedOrders.map((order, i) => (
             <motion.div
               key={order._id}
               initial={{ opacity: 0, y: 10 }}
@@ -736,6 +746,15 @@ export default function OrdersClient({
             </motion.div>
           ))}
         </div>
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={totalItems}
+          itemsPerPage={itemsPerPage}
+        />
       </div>
 
       {/* Order Detail Sidebar */}

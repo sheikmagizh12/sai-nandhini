@@ -10,25 +10,10 @@ import {
   MapPin,
   ArrowUp,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useNavbarData } from "@/context/NavbarDataContext";
 
 export default function Footer() {
-  const [settings, setSettings] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const res = await fetch("/api/admin/settings");
-        if (res.ok) {
-          const data = await res.json();
-          setSettings(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch settings", error);
-      }
-    };
-    fetchSettings();
-  }, []);
+  const { settings } = useNavbarData();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });

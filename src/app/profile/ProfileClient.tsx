@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Lock, User as UserIcon, LogOut, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import { validateForm, passwordResetSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 export default function ProfileClient() {
   const { data: session, isPending: status } = authClient.useSession();
@@ -15,6 +17,7 @@ export default function ProfileClient() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLinking, setIsLinking] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   useEffect(() => {
     if (!status && !session) {
@@ -25,15 +28,12 @@ export default function ProfileClient() {
   const handleSetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+    const validation = validateForm(passwordResetSchema, { password, confirmPassword });
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
       return;
     }
-
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
+    setFieldErrors({});
 
     setIsSubmitting(true);
     try {
@@ -53,6 +53,7 @@ export default function ProfileClient() {
       );
       setPassword("");
       setConfirmPassword("");
+      setFieldErrors({});
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -252,12 +253,16 @@ export default function ProfileClient() {
                     <input
                       type="password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-primary transition-colors focus:bg-white text-sm"
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setFieldErrors(prev => ({ ...prev, password: "" }));
+                      }}
+                      className={`w-full px-4 py-3 bg-gray-50 border border-${fieldErrors.password ? "red-300" : "gray-200"} rounded-xl outline-none focus:border-primary transition-colors focus:bg-white text-sm`}
                       placeholder="Enter new password"
                       minLength={8}
                       required
                     />
+                    <FormError message={fieldErrors.password} />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-[#234d1b]/70 mb-2 uppercase tracking-widest text-[10px]">
@@ -266,12 +271,16 @@ export default function ProfileClient() {
                     <input
                       type="password"
                       value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-primary transition-colors focus:bg-white text-sm"
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        setFieldErrors(prev => ({ ...prev, confirmPassword: "" }));
+                      }}
+                      className={`w-full px-4 py-3 bg-gray-50 border border-${fieldErrors.confirmPassword ? "red-300" : "gray-200"} rounded-xl outline-none focus:border-primary transition-colors focus:bg-white text-sm`}
                       placeholder="Confirm new password"
                       minLength={8}
                       required
                     />
+                    <FormError message={fieldErrors.confirmPassword} />
                   </div>
                   <button
                     type="submit"

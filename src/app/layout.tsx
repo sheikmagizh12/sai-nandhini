@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Poppins, Baloo_2, Geist } from "next/font/google";
 import "./globals.css";
 import connectDB from "@/lib/mongodb";
 import Settings from "@/models/Settings";
+import Category from "@/models/Category";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { Providers } from "@/components/Providers";
+import { NavbarDataProvider } from "@/context/NavbarDataContext";
 import { cn } from "@/lib/utils";
+import { withCache, CACHE_KEYS } from "@/lib/cache";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -19,6 +23,14 @@ const baloo = Baloo_2({
   variable: "--font-baloo",
 });
 
+const getCachedSeoSettings = withCache(CACHE_KEYS.SEO, 60_000, async () => {
+  await connectDB();
+  const settings = await Settings.findOne()
+    .select("seo favicon shopName")
+    .lean();
+  return settings ? JSON.parse(JSON.stringify(settings)) : null;
+});
+
 export async function generateMetadata(): Promise<Metadata> {
   const defaultMeta = {
     title: "Sai Nandhini Tasty World | Authentic South Indian Delicacies",
@@ -29,8 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 
   try {
-    await connectDB();
-    const settings = await Settings.findOne().select("seo favicon shopName");
+    const settings = await getCachedSeoSettings();
 
     if (settings) {
       const siteName = settings.shopName || "Sai Nandhini Tasty World";
@@ -56,23 +67,51 @@ export async function generateMetadata(): Promise<Metadata> {
   return defaultMeta;
 }
 
-
-
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+
+const getNavbarData = withCache(CACHE_KEYS.NAVBAR, 60_000, async () => {
+  try {
+    await connectDB();
+    const [settings, categories] = await Promise.all([
+      Settings.findOne()
+        .select("logo shopName contactPhone contactEmail socialMedia address")
+        .lean(),
+      Category.find({ isActive: { $ne: false } })
+        .select("_id name slug")
+        .sort({ order: 1 })
+        .lean(),
+    ]);
+    return {
+      settings: settings ? JSON.parse(JSON.stringify(settings)) : null,
+      categories: JSON.parse(JSON.stringify(categories || [])),
+    };
+  } catch (e) {
+    console.error("Navbar data fetch error:", e);
+    return { settings: null, categories: [] };
+  }
+});
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Don't await! Pass the promise down — resolves via React use() in the provider
+  // This keeps the layout synchronous so pages can be statically rendered / ISR cached
+  const navbarPromise = getNavbarData();
+
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <body
         className={`${poppins.variable} ${baloo.variable} font-sans antialiased text-gray-900 bg-secondary`}
       >
         <Providers>
-          {children}
-          <WhatsAppButton />
+          <Suspense>
+            <NavbarDataProvider dataPromise={navbarPromise}>
+              {children}
+              <WhatsAppButton />
+            </NavbarDataProvider>
+          </Suspense>
         </Providers>
       </body>
     </html>

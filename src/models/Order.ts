@@ -59,6 +59,13 @@ const OrderSchema = new Schema(
   },
 );
 
+// Indexes for fast queries on Atlas
+OrderSchema.index({ createdAt: -1 });
+OrderSchema.index({ isPaid: 1, createdAt: -1 });
+OrderSchema.index({ status: 1 });
+OrderSchema.index({ user: 1, createdAt: -1 });
+OrderSchema.index({ "shippingAddress.email": 1 });
+
 const Order = models.Order || model("Order", OrderSchema);
 
 export default Order;

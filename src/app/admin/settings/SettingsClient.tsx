@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import { validateForm, settingsBrandSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 // Tab configuration
 const TABS = [
@@ -151,6 +153,7 @@ export default function SettingsClient({
   const [message, setMessage] = useState("");
   const [showRzpSecret, setShowRzpSecret] = useState(false);
   const [showSmtpPass, setShowSmtpPass] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   // Sync settings when initialSettings prop changes
   useEffect(() => {
@@ -175,6 +178,17 @@ export default function SettingsClient({
   };
 
   const handleSave = async () => {
+    const validation = validateForm(settingsBrandSchema, {
+      shopName: settings.shopName || "",
+      contactEmail: settings.contactEmail || "",
+      contactPhone: settings.contactPhone || "",
+    });
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      toast.error("Please fix the validation errors.");
+      return;
+    }
+    setFieldErrors({});
     setSaving(true);
     setMessage("");
     try {
@@ -406,13 +420,15 @@ export default function SettingsClient({
                   <FieldLabel>Shop Name</FieldLabel>
                   <input
                     type="text"
-                    className={INPUT_CLASS}
+                    className={`${INPUT_CLASS} ${fieldErrors.shopName ? "border-red-300" : ""}`}
                     value={settings.shopName || ""}
-                    onChange={(e) =>
-                      setSettings({ ...settings, shopName: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setSettings({ ...settings, shopName: e.target.value });
+                      setFieldErrors((prev) => ({ ...prev, shopName: "" }));
+                    }}
                     placeholder="Your Shop Name"
                   />
+                  <FormError message={fieldErrors.shopName} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb";
 import SubCategory from "@/models/SubCategory";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { revalidatePublicData, CACHE_KEYS } from "@/lib/cache";
 
 export async function GET(req: Request) {
   try {
@@ -45,6 +46,7 @@ export async function POST(req: Request) {
       description,
     });
 
+    revalidatePublicData([CACHE_KEYS.CATEGORIES]);
     return NextResponse.json(subCategory, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -82,6 +84,7 @@ export async function DELETE(req: Request) {
       );
     }
 
+    revalidatePublicData([CACHE_KEYS.CATEGORIES]);
     return NextResponse.json({ message: "Subcategory deleted successfully" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

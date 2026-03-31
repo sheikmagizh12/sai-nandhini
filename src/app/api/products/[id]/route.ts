@@ -4,7 +4,7 @@ import Product from "@/models/Product";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { uploadToCloudinary } from "@/lib/cloudinary";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicData, CACHE_KEYS } from "@/lib/cache";
 
 export async function GET(
   req: Request,
@@ -79,10 +79,10 @@ export async function PUT(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    // Revalidate affected pages
-    revalidatePath("/");
-    revalidatePath("/shop");
-    revalidatePath(`/shop/${product.slug}`, "page");
+    revalidatePublicData(
+      [CACHE_KEYS.PRODUCTS, CACHE_KEYS.FEATURED, CACHE_KEYS.PRODUCT_SLUG],
+      ["/", "/shop", `/shop/${product.slug}`],
+    );
 
     return NextResponse.json(product);
   } catch (error: any) {
@@ -109,9 +109,10 @@ export async function DELETE(
     if (!product)
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
 
-    // Revalidate affected pages
-    revalidatePath("/");
-    revalidatePath("/shop");
+    revalidatePublicData(
+      [CACHE_KEYS.PRODUCTS, CACHE_KEYS.FEATURED, CACHE_KEYS.PRODUCT_SLUG],
+      ["/", "/shop"],
+    );
 
     return NextResponse.json({ message: "Product deleted successfully" });
   } catch (error: any) {

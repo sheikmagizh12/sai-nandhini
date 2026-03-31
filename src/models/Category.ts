@@ -11,6 +11,8 @@ const CategorySchema = new Schema({
     timestamps: true,
 });
 
+CategorySchema.index({ isActive: 1, order: 1 });
+
 const Category = models.Category || model("Category", CategorySchema);
 
 export default Category;

@@ -4,7 +4,7 @@ const UserSchema = new Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
     role: {
       type: String,
       enum: ["customer", "admin", "staff", "user"],
@@ -23,6 +23,9 @@ const UserSchema = new Schema(
     collection: "user",
   },
 );
+
+UserSchema.index({ role: 1, createdAt: -1 });
+UserSchema.index({ phone: 1 });
 
 if (mongoose.models && mongoose.models.User) {
   delete mongoose.models.User;

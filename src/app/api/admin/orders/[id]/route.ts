@@ -4,6 +4,7 @@ import Order from "@/models/Order";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { sendStatusUpdateEmail } from "@/lib/email-service";
+import { revalidatePath } from "next/cache";
 
 export async function PUT(
   req: Request,
@@ -81,6 +82,8 @@ export async function PUT(
       })();
     }
 
+    revalidatePath("/orders");
+    revalidatePath(`/orders/${id}`);
     return NextResponse.json(order);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

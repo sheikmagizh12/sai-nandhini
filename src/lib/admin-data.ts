@@ -12,59 +12,60 @@ const MASKED = "********";
 export async function getAnalyticsData() {
   await connectDB();
 
-  // 1. Sales by Category
-  const salesByCategory = await Order.aggregate([
-    { $match: { isPaid: true } },
-    { $unwind: "$orderItems" },
-    {
-      $lookup: {
-        from: "products",
-        localField: "orderItems.product",
-        foreignField: "_id",
-        as: "productDetails",
-      },
-    },
-    { $unwind: "$productDetails" },
-    {
-      $group: {
-        _id: "$productDetails.category",
-        totalAmount: {
-          $sum: { $multiply: ["$orderItems.qty", "$orderItems.price"] },
+  // Run all 3 aggregations in parallel (avoid data waterfall)
+  const [salesByCategory, topProducts, paymentMethods] = await Promise.all([
+    // 1. Sales by Category
+    Order.aggregate([
+      { $match: { isPaid: true } },
+      { $unwind: "$orderItems" },
+      {
+        $lookup: {
+          from: "products",
+          localField: "orderItems.product",
+          foreignField: "_id",
+          as: "productDetails",
         },
-        count: { $sum: "$orderItems.qty" },
       },
-    },
-    { $sort: { totalAmount: -1 } },
-  ]);
-
-  // 2. Top Selling Products
-  const topProducts = await Order.aggregate([
-    { $match: { isPaid: true } },
-    { $unwind: "$orderItems" },
-    {
-      $group: {
-        _id: "$orderItems.product",
-        name: { $first: "$orderItems.name" },
-        totalSales: {
-          $sum: { $multiply: ["$orderItems.qty", "$orderItems.price"] },
+      { $unwind: "$productDetails" },
+      {
+        $group: {
+          _id: "$productDetails.category",
+          totalAmount: {
+            $sum: { $multiply: ["$orderItems.qty", "$orderItems.price"] },
+          },
+          count: { $sum: "$orderItems.qty" },
         },
-        totalQty: { $sum: "$orderItems.qty" },
       },
-    },
-    { $sort: { totalSales: -1 } },
-    { $limit: 5 },
-  ]);
-
-  // 3. Payment Method Distribution
-  const paymentMethods = await Order.aggregate([
-    { $match: { isPaid: true } },
-    {
-      $group: {
-        _id: "$paymentMethod",
-        count: { $sum: 1 },
-        totalAmount: { $sum: "$totalPrice" },
+      { $sort: { totalAmount: -1 } },
+    ]),
+    // 2. Top Selling Products
+    Order.aggregate([
+      { $match: { isPaid: true } },
+      { $unwind: "$orderItems" },
+      {
+        $group: {
+          _id: "$orderItems.product",
+          name: { $first: "$orderItems.name" },
+          totalSales: {
+            $sum: { $multiply: ["$orderItems.qty", "$orderItems.price"] },
+          },
+          totalQty: { $sum: "$orderItems.qty" },
+        },
       },
-    },
+      { $sort: { totalSales: -1 } },
+      { $limit: 5 },
+    ]),
+    // 3. Payment Method Distribution
+    Order.aggregate([
+      { $match: { isPaid: true } },
+      {
+        $group: {
+          _id: "$paymentMethod",
+          count: { $sum: 1 },
+          totalAmount: { $sum: "$totalPrice" },
+        },
+      },
+    ]),
   ]);
 
   return {
@@ -80,34 +81,60 @@ export async function getCustomersWithStats() {
   // Get all customers (and standard users)
   const customers = await User.find({ role: { $in: ["customer", "user"] } })
     .select("-password")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .lean();
 
-  // Get order stats for each customer
-  const customersWithStats = await Promise.all(
-    customers.map(async (customer) => {
-      const orders = await Order.find({
+  // Aggregate order stats in a single query instead of N+1
+  const customerIds = customers.map((c) => c._id);
+  const customerEmails = customers.map((c) => c.email).filter(Boolean);
+
+  const orderStats = await Order.aggregate([
+    {
+      $match: {
         $or: [
-          { user: customer._id },
-          { "shippingAddress.email": customer.email }
-        ]
-      }).sort({ createdAt: -1 });
+          { user: { $in: customerIds } },
+          { "shippingAddress.email": { $in: customerEmails } },
+        ],
+      },
+    },
+    {
+      $group: {
+        _id: { $ifNull: ["$user", "$shippingAddress.email"] },
+        orderCount: { $sum: 1 },
+        totalSpent: { $sum: { $cond: ["$isPaid", "$totalPrice", 0] } },
+        latestPhone: { $first: "$shippingAddress.phone" },
+      },
+    },
+  ]);
 
-      const totalSpent = orders.reduce(
-        (sum, order) => sum + (order.isPaid ? order.totalPrice : 0),
-        0,
-      );
+  // Build lookup maps
+  const statsById = new Map<string, any>();
+  const statsByEmail = new Map<string, any>();
+  for (const stat of orderStats) {
+    const key = String(stat._id);
+    if (key.includes("@")) {
+      statsByEmail.set(key, stat);
+    } else {
+      statsById.set(key, stat);
+    }
+  }
 
-      const phone = customer.phone || (orders.length > 0 ? orders[0].shippingAddress?.phone : undefined);
+  const customersWithStats = customers.map((customer) => {
+    const idStr = customer._id.toString();
+    const stat = statsById.get(idStr) || statsByEmail.get(customer.email) || {
+      orderCount: 0,
+      totalSpent: 0,
+      latestPhone: undefined,
+    };
 
-      return {
-        ...customer.toObject(),
-        phone,
-        _id: customer._id.toString(), // Convert ObjectId to string for serialization
-        orderCount: orders.length,
-        totalSpent,
-      };
-    }),
-  );
+    return {
+      ...customer,
+      phone: customer.phone || stat.latestPhone,
+      _id: idStr,
+      orderCount: stat.orderCount,
+      totalSpent: stat.totalSpent,
+    };
+  });
 
   return JSON.parse(JSON.stringify(customersWithStats));
 }
@@ -117,19 +144,19 @@ export async function getCustomerByPhone(phone: string) {
   const customer = await User.findOne({
     phone,
     role: { $in: ["customer", "user"] },
-  }).select("-password");
+  }).select("-password").lean();
   return customer ? JSON.parse(JSON.stringify(customer)) : null;
 }
 
 export async function getCategoriesData() {
   await connectDB();
-  const categories = await Category.find({}).sort({ order: 1 });
+  const categories = await Category.find({}).sort({ order: 1 }).lean();
   return JSON.parse(JSON.stringify(categories));
 }
 
 export async function getCouponsData() {
   await connectDB();
-  const coupons = await Coupon.find({}).sort({ createdAt: -1 });
+  const coupons = await Coupon.find({}).sort({ createdAt: -1 }).lean();
   return JSON.parse(JSON.stringify(coupons));
 }
 
@@ -140,127 +167,176 @@ export async function getDashboardStats(range: string = "week") {
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
 
-  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-  // 1. Threshold from settings
-  const settings = await Settings.findOne();
-  const threshold = settings?.lowStockThreshold || 10;
-
-  // KPIs
-  const productsCount = await Product.countDocuments();
-  const customersCount = await User.countDocuments({
-    role: { $in: ["customer", "user"] },
-  });
-
   // Determine current and comparison period start dates
   let days = 7;
-  let periodTitle = "Week";
   if (range === "today") {
     days = 1;
-    periodTitle = "Today";
   } else if (range === "month") {
     days = 30;
-    periodTitle = "Month";
   }
 
   const currentPeriodStart = new Date(today);
   currentPeriodStart.setDate(today.getDate() - (days - 1));
 
-  const prevPeriodEnd = new Date(currentPeriodStart);
-  prevPeriodEnd.setMilliseconds(-1);
-
   const prevPeriodStart = new Date(currentPeriodStart);
   prevPeriodStart.setDate(currentPeriodStart.getDate() - days);
 
-  // Growth & Metrics Aggregation
-  const metrics = await Order.aggregate([
-    {
-      $facet: {
-        // Current Period Stats
-        current: [
-          { $match: { createdAt: { $gte: currentPeriodStart } } },
-          {
-            $group: {
-              _id: null,
-              revenue: { $sum: { $cond: ["$isPaid", "$totalPrice", 0] } },
-              orders: { $sum: 1 },
-              pendingOrders: {
-                $sum: { $cond: [{ $eq: ["$status", "Pending"] }, 1, 0] },
-              },
-              activeOrders: {
-                $sum: {
-                  $cond: [
-                    { $in: ["$status", ["Pending", "Processing", "Shipping"]] },
-                    1,
-                    0,
-                  ],
+  // Run ALL independent queries in parallel (avoid data waterfall)
+  const [
+    settings,
+    productsCount,
+    customersCount,
+    lowStockCount,
+    outOfStockCount,
+    metrics,
+    salesTrend,
+    lowStockProducts,
+    outOfStockProducts,
+    recentOrders,
+    topProducts,
+  ] = await Promise.all([
+    Settings.findOne().lean(),
+    Product.countDocuments(),
+    User.countDocuments({ role: { $in: ["customer", "user"] } }),
+    Product.countDocuments({ stock: { $lte: 10, $gt: 0 } }),
+    Product.countDocuments({ stock: 0 }),
+    // Growth & Metrics Aggregation ($facet runs sub-pipelines in parallel)
+    Order.aggregate([
+      {
+        $facet: {
+          current: [
+            { $match: { createdAt: { $gte: currentPeriodStart } } },
+            {
+              $group: {
+                _id: null,
+                revenue: { $sum: { $cond: ["$isPaid", "$totalPrice", 0] } },
+                orders: { $sum: 1 },
+                pendingOrders: {
+                  $sum: { $cond: [{ $eq: ["$status", "Pending"] }, 1, 0] },
+                },
+                activeOrders: {
+                  $sum: {
+                    $cond: [
+                      { $in: ["$status", ["Pending", "Processing", "Shipping"]] },
+                      1,
+                      0,
+                    ],
+                  },
                 },
               },
             },
-          },
-        ],
-        // Previous Period Stats
-        previous: [
-          {
-            $match: {
-              createdAt: { $gte: prevPeriodStart, $lt: currentPeriodStart },
-            },
-          },
-          {
-            $group: {
-              _id: null,
-              revenue: { $sum: { $cond: ["$isPaid", "$totalPrice", 0] } },
-              orders: { $sum: 1 },
-            },
-          },
-        ],
-        // All Time Revenue (for Month/Today displays if needed)
-        allTime: [
-          {
-            $group: {
-              _id: null,
-              totalRevenue: { $sum: { $cond: ["$isPaid", "$totalPrice", 0] } },
-              totalOrders: { $sum: 1 },
-            },
-          },
-        ],
-        // Status Distribution
-        statusDistribution: [
-          { $match: { createdAt: { $gte: currentPeriodStart } } },
-          {
-            $group: {
-              _id: "$status",
-              count: { $sum: 1 },
-            },
-          },
-        ],
-        // Revenue by Category (Top 5)
-        revenueByCategory: [
-          { $match: { isPaid: true, createdAt: { $gte: currentPeriodStart } } },
-          { $unwind: "$orderItems" },
-          {
-            $lookup: {
-              from: "products",
-              localField: "orderItems.product",
-              foreignField: "_id",
-              as: "product",
-            },
-          },
-          { $unwind: "$product" },
-          {
-            $group: {
-              _id: "$product.category",
-              value: {
-                $sum: { $multiply: ["$orderItems.qty", "$orderItems.price"] },
+          ],
+          previous: [
+            {
+              $match: {
+                createdAt: { $gte: prevPeriodStart, $lt: currentPeriodStart },
               },
             },
-          },
-          { $sort: { value: -1 } },
-          { $limit: 5 },
-        ],
+            {
+              $group: {
+                _id: null,
+                revenue: { $sum: { $cond: ["$isPaid", "$totalPrice", 0] } },
+                orders: { $sum: 1 },
+              },
+            },
+          ],
+          allTime: [
+            {
+              $group: {
+                _id: null,
+                totalRevenue: { $sum: { $cond: ["$isPaid", "$totalPrice", 0] } },
+                totalOrders: { $sum: 1 },
+              },
+            },
+          ],
+          statusDistribution: [
+            { $match: { createdAt: { $gte: currentPeriodStart } } },
+            {
+              $group: {
+                _id: "$status",
+                count: { $sum: 1 },
+              },
+            },
+          ],
+          revenueByCategory: [
+            { $match: { isPaid: true, createdAt: { $gte: currentPeriodStart } } },
+            { $unwind: "$orderItems" },
+            {
+              $lookup: {
+                from: "products",
+                localField: "orderItems.product",
+                foreignField: "_id",
+                as: "product",
+              },
+            },
+            { $unwind: "$product" },
+            {
+              $group: {
+                _id: "$product.category",
+                value: {
+                  $sum: { $multiply: ["$orderItems.qty", "$orderItems.price"] },
+                },
+              },
+            },
+            { $sort: { value: -1 } },
+            { $limit: 5 },
+          ],
+        },
       },
-    },
+    ]),
+    // Sales Trend
+    Order.aggregate([
+      { $match: { isPaid: true, createdAt: { $gte: currentPeriodStart } } },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: range === "today" ? "%H:00" : "%Y-%m-%d",
+              date: "$createdAt",
+              timezone: "+05:30",
+            },
+          },
+          total: { $sum: "$totalPrice" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]),
+    // Stock Alerts
+    Product.find({ stock: { $lte: 10, $gt: 0 } })
+      .select("name stock uom images")
+      .limit(5)
+      .lean(),
+    Product.find({ stock: 0 })
+      .select("name stock uom images")
+      .limit(5)
+      .lean(),
+    // Recent Orders
+    Order.find({})
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .populate("user", "name email")
+      .lean(),
+    // Top Selling Products
+    Order.aggregate([
+      { $match: { isPaid: true, createdAt: { $gte: currentPeriodStart } } },
+      { $unwind: "$orderItems" },
+      {
+        $group: {
+          _id: "$orderItems.product",
+          name: { $first: "$orderItems.name" },
+          totalSold: { $sum: "$orderItems.qty" },
+          revenue: {
+            $sum: { $multiply: ["$orderItems.qty", "$orderItems.price"] },
+          },
+        },
+      },
+      { $sort: { totalSold: -1 } },
+      { $limit: 5 },
+    ]),
   ]);
+
+  const threshold = settings?.lowStockThreshold || 10;
 
   const m = metrics[0];
   const curStats = m.current[0] || {
@@ -272,7 +348,6 @@ export async function getDashboardStats(range: string = "week") {
   const prevStats = m.previous[0] || { revenue: 0, orders: 0 };
   const allTimeStats = m.allTime[0] || { totalRevenue: 0, totalOrders: 0 };
 
-  // Calculate Growth Percentages
   const calculateGrowth = (current: number, previous: number) => {
     if (previous === 0) return current > 0 ? 100 : 0;
     return ((current - previous) / previous) * 100;
@@ -281,31 +356,12 @@ export async function getDashboardStats(range: string = "week") {
   const revenueGrowth = calculateGrowth(curStats.revenue, prevStats.revenue);
   const ordersGrowth = calculateGrowth(curStats.orders, prevStats.orders);
 
-  // Sales Trend Pipeline
-  const salesTrend = await Order.aggregate([
-    { $match: { isPaid: true, createdAt: { $gte: currentPeriodStart } } },
-    {
-      $group: {
-        _id: {
-          $dateToString: {
-            format: range === "today" ? "%H:00" : "%Y-%m-%d",
-            date: "$createdAt",
-            timezone: "+05:30",
-          },
-        },
-        total: { $sum: "$totalPrice" },
-        count: { $sum: 1 },
-      },
-    },
-    { $sort: { _id: 1 } },
-  ]);
-
   // Fill Trend Data
   const chartData = [];
   if (range === "today") {
     for (let i = 0; i <= now.getHours(); i++) {
       const hour = String(i).padStart(2, "0") + ":00";
-      const found = salesTrend.find((item) => item._id === hour);
+      const found = salesTrend.find((item: any) => item._id === hour);
       chartData.push({
         date: hour,
         amount: found ? found.total : 0,
@@ -317,11 +373,10 @@ export async function getDashboardStats(range: string = "week") {
       const date = new Date(currentPeriodStart);
       date.setDate(currentPeriodStart.getDate() + i);
 
-      // Calculate IST date string YYYY-MM-DD
       const istDate = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
       const dateStr = istDate.toISOString().split("T")[0];
 
-      const found = salesTrend.find((item) => item._id === dateStr);
+      const found = salesTrend.find((item: any) => item._id === dateStr);
       chartData.push({
         date:
           days > 7
@@ -333,42 +388,6 @@ export async function getDashboardStats(range: string = "week") {
       });
     }
   }
-
-  // Stock Alerts
-  const lowStockProducts = await Product.find({
-    stock: { $lte: threshold, $gt: 0 },
-  })
-    .select("name stock uom images")
-    .limit(5);
-
-  const outOfStockProducts = await Product.find({ stock: 0 })
-    .select("name stock uom images")
-    .limit(5);
-
-  // Recent Orders
-  const recentOrders = await Order.find({})
-    .sort({ createdAt: -1 })
-    .limit(8)
-    .populate("user", "name email")
-    .lean();
-
-  // Top Selling Products
-  const topProducts = await Order.aggregate([
-    { $match: { isPaid: true, createdAt: { $gte: currentPeriodStart } } },
-    { $unwind: "$orderItems" },
-    {
-      $group: {
-        _id: "$orderItems.product",
-        name: { $first: "$orderItems.name" },
-        totalSold: { $sum: "$orderItems.qty" },
-        revenue: {
-          $sum: { $multiply: ["$orderItems.qty", "$orderItems.price"] },
-        },
-      },
-    },
-    { $sort: { totalSold: -1 } },
-    { $limit: 5 },
-  ]);
 
   return JSON.parse(
     JSON.stringify({
@@ -390,14 +409,11 @@ export async function getDashboardStats(range: string = "week") {
         },
         products: {
           total: productsCount,
-          lowStock: await Product.countDocuments({
-            stock: { $lte: threshold, $gt: 0 },
-          }),
-          outOfStock: await Product.countDocuments({ stock: 0 }),
+          lowStock: lowStockCount,
+          outOfStock: outOfStockCount,
         },
         customers: {
           total: customersCount,
-          // Calculate customer growth if needed, for now just total
         },
         statusDistribution: m.statusDistribution.reduce(
           (acc: any, cur: any) => {
@@ -421,7 +437,7 @@ export async function getDashboardStats(range: string = "week") {
 
 export async function getProductsData() {
   await connectDB();
-  const products = await Product.find({}).sort({ createdAt: -1 });
+  const products = await Product.find({}).sort({ createdAt: -1 }).lean();
   return JSON.parse(JSON.stringify(products));
 }
 
@@ -469,11 +485,12 @@ export async function getOrdersData() {
   await connectDB();
   const orders = await Order.find({})
     .sort({ createdAt: -1 })
-    .populate("user", "name email");
+    .populate("user", "name email")
+    .lean();
   return JSON.parse(JSON.stringify(orders));
 }
 export async function getShippingRatesData() {
   await connectDB();
-  const rates = await ShippingRate.find({}).sort({ minAmount: 1 });
+  const rates = await ShippingRate.find({}).sort({ minAmount: 1 }).lean();
   return JSON.parse(JSON.stringify(rates));
 }

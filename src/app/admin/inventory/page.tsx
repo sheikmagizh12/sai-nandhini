@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import { validateForm, inventoryPurchaseSchema, inventoryAdjustmentSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -40,6 +42,7 @@ export default function InventoryPage() {
   const [cost, setCost] = useState<number | "">("");
   const [supplier, setSupplier] = useState("");
   const [formLoading, setFormLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const fetchProducts = async () => {
     try {
@@ -63,6 +66,10 @@ export default function InventoryPage() {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    setFieldErrors({});
+  }, [actionType]);
+
   const fetchHistory = async (productId: string) => {
     try {
       const res = await fetch(`/api/admin/inventory?productId=${productId}`);
@@ -84,10 +91,14 @@ export default function InventoryPage() {
   };
 
   const handleSubmit = async () => {
-    if (!quantity || isNaN(Number(quantity))) {
-      toast.error("Please enter a valid quantity");
-      return;
+    if (actionType === "purchase") {
+      const validation = validateForm(inventoryPurchaseSchema, { quantity, cost, supplier });
+      if (!validation.success) { setFieldErrors(validation.errors); return; }
+    } else {
+      const validation = validateForm(inventoryAdjustmentSchema, { quantity, reason });
+      if (!validation.success) { setFieldErrors(validation.errors); return; }
     }
+    setFieldErrors({});
 
     setFormLoading(true);
     try {
@@ -446,8 +457,9 @@ export default function InventoryPage() {
                                 setQuantity(Number(e.target.value))
                               }
                               placeholder="0"
-                              className="w-full bg-white p-3 sm:p-4 rounded-xl shadow-sm text-base sm:text-lg font-bold text-[#234d1b] outline-none transition-shadow font-serif focus-visible:ring-2 focus-visible:ring-[#f8bf51]/50 touch-manipulation tabular-nums"
+                              className={`w-full bg-white p-3 sm:p-4 rounded-xl shadow-sm text-base sm:text-lg font-bold text-[#234d1b] outline-none transition-shadow font-serif focus-visible:ring-2 focus-visible:ring-[#f8bf51]/50 touch-manipulation tabular-nums ${fieldErrors.quantity ? "ring-2 ring-red-300" : ""}`}
                             />
+                            <FormError message={fieldErrors.quantity} />
                           </div>
 
                           {actionType === "purchase" ? (
@@ -463,8 +475,9 @@ export default function InventoryPage() {
                                     setCost(Number(e.target.value))
                                   }
                                   placeholder="0.00"
-                                  className="w-full bg-white p-3 rounded-xl border-none outline-none transition-shadow font-bold focus-visible:ring-2 focus-visible:ring-[#f8bf51]/50 touch-manipulation tabular-nums"
+                                  className={`w-full bg-white p-3 rounded-xl border-none outline-none transition-shadow font-bold focus-visible:ring-2 focus-visible:ring-[#f8bf51]/50 touch-manipulation tabular-nums ${fieldErrors.cost ? "ring-2 ring-red-300" : ""}`}
                                 />
+                                <FormError message={fieldErrors.cost} />
                               </div>
                               <div>
                                 <label className="text-[10px] font-bold text-[#234d1b]/60 uppercase tracking-widest mb-1.5 block">
@@ -475,8 +488,9 @@ export default function InventoryPage() {
                                   value={supplier}
                                   onChange={(e) => setSupplier(e.target.value)}
                                   placeholder="Vendor Name"
-                                  className="w-full bg-white p-3 rounded-xl border-none outline-none transition-shadow font-medium focus-visible:ring-2 focus-visible:ring-[#f8bf51]/50 touch-manipulation"
+                                  className={`w-full bg-white p-3 rounded-xl border-none outline-none transition-shadow font-medium focus-visible:ring-2 focus-visible:ring-[#f8bf51]/50 touch-manipulation ${fieldErrors.supplier ? "ring-2 ring-red-300" : ""}`}
                                 />
+                                <FormError message={fieldErrors.supplier} />
                               </div>
                             </>
                           ) : (
@@ -487,7 +501,7 @@ export default function InventoryPage() {
                               <select
                                 value={reason}
                                 onChange={(e) => setReason(e.target.value)}
-                                className="w-full bg-white p-3 rounded-xl outline-none font-medium cursor-pointer transition-shadow focus-visible:ring-2 focus-visible:ring-[#f8bf51]/50 touch-manipulation"
+                                className={`w-full bg-white p-3 rounded-xl outline-none font-medium cursor-pointer transition-shadow focus-visible:ring-2 focus-visible:ring-[#f8bf51]/50 touch-manipulation ${fieldErrors.reason ? "ring-2 ring-red-300" : ""}`}
                               >
                                 <option value="">Select Reason...</option>
                                 <option value="Damaged">
@@ -497,6 +511,7 @@ export default function InventoryPage() {
                                 <option value="Audit">Audit Correction</option>
                                 <option value="Return">Customer Return</option>
                               </select>
+                              <FormError message={fieldErrors.reason} />
                             </div>
                           )}
                         </div>

@@ -30,7 +30,7 @@ export default async function OrderDetailsPage({
   const order = await Order.findById(id).populate({
     path: "orderItems.product",
     select: "slug name",
-  });
+  }).lean();
 
   if (!order) {
     return (

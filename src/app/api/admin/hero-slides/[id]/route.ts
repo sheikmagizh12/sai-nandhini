@@ -9,7 +9,7 @@ import {
   getUrlFromPublicId,
   getPublicIdFromUrl,
 } from "@/lib/cloudinary";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicData, CACHE_KEYS } from "@/lib/cache";
 
 export async function PUT(
   req: Request,
@@ -66,7 +66,7 @@ export async function PUT(
     });
 
     // Revalidate home page to show updated banner immediately
-    revalidatePath("/");
+    revalidatePublicData([CACHE_KEYS.HERO_SLIDES], ["/"]);
 
     return NextResponse.json({
       success: true,
@@ -113,7 +113,7 @@ export async function DELETE(
     await HeroSlide.findByIdAndDelete(id);
     
     // Revalidate home page to reflect deleted banner
-    revalidatePath("/");
+    revalidatePublicData([CACHE_KEYS.HERO_SLIDES], ["/"]);
     
     return NextResponse.json({ success: true, message: "Slide deleted" });
   } catch (error: any) {

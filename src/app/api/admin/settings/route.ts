@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { encryptPassword, decryptPassword } from "@/lib/encryption";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import Razorpay from "razorpay";
+import { revalidatePublicData, CACHE_KEYS } from "@/lib/cache";
 
 const MASKED = "********";
 
@@ -96,6 +97,20 @@ export async function POST(req: Request) {
       data = await req.json();
     }
 
+    // Upload any base64 images to Cloudinary (prevent MB+ document bloat)
+    if (data.logo && data.logo.startsWith("data:")) {
+      const logoResult = await uploadToCloudinary(data.logo, "sainandhini/brand");
+      data.logo = logoResult.secure_url;
+    }
+    if (data.favicon && data.favicon.startsWith("data:")) {
+      const faviconResult = await uploadToCloudinary(data.favicon, "sainandhini/brand");
+      data.favicon = faviconResult.secure_url;
+    }
+    if (data.seo?.ogImage && data.seo.ogImage.startsWith("data:")) {
+      const ogResult = await uploadToCloudinary(data.seo.ogImage, "sainandhini/brand");
+      data.seo.ogImage = ogResult.secure_url;
+    }
+
     await connectDB();
 
     // Handle Sensitive fields
@@ -169,6 +184,11 @@ export async function POST(req: Request) {
       }
     }
 
+    // Safety net: never store base64 images in MongoDB
+    if (data.logo && data.logo.startsWith("data:")) delete data.logo;
+    if (data.favicon && data.favicon.startsWith("data:")) delete data.favicon;
+    if (data.seo?.ogImage && data.seo.ogImage.startsWith("data:")) delete data.seo.ogImage;
+
     const settings = await Settings.findOneAndUpdate({}, data, {
       returnDocument: "after",
       upsert: true,
@@ -182,6 +202,8 @@ export async function POST(req: Request) {
     if (response.smtp?.password) response.smtp.password = MASKED;
     if (response.googleMyBusiness?.apiKey)
       response.googleMyBusiness.apiKey = MASKED;
+
+    revalidatePublicData([CACHE_KEYS.SEO, CACHE_KEYS.NAVBAR, CACHE_KEYS.SETTINGS_PUBLIC]);
 
     return NextResponse.json(response);
   } catch (error: any) {

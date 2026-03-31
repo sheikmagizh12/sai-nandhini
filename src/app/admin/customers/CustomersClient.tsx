@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import Pagination, { usePagination } from "@/components/Pagination";
 
 export default function CustomersClient({
   initialData,
@@ -32,6 +33,15 @@ export default function CustomersClient({
       c.email.toLowerCase().includes(search.toLowerCase()) ||
       (c.phone && c.phone.includes(search)),
   );
+
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedCustomers,
+    setCurrentPage,
+    totalItems,
+    itemsPerPage,
+  } = usePagination(filtered, 12);
 
   if (loading)
     return (
@@ -67,7 +77,7 @@ export default function CustomersClient({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
-        {filtered.map((customer, i) => (
+        {paginatedCustomers.map((customer, i) => (
           <motion.div
             key={customer._id}
             initial={{ opacity: 0, scale: 0.95 }}
@@ -141,6 +151,15 @@ export default function CustomersClient({
           </motion.div>
         ))}
       </div>
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+      />
 
       {filtered.length === 0 && (
         <div className="text-center py-20 bg-white rounded-[3rem] border border-gray-100">

@@ -5,6 +5,8 @@ import Image from "next/image";
 import { X, Upload, Loader2, ChevronDown, Check, Save } from "lucide-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { validateForm, productSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -41,6 +43,7 @@ export default function ProductModal({
   const [categories, setCategories] = useState<any[]>([]);
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [uoms, setUoms] = useState<any[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [manageInventory, setManageInventory] = useState(true);
@@ -98,6 +101,7 @@ export default function ProductModal({
   }, [formData.category, categories]);
 
   useEffect(() => {
+    setFieldErrors({});
     if (product) {
       setFormData({
         name: product.name || "",
@@ -208,6 +212,19 @@ export default function ProductModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validation = validateForm(productSchema, {
+      name: formData.name,
+      description: formData.description,
+      price: formData.price,
+      category: formData.category,
+    });
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      return;
+    }
+    setFieldErrors({});
+
     setLoading(true);
 
     const data = new FormData();
@@ -287,10 +304,14 @@ export default function ProductModal({
                       type="text"
                       required
                       value={formData.name}
-                      onChange={(e) => handleNameChange(e.target.value)}
+                      onChange={(e) => {
+                        handleNameChange(e.target.value);
+                        setFieldErrors(prev => ({ ...prev, name: "" }));
+                      }}
                       className="w-full bg-[#ece0cc] border-none rounded-2xl py-4 px-6 outline-none focus:ring-2 focus:ring-[#f8bf51]/30 transition-all font-bold text-[#234d1b] placeholder:text-gray-300"
                       placeholder="e.g. Signature Red Velvet Cake"
                     />
+                    <FormError message={fieldErrors.name} />
                     <p className="text-[10px] text-gray-400 font-mono mt-1 ml-1 tracking-wider uppercase opacity-50">
                       /{formData.slug}
                     </p>
@@ -304,15 +325,17 @@ export default function ProductModal({
                       rows={4}
                       required
                       value={formData.description}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setFormData({
                           ...formData,
                           description: e.target.value,
-                        })
-                      }
+                        });
+                        setFieldErrors(prev => ({ ...prev, description: "" }));
+                      }}
                       className="w-full bg-[#ece0cc] border-none rounded-2xl py-4 px-6 outline-none focus:ring-2 focus:ring-[#f8bf51]/30 transition-all font-medium text-[#234d1b] placeholder:text-gray-300 resize-none"
                       placeholder="Describe your product..."
                     />
+                    <FormError message={fieldErrors.description} />
                   </div>
 
                   <div className="grid grid-cols-2 gap-6">
@@ -323,12 +346,13 @@ export default function ProductModal({
                       <div className="relative">
                         <select
                           value={formData.category} // Assuming category name is stored
-                          onChange={(e) =>
+                          onChange={(e) => {
                             setFormData({
                               ...formData,
                               category: e.target.value,
-                            })
-                          }
+                            });
+                            setFieldErrors(prev => ({ ...prev, category: "" }));
+                          }}
                           className="w-full bg-[#ece0cc] border-none rounded-2xl py-4 px-6 outline-none focus:ring-2 focus:ring-[#f8bf51]/30 transition-all font-bold text-[#234d1b] appearance-none cursor-pointer"
                         >
                           <option value="">Select Category</option>
@@ -343,6 +367,7 @@ export default function ProductModal({
                           size={16}
                         />
                       </div>
+                      <FormError message={fieldErrors.category} />
                     </div>
 
                     <div className="space-y-2">
@@ -494,6 +519,7 @@ export default function ProductModal({
                   <h3 className="text-sm font-black uppercase tracking-widest text-[#234d1b] border-b border-[#234d1b]/10 pb-2">
                     Pricing & Variants (UOM)
                   </h3>
+                  <FormError message={fieldErrors.price} />
 
                   <div className="bg-[#ece0cc] rounded-[32px] p-8 space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar">
                     {dataLoading ? (

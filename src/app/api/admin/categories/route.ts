@@ -5,6 +5,7 @@ import { getCategoriesData } from "@/lib/admin-data";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { revalidatePublicData, CACHE_KEYS } from "@/lib/cache";
 
 export async function GET() {
   try {
@@ -79,6 +80,7 @@ export async function POST(req: Request) {
       image: imageUrl,
       description,
     });
+    revalidatePublicData([CACHE_KEYS.CATEGORIES, CACHE_KEYS.NAVBAR]);
     return NextResponse.json(category, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -172,6 +174,7 @@ export async function PUT(req: Request) {
       );
     }
 
+    revalidatePublicData([CACHE_KEYS.CATEGORIES, CACHE_KEYS.NAVBAR]);
     return NextResponse.json(updatedCategory);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -218,6 +221,7 @@ export async function DELETE(req: Request) {
       await SubCategory.deleteMany({ parentCategory: id });
     }
 
+    revalidatePublicData([CACHE_KEYS.CATEGORIES, CACHE_KEYS.NAVBAR]);
     return NextResponse.json({ message: "Category deleted successfully" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

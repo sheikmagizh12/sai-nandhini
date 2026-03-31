@@ -21,6 +21,8 @@ import {
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import { validateForm, orderTrackSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 export default function TrackOrderClient() {
     const searchParams = useSearchParams();
@@ -30,6 +32,7 @@ export default function TrackOrderClient() {
     const [loading, setLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
     useEffect(() => {
         setMounted(true);
@@ -41,10 +44,12 @@ export default function TrackOrderClient() {
     const handleTrack = async (e?: React.FormEvent, idToUse = orderId, emailToUse = email) => {
         if (e) e.preventDefault();
 
-        if (!idToUse || !emailToUse) {
-            toast.error("Please enter both Order ID and Email address.");
+        const validation = validateForm(orderTrackSchema, { orderId: idToUse, email: emailToUse });
+        if (!validation.success) {
+            setFieldErrors(validation.errors);
             return;
         }
+        setFieldErrors({});
 
         setLoading(true);
         setHasSearched(true);
@@ -120,9 +125,10 @@ export default function TrackOrderClient() {
                                 type="text"
                                 placeholder="e.g. 65af..."
                                 value={orderId}
-                                onChange={(e) => setOrderId(e.target.value)}
-                                className="w-full bg-gray-50 border-2 border-transparent focus:border-primary/20 focus:bg-white rounded-xl px-4 py-3 outline-none transition-all text-sm font-medium"
+                                onChange={(e) => { setOrderId(e.target.value); setFieldErrors(prev => ({ ...prev, orderId: "" })); }}
+                                className={`w-full bg-gray-50 border-2 ${fieldErrors.orderId ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-xl px-4 py-3 outline-none transition-all text-sm font-medium`}
                             />
+                            <FormError message={fieldErrors.orderId} />
                         </div>
                         <div className="md:col-span-2">
                             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Email Address</label>
@@ -130,9 +136,10 @@ export default function TrackOrderClient() {
                                 type="email"
                                 placeholder="your@email.com"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-gray-50 border-2 border-transparent focus:border-primary/20 focus:bg-white rounded-xl px-4 py-3 outline-none transition-all text-sm font-medium"
+                                onChange={(e) => { setEmail(e.target.value); setFieldErrors(prev => ({ ...prev, email: "" })); }}
+                                className={`w-full bg-gray-50 border-2 ${fieldErrors.email ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-xl px-4 py-3 outline-none transition-all text-sm font-medium`}
                             />
+                            <FormError message={fieldErrors.email} />
                         </div>
                         <div className="flex items-end">
                             <button

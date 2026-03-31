@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { invalidateCache } from "@/lib/cache";
 import connectDB from "@/lib/mongodb";
 import Product from "@/models/Product";
 import Category from "@/models/Category";
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
       ShippingRate.deleteMany({}),
     ]);
 
+    invalidateCache(); // Clear all caches
     return NextResponse.json({ message: "All demo data erased successfully" });
   } catch (error: any) {
     return NextResponse.json(

@@ -4,6 +4,7 @@ cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
+  analytics: false, // Disable URL analytics to avoid sdk_semver error in Next.js bundler
 });
 
 export default cloudinary;

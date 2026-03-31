@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import HeroCarousel from "@/components/HeroCarousel";
 import TrustSection from "@/components/TrustSection";
@@ -9,7 +10,7 @@ import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import CorporateEnquiry from "@/components/CorporateEnquiry";
 import GoogleReviewsCarousel from "@/components/GoogleReviewsCarousel";
-import { getHeroSlides, getCategories, getProducts } from "@/lib/data";
+import { getHeroSlides, getCategories, getFeaturedProducts } from "@/lib/data";
 
 export const metadata = {
   title: "Sai Nandhini | Authentic Homemade Sweets & Snacks",
@@ -20,42 +21,50 @@ export const metadata = {
 // Revalidate every 60 seconds (ISR)
 export const revalidate = 60;
 
-export default async function Home() {
-  const [heroSlides, categories, products] = await Promise.all([
-    getHeroSlides(),
-    getCategories(),
-    getProducts(),
-  ]);
+// Async server components for Suspense streaming (Next.js data-patterns guideline)
+async function HeroSection() {
+  const heroSlides = await getHeroSlides();
+  return <HeroCarousel initialSlides={heroSlides} />;
+}
 
+async function CategoriesSection() {
+  const categories = await getCategories();
+  return <CategorySection initialCategories={categories} />;
+}
+
+async function ProductsSection() {
+  const products = await getFeaturedProducts(8);
+  return <FeaturedProducts initialProducts={products} />;
+}
+
+export default function Home() {
   return (
     <main className="min-h-screen bg-[#ece0cc]">
       <Navbar />
 
-      {/* Hero Carousel */}
-      <HeroCarousel initialSlides={heroSlides} />
+      {/* Hero — streams first, shows skeleton while loading */}
+      <Suspense fallback={<div className="h-[60vh] bg-[#ece0cc] animate-pulse" />}>
+        <HeroSection />
+      </Suspense>
 
-      {/* Trust Badges — Cream */}
+      {/* Trust Badges — static, renders instantly */}
       <TrustSection />
 
-      {/* Top Categories — Cream */}
-      <CategorySection initialCategories={categories} />
+      {/* Categories — streams independently */}
+      <Suspense fallback={<div className="h-64 bg-[#ece0cc] animate-pulse" />}>
+        <CategoriesSection />
+      </Suspense>
 
-      {/* Best Sellers — White */}
-      <FeaturedProducts initialProducts={products.slice(0, 8)} />
+      {/* Featured Products — streams independently */}
+      <Suspense fallback={<div className="h-96 bg-white animate-pulse" />}>
+        <ProductsSection />
+      </Suspense>
 
-      {/* Why Choose Us — Dark Green */}
+      {/* Static sections — render instantly */}
       <WhyChooseUs />
-
-      {/* About Us — Cream */}
       <AboutUs />
-
-      {/* Google Reviews — Dark Green */}
       <GoogleReviewsCarousel />
-
-      {/* Corporate Enquiry — White */}
       <CorporateEnquiry />
-
-      {/* CTA Section — Dark Green */}
       <CTASection />
 
       <Footer />

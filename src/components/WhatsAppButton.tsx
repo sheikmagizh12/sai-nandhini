@@ -1,28 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useNavbarData } from "@/context/NavbarDataContext";
 
 export default function WhatsAppButton() {
-  const [phone, setPhone] = useState("");
+  const { settings } = useNavbarData();
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const res = await fetch("/api/admin/settings");
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.contactPhone) {
-            // Clean phone number (remove spaces, etc.)
-            const cleanPhone = data.contactPhone.replace(/[^0-9]/g, "");
-            setPhone(cleanPhone);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching settings for WhatsApp:", error);
-      }
-    };
-    fetchSettings();
-  }, []);
+  const phone = settings?.contactPhone
+    ? settings.contactPhone.replace(/[^0-9]/g, "")
+    : "";
 
   if (!phone) return null;
 
@@ -34,7 +19,6 @@ export default function WhatsAppButton() {
       className="fixed bottom-24 right-6 z-[100] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:bg-[#20BA5A] hover:scale-110 transition-all duration-300 flex items-center justify-center group"
       title="Chat with us on WhatsApp"
     >
-      {/* WhatsApp Icon SVG */}
       <svg
         viewBox="0 0 24 24"
         width="28"

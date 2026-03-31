@@ -7,6 +7,7 @@ import { decryptPassword } from "@/lib/encryption";
 import { generateInvoiceHTML } from "@/lib/invoice-generator";
 import { generatePDFFromHTML } from "@/lib/pdf-generator";
 import { sendOrderConfirmationEmail } from "@/lib/email-service";
+import { revalidatePath } from "next/cache";
 
 // Helper: get decrypted payment config from DB (exact ref repo pattern)
 async function getDecryptedPaymentConfig() {
@@ -133,7 +134,7 @@ export async function POST(req: Request) {
         }
       }
 
-      // Return immediately without waiting for email
+      revalidatePath("/orders");
       return NextResponse.json({
         success: true,
         message: "Payment verified successfully",

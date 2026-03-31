@@ -23,13 +23,13 @@ export default async function OrdersPage() {
 
   await connectDB();
   const orders = await Order.find({ user: session.user.id })
+    .select("_id createdAt status isDelivered awbNumber orderItems totalPrice isPaid")
     .populate({
       path: "orderItems.product",
       select: "slug name",
     })
-    .sort({
-      createdAt: -1,
-    });
+    .sort({ createdAt: -1 })
+    .lean();
 
   return (
     <div className="flex flex-col min-h-screen">

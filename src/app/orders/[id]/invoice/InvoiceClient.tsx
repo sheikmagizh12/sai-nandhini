@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useNavbarData } from "@/context/NavbarDataContext";
 
 export default function InvoiceClient({
   order,
@@ -10,22 +11,10 @@ export default function InvoiceClient({
   format: string;
 }) {
   const [mounted, setMounted] = useState(false);
-  const [settings, setSettings] = useState<any>(null);
+  const { settings } = useNavbarData();
 
   useEffect(() => {
     setMounted(true);
-    const fetchSettings = async () => {
-      try {
-        const res = await fetch("/api/admin/settings");
-        if (res.ok) {
-          const data = await res.json();
-          setSettings(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch settings", error);
-      }
-    };
-    fetchSettings();
   }, []);
 
   useEffect(() => {

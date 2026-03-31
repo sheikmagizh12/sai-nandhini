@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import Pagination, { usePagination } from "@/components/Pagination";
 import {
   Plus,
   Search,
@@ -152,6 +153,15 @@ export default function ProductsClient({
         return stock <= threshold && stock > 0;
       }).length
     : 0;
+
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedProducts,
+    setCurrentPage,
+    totalItems,
+    itemsPerPage,
+  } = usePagination(filteredProducts, 15);
 
   // Derived logic for display
   const getStockStatus = (p: any) => {
@@ -496,7 +506,7 @@ export default function ProductsClient({
           </div>
         ) : (
           <AnimatePresence>
-            {filteredProducts.map((p, i) => {
+            {paginatedProducts.map((p, i) => {
               const status = getStockStatus(p);
               const totalStock =
                 p.variants?.reduce(
@@ -623,6 +633,15 @@ export default function ProductsClient({
             })}
           </AnimatePresence>
         )}
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={totalItems}
+          itemsPerPage={itemsPerPage}
+        />
       </div>
 
       <ProductModal

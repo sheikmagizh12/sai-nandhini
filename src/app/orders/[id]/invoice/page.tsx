@@ -27,7 +27,7 @@ export default async function InvoicePage(props: {
   const order = await Order.findById(id).populate({
     path: "orderItems.product",
     select: "slug name",
-  });
+  }).lean();
 
   if (!order) {
     return (

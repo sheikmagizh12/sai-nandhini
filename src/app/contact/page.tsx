@@ -13,29 +13,17 @@ import {
   Calendar,
   Briefcase,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
+import { useNavbarData } from "@/context/NavbarDataContext";
+import { validateForm, contactSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 export default function ContactPage() {
-  const [settings, setSettings] = useState<any>(null);
+  const { settings } = useNavbarData();
   const [activeTab, setActiveTab] = useState<"general" | "corporate">(
     "general",
   );
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const res = await fetch("/api/admin/settings");
-        if (res.ok) {
-          const data = await res.json();
-          setSettings(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch settings", error);
-      }
-    };
-    fetchSettings();
-  }, []);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -47,10 +35,19 @@ export default function ContactPage() {
     date: "",
   });
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    const validation = validateForm(contactSchema, formData);
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      setLoading(false);
+      return;
+    }
+    setFieldErrors({});
 
     try {
       const res = await fetch("/api/enquiry", {
@@ -236,12 +233,14 @@ export default function ContactPage() {
                       type="text"
                       required
                       value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        setFieldErrors((prev) => ({ ...prev, name: "" }));
+                      }}
                       placeholder="John Doe"
-                      className="w-full bg-gray-50 border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl py-5 px-6 outline-none transition-all font-medium"
+                      className={`w-full bg-gray-50 border ${fieldErrors.name ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-5 px-6 outline-none transition-all font-medium`}
                     />
+                    <FormError message={fieldErrors.name} />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
@@ -251,12 +250,14 @@ export default function ContactPage() {
                       type="email"
                       required
                       value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, email: e.target.value });
+                        setFieldErrors((prev) => ({ ...prev, email: "" }));
+                      }}
                       placeholder="john@example.com"
-                      className="w-full bg-gray-50 border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl py-5 px-6 outline-none transition-all font-medium"
+                      className={`w-full bg-gray-50 border ${fieldErrors.email ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-5 px-6 outline-none transition-all font-medium`}
                     />
+                    <FormError message={fieldErrors.email} />
                   </div>
                 </div>
 
@@ -269,12 +270,14 @@ export default function ContactPage() {
                       type="tel"
                       required
                       value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, phone: e.target.value });
+                        setFieldErrors((prev) => ({ ...prev, phone: "" }));
+                      }}
                       placeholder="+91 98765 43210"
-                      className="w-full bg-gray-50 border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl py-5 px-6 outline-none transition-all font-medium"
+                      className={`w-full bg-gray-50 border ${fieldErrors.phone ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-5 px-6 outline-none transition-all font-medium`}
                     />
+                    <FormError message={fieldErrors.phone} />
                   </div>
                   {activeTab === "corporate" && (
                     <div className="space-y-2">
@@ -331,16 +334,18 @@ export default function ContactPage() {
                     rows={6}
                     required
                     value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, message: e.target.value });
+                      setFieldErrors((prev) => ({ ...prev, message: "" }));
+                    }}
                     placeholder={
                       activeTab === "general"
                         ? "How can we help you today?"
                         : "Tell us about your event, expected guest count, and requirements..."
                     }
-                    className="w-full bg-gray-50 border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl py-6 px-6 outline-none transition-all font-medium resize-none"
+                    className={`w-full bg-gray-50 border ${fieldErrors.message ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-6 px-6 outline-none transition-all font-medium resize-none`}
                   />
+                  <FormError message={fieldErrors.message} />
                 </div>
 
                 <button

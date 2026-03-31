@@ -7,6 +7,7 @@ import { decryptPassword } from "@/lib/encryption";
 import { generateInvoiceHTML } from "@/lib/invoice-generator";
 import { generatePDFFromHTML } from "@/lib/pdf-generator";
 import { sendOrderConfirmationEmail } from "@/lib/email-service";
+import { revalidatePath } from "next/cache";
 
 // Helper: get decrypted webhook secret
 async function getDecryptedWebhookSecret() {
@@ -150,6 +151,7 @@ export async function POST(req: Request) {
       }
     }
 
+    revalidatePath("/orders");
     return NextResponse.json({ success: true, status: "ok" });
   } catch (error: any) {
     console.error("Webhook Handler Error:", error);

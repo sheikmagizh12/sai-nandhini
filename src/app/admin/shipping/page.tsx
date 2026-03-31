@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Truck, Plus, Trash2, Save, Loader2, Package, MapPin, Edit2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { validateForm, shippingRateSchema, FieldErrors } from "@/lib/validations";
+import FormError from "@/components/FormError";
 
 interface ShippingRate {
   _id?: string;
@@ -24,6 +26,7 @@ export default function ShippingManagementPage() {
     rate: 0,
     estimatedDelivery: "",
   });
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   useEffect(() => {
     fetchRates();
@@ -83,18 +86,12 @@ export default function ShippingManagementPage() {
   };
 
   const addRate = async () => {
-    if (!newRate.location) {
-      toast.error("Please select a location");
+    const validation = validateForm(shippingRateSchema, newRate);
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
       return;
     }
-    if (newRate.rate < 0) {
-      toast.error("Rate cannot be negative");
-      return;
-    }
-    if (!newRate.estimatedDelivery.trim()) {
-      toast.error("Please enter estimated delivery time");
-      return;
-    }
+    setFieldErrors({});
 
     setSaving(true);
     try {
@@ -233,10 +230,11 @@ export default function ShippingManagementPage() {
                 </label>
                 <select
                   value={newRate.location}
-                  onChange={(e) =>
-                    setNewRate({ ...newRate, location: e.target.value })
-                  }
-                  className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
+                  onChange={(e) => {
+                    setNewRate({ ...newRate, location: e.target.value });
+                    setFieldErrors((prev) => ({ ...prev, location: "" }));
+                  }}
+                  className={`w-full bg-gray-50 border ${fieldErrors.location ? "border-red-300" : "border-transparent"} focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation`}
                 >
                   <option value="">Select location</option>
                   {availableLocations.map((loc) => (
@@ -245,6 +243,7 @@ export default function ShippingManagementPage() {
                     </option>
                   ))}
                 </select>
+                <FormError message={fieldErrors.location} />
               </div>
 
               <div>
@@ -256,15 +255,17 @@ export default function ShippingManagementPage() {
                   step="0.01"
                   min="0"
                   value={newRate.rate}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setNewRate({
                       ...newRate,
                       rate: parseFloat(e.target.value) || 0,
-                    })
-                  }
+                    });
+                    setFieldErrors((prev) => ({ ...prev, rate: "" }));
+                  }}
                   placeholder="Enter 0 for free"
-                  className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base tabular-nums focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
+                  className={`w-full bg-gray-50 border ${fieldErrors.rate ? "border-red-300" : "border-transparent"} focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base tabular-nums focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation`}
                 />
+                <FormError message={fieldErrors.rate} />
               </div>
 
               <div>
@@ -274,15 +275,17 @@ export default function ShippingManagementPage() {
                 <input
                   type="text"
                   value={newRate.estimatedDelivery}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setNewRate({
                       ...newRate,
                       estimatedDelivery: e.target.value,
-                    })
-                  }
+                    });
+                    setFieldErrors((prev) => ({ ...prev, estimatedDelivery: "" }));
+                  }}
                   placeholder="e.g., 2-3 days"
-                  className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation"
+                  className={`w-full bg-gray-50 border ${fieldErrors.estimatedDelivery ? "border-red-300" : "border-transparent"} focus:border-primary/20 rounded-xl py-3.5 px-4 outline-none transition-all shadow-sm font-black text-base focus:bg-white focus:ring-4 focus:ring-primary/5 touch-manipulation`}
                 />
+                <FormError message={fieldErrors.estimatedDelivery} />
               </div>
 
               <div className="flex items-end">

@@ -5,6 +5,7 @@ import Product from "@/models/Product";
 import Order from "@/models/Order";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { invalidateCache, CACHE_KEYS } from "@/lib/cache";
 
 // GET public reviews for a product
 export async function GET(req: NextRequest) {
@@ -95,6 +96,7 @@ export async function POST(req: NextRequest) {
       isApproved: false, // Requires admin approval
     });
 
+    invalidateCache(CACHE_KEYS.PRODUCTS, CACHE_KEYS.PRODUCT_SLUG);
     return NextResponse.json(review, { status: 201 });
   } catch (error) {
     console.error("POST review error:", error);

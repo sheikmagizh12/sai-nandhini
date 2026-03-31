@@ -6,7 +6,7 @@ const EnquirySchema = new mongoose.Schema({
     phone: { type: String, required: true },
     type: {
         type: String,
-        enum: ["Corporate Booking", "Event Catering", "Bulk Order", "Other"],
+        enum: ["General Inquiry", "Order Support", "Product Question", "Feedback", "Corporate Booking", "Event Catering", "Bulk Order", "Corporate Gifting", "Other"],
         default: "Other"
     },
     message: { type: String, required: true },

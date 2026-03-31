@@ -14,12 +14,14 @@ const nextConfig = {
     ],
   },
   experimental: {
-    // Disable client-side router cache so navigations always get fresh server data
-    // Without this, Next.js caches RSC payloads for 30s during SPA navigation
+    // Minimize client-side router cache so navigations get near-fresh server data
     staleTimes: {
       dynamic: 0,
-      static: 0,
+      static: 30,
     },
+  },
+  turbopack: {
+    root: "C:\\sai-nandhini-new\\sai-nandhini",
   },
 };
 

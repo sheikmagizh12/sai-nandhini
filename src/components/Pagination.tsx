@@ -25,7 +25,7 @@ export default function Pagination({
 
   const getPageNumbers = () => {
     const pages: (number | "...")[] = [];
-    if (totalPages <= 7) {
+    if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else {
       pages.push(1);
@@ -44,44 +44,51 @@ export default function Pagination({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4">
-      <p className="text-xs text-gray-500 font-medium">
-        Showing {startItem}–{endItem} of {totalItems}
-      </p>
-      <div className="flex items-center gap-1">
-        <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        >
-          <ChevronLeft size={16} />
-        </button>
-        {getPageNumbers().map((page, i) =>
-          page === "..." ? (
-            <span key={`dots-${i}`} className="px-2 text-gray-400 text-sm">
-              ...
-            </span>
-          ) : (
-            <button
-              key={page}
-              onClick={() => onPageChange(page as number)}
-              className={`min-w-[32px] h-8 rounded-lg text-xs font-bold transition-colors ${
-                currentPage === page
-                  ? "bg-[#234d1b] text-white"
-                  : "hover:bg-gray-100 text-gray-600"
-              }`}
-            >
-              {page}
-            </button>
-          ),
-        )}
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        >
-          <ChevronRight size={16} />
-        </button>
+    <div className="bg-white rounded-2xl sm:rounded-[2rem] border border-gray-100 shadow-sm px-4 sm:px-8 py-4 sm:py-5 mt-6 mb-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p className="text-[10px] sm:text-[11px] font-black text-gray-400 uppercase tracking-[0.15em] order-2 sm:order-1">
+          Showing {startItem}–{endItem} of {totalItems}
+        </p>
+        <div className="flex items-center gap-2 order-1 sm:order-2">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-[#234d1b] hover:text-white disabled:opacity-20 disabled:hover:bg-gray-50 disabled:hover:text-gray-400 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <div className="flex items-center gap-1.5">
+            {getPageNumbers().map((page, i) =>
+              page === "..." ? (
+                <span
+                  key={`dots-${i}`}
+                  className="w-6 text-center text-gray-300 text-xs font-black select-none"
+                >
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={page}
+                  onClick={() => onPageChange(page as number)}
+                  className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl text-xs font-black transition-all ${
+                    currentPage === page
+                      ? "bg-[#234d1b] text-white shadow-lg shadow-[#234d1b]/20 scale-110"
+                      : "bg-gray-50 text-gray-400 hover:bg-[#234d1b]/10 hover:text-[#234d1b]"
+                  }`}
+                >
+                  {page}
+                </button>
+              ),
+            )}
+          </div>
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-[#234d1b] hover:text-white disabled:opacity-20 disabled:hover:bg-gray-50 disabled:hover:text-gray-400 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -96,7 +103,6 @@ export function usePagination<T>(items: T[], itemsPerPage: number = 15) {
     currentPage * itemsPerPage,
   );
 
-  // Reset to page 1 when filtered items change
   useEffect(() => {
     setCurrentPage(1);
   }, [items.length]);

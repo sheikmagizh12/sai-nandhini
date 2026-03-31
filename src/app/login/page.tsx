@@ -112,7 +112,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    setFieldErrors(prev => ({ ...prev, email: "" }));
+                    setFieldErrors((prev) => ({ ...prev, email: "" }));
                   }}
                   className={`w-full bg-white/50 border ${fieldErrors.email ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all shadow-sm`}
                   placeholder="name@example.com"
@@ -126,12 +126,6 @@ export default function LoginPage() {
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                   Password
                 </label>
-                <Link
-                  href="#"
-                  className="text-xs font-bold text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link>
               </div>
               <div className="relative">
                 <Lock
@@ -144,7 +138,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
-                    setFieldErrors(prev => ({ ...prev, password: "" }));
+                    setFieldErrors((prev) => ({ ...prev, password: "" }));
                   }}
                   className={`w-full bg-white/50 border ${fieldErrors.password ? "border-red-300" : "border-transparent"} focus:border-primary/20 focus:bg-white rounded-2xl py-4 pl-12 pr-12 outline-none transition-all shadow-sm`}
                   placeholder="••••••••"

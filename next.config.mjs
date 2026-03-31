@@ -20,9 +20,6 @@ const nextConfig = {
       static: 30,
     },
   },
-  turbopack: {
-    root: "C:\\sai-nandhini-new\\sai-nandhini",
-  },
 };
 
 export default nextConfig;

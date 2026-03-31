@@ -4,12 +4,15 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { validateForm, loginSchema, FieldErrors } from "@/lib/validations";
 import FormError from "@/components/FormError";
 import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavbarData } from "@/context/NavbarDataContext";
 
 export default function LoginPage() {
+  const { settings } = useNavbarData();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -62,16 +65,22 @@ export default function LoginPage() {
       >
         <div className="glass-card p-6 md:p-10">
           <div className="text-center mb-6 md:mb-10">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 mb-4 md:mb-6"
-            >
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-lg">
-                S
-              </div>
-              <span className="text-xl md:text-2xl font-serif font-bold text-primary-dark">
-                Sai Nandhini
-              </span>
+            <Link href="/" className="inline-block mb-4 md:mb-6">
+              {settings?.logo ? (
+                <div className="h-14 md:h-20 w-48 md:w-64 relative mx-auto">
+                  <Image
+                    src={settings.logo}
+                    alt={settings.shopName || "Sai Nandhini"}
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              ) : (
+                <span className="text-xl md:text-2xl font-serif font-bold text-primary-dark">
+                  {settings?.shopName || "Sai Nandhini"}
+                </span>
+              )}
             </Link>
             <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary-dark">
               Welcome Back

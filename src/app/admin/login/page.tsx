@@ -4,12 +4,15 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Lock, Loader2, ArrowRight, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { validateForm, adminLoginSchema, FieldErrors } from "@/lib/validations";
 import FormError from "@/components/FormError";
+import { useNavbarData } from "@/context/NavbarDataContext";
 
 export default function AdminLoginPage() {
+  const { settings } = useNavbarData();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -67,13 +70,22 @@ export default function AdminLoginPage() {
       >
         <div className="bg-white rounded-[2.5rem] p-10 shadow-2xl border border-white/20">
           <div className="text-center mb-8">
-            <Link href="/" className="inline-flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-[#556B2F] rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg">
-                SN
-              </div>
-              <span className="text-2xl font-serif font-black text-[#556B2F]">
-                Tasty World
-              </span>
+            <Link href="/" className="inline-block mb-6">
+              {settings?.logo ? (
+                <div className="h-14 md:h-20 w-48 md:w-64 relative mx-auto">
+                  <Image
+                    src={settings.logo}
+                    alt={settings.shopName || "Sai Nandhini"}
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              ) : (
+                <span className="text-2xl font-serif font-black text-[#556B2F]">
+                  {settings?.shopName || "Sai Nandhini Tasty World"}
+                </span>
+              )}
             </Link>
             <div className="flex items-center justify-center gap-2 mb-2">
               <ShieldCheck className="text-[#556B2F]" size={20} />

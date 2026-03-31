@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Pagination, { usePagination } from "@/components/Pagination";
 import {
   Search,
   Filter,
@@ -147,6 +148,15 @@ export default function InventoryPage() {
       p.category.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedProducts,
+    setCurrentPage,
+    totalItems,
+    itemsPerPage,
+  } = usePagination(filteredProducts, 15);
+
   return (
     <div className="space-y-8 font-sans">
       {/* Header */}
@@ -199,7 +209,7 @@ export default function InventoryPage() {
           </div>
         ) : (
           <AnimatePresence>
-            {filteredProducts.map((p, i) => {
+            {paginatedProducts.map((p, i) => {
               const totalStock =
                 p.variants?.reduce(
                   (acc: number, v: any) => acc + (v.stock || 0),
@@ -273,6 +283,14 @@ export default function InventoryPage() {
             })}
           </AnimatePresence>
         )}
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={totalItems}
+          itemsPerPage={itemsPerPage}
+        />
       </div>
 
       {/* Management Modal */}

@@ -20,7 +20,6 @@ export default function ShippingManagementPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [migrating, setMigrating] = useState(false);
   const [newRate, setNewRate] = useState<ShippingRate>({
     location: "",
     rate: 0,
@@ -39,7 +38,7 @@ export default function ShippingManagementPage() {
       
       // Check if we got an error (old schema)
       if (data.error) {
-        toast.error("Old shipping data detected. Please click 'Migrate to New System' button.");
+        toast.error("Old shipping data detected. Please re-configure your settings.");
         setRates([]);
       } else {
         setRates(data);
@@ -51,34 +50,6 @@ export default function ShippingManagementPage() {
     }
   };
 
-  const migrateToNewSystem = async () => {
-    if (!confirm("This will clear all old shipping rates. You'll need to add new location-based rates. Continue?")) {
-      return;
-    }
-
-    setMigrating(true);
-    try {
-      const res = await fetch("/api/admin/shipping-rates/migrate", {
-        method: "POST",
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        toast.success(data.message);
-        // Reload the page to clear any cached models
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-      } else {
-        const error = await res.json();
-        toast.error(error.error || "Migration failed");
-        setMigrating(false);
-      }
-    } catch (error) {
-      toast.error("Failed to migrate shipping system");
-      setMigrating(false);
-    }
-  };
 
   const getAvailableLocations = () => {
     const usedLocations = rates.map((r) => r.location);
@@ -196,23 +167,7 @@ export default function ShippingManagementPage() {
               </p>
             </div>
           </div>
-          <button
-            onClick={migrateToNewSystem}
-            disabled={migrating}
-            className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg transition-all disabled:opacity-50 flex items-center gap-2"
-          >
-            {migrating ? (
-              <>
-                <Loader2 className="animate-spin" size={16} />
-                Migrating...
-              </>
-            ) : (
-              <>
-                <Package size={16} />
-                Migrate to New System
-              </>
-            )}
-          </button>
+
         </div>
 
         {/* Add New Rate Card */}

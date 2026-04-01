@@ -31,13 +31,11 @@ import toast from "react-hot-toast";
 import { validateForm, settingsBrandSchema, FieldErrors } from "@/lib/validations";
 import FormError from "@/components/FormError";
 
-// Tab configuration
 const TABS = [
   { id: "brand", label: "Brand Identity", icon: Store },
   { id: "payment", label: "Payment Gateway", icon: CreditCard },
   { id: "email", label: "Email Config", icon: Mail },
   { id: "seo", label: "SEO & Metadata", icon: Search },
-  { id: "inventory", label: "Inventory", icon: Package },
   { id: "reviews", label: "Google Reviews", icon: MessageSquare },
 ];
 
@@ -1078,103 +1076,7 @@ export default function SettingsClient({
             </SettingsCard>
           )}
 
-          {/* Inventory Management Tab */}
-          {activeTab === "inventory" && (
-            <SettingsCard>
-              <CardHeader
-                icon={<Package size={20} />}
-                title="Inventory Management"
-                description="Global settings for tracking and managing product stock"
-              />
-              <div className="space-y-8">
-                <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-6">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
-                      <Package size={16} className="text-amber-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-amber-900 mb-1">
-                        Stock Control Policies
-                      </p>
-                      <p className="text-xs text-amber-700">
-                        These settings affect how the store handles out-of-stock
-                        items and when to notify you about low inventory levels.
-                      </p>
-                    </div>
-                  </div>
-                </div>
 
-                <ToggleSwitch
-                  checked={settings.manageInventory ?? true}
-                  onChange={() =>
-                    setSettings({
-                      ...settings,
-                      manageInventory: !(settings.manageInventory ?? true),
-                    })
-                  }
-                  label="Enable Global Inventory Tracking"
-                  description="When enabled, the system will track stock quantities and prevent orders for out-of-stock items"
-                />
-
-                <div className="border-t border-gray-100 pt-8">
-                  <div className="max-w-xs">
-                    <FieldLabel>Low Stock Threshold</FieldLabel>
-                    <div className="relative">
-                      <Package
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                        size={16}
-                      />
-                      <input
-                        type="number"
-                        className={`${INPUT_CLASS} pl-12`}
-                        value={settings.lowStockThreshold || 10}
-                        onChange={(e) =>
-                          setSettings({
-                            ...settings,
-                            lowStockThreshold: Number(e.target.value),
-                          })
-                        }
-                        placeholder="10"
-                        min="0"
-                      />
-                    </div>
-                    <p className="text-[10px] text-gray-400 mt-2 font-medium">
-                      Items with stock below this number will be flagged in the
-                      inventory dashboard.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-100 pt-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ToggleSwitch
-                      checked={settings.allowOrderCancellation ?? true}
-                      onChange={() =>
-                        setSettings({
-                          ...settings,
-                          allowOrderCancellation:
-                            !settings.allowOrderCancellation,
-                        })
-                      }
-                      label="Allow Order Cancellation"
-                      description="Let customers cancel orders before they are processed"
-                    />
-                    {/* <ToggleSwitch
-                      checked={settings.allowScheduledOrders ?? false}
-                      onChange={() =>
-                        setSettings({
-                          ...settings,
-                          allowScheduledOrders: !settings.allowScheduledOrders,
-                        })
-                      }
-                      label="Enable Scheduled Orders"
-                      description="Allow customers to pick a delivery date during checkout"
-                    /> */}
-                  </div>
-                </div>
-              </div>
-            </SettingsCard>
-          )}
         </motion.div>
       </AnimatePresence>
 

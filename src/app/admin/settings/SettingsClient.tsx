@@ -493,21 +493,7 @@ export default function SettingsClient({
                   </div>
                 </div>
 
-                <div>
-                  <FieldLabel>Announcement Banner</FieldLabel>
-                  <input
-                    type="text"
-                    className={INPUT_CLASS}
-                    value={settings.announcement || ""}
-                    onChange={(e) =>
-                      setSettings({ ...settings, announcement: e.target.value })
-                    }
-                    placeholder="e.g., Welcome to our store!"
-                  />
-                  <p className="text-xs text-gray-500 mt-1.5">
-                    This message will appear at the top of your website
-                  </p>
-                </div>
+
               </div>
             </SettingsCard>
           )}

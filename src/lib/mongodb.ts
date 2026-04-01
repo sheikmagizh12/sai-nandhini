@@ -12,10 +12,13 @@ if (!cached) {
     cached = (global as any).mongoose = { conn: null, promise: null };
 }
 
-// Connection event handlers (MongoDB skill guideline)
-mongoose.connection.on("connected", () => console.log("MongoDB connected"));
-mongoose.connection.on("error", (err) => console.error("MongoDB error:", err));
-mongoose.connection.on("disconnected", () => console.log("MongoDB disconnected"));
+// Register connection event handlers only once
+if (!(global as any).__mongooseListenersRegistered) {
+    mongoose.connection.on("connected", () => console.log("MongoDB connected"));
+    mongoose.connection.on("error", (err) => console.error("MongoDB error:", err));
+    mongoose.connection.on("disconnected", () => console.log("MongoDB disconnected"));
+    (global as any).__mongooseListenersRegistered = true;
+}
 
 async function connectDB() {
     if (cached.conn) {

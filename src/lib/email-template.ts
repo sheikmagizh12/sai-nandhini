@@ -734,7 +734,7 @@ function resolveSettings(settings: ShopSettings | undefined): ResolvedSettings {
       "# 3/81, 1st Floor, Kaveri Main Street, SRV Nagar, Thirunagar",
     city: settings?.city || "Madurai - 625006",
     logoText,
-    domain: settings?.appUrl ?? "https://sainandhini.com",
+    domain: "https://sntasty.com",
   };
 }
 
@@ -916,10 +916,11 @@ export function getEmailTemplate(
 
 
           <!-- ── PROGRESS BAR ───────────────────────────────────── -->
-          ${buildProgressBar(cfg).trim()
-      ? `<tr><td style="padding:0;">${buildProgressBar(cfg)}</td></tr>`
-      : ""
-    }
+          ${
+            buildProgressBar(cfg).trim()
+              ? `<tr><td style="padding:0;">${buildProgressBar(cfg)}</td></tr>`
+              : ""
+          }
 
 
           <!-- ── ZIGZAG header → white ──────────────────────────── -->
@@ -951,11 +952,12 @@ export function getEmailTemplate(
                 <!-- Items or refund breakdown -->
                 <tr>
                   <td>
-                    ${isCancelled
-      ? buildRefundBreakdown(order, fmt)
-      : buildItemsSection(order, domain, fmt, itemsLabel) +
-      buildTotals(order, fmt)
-    }
+                    ${
+                      isCancelled
+                        ? buildRefundBreakdown(order, fmt)
+                        : buildItemsSection(order, domain, fmt, itemsLabel) +
+                          buildTotals(order, fmt)
+                    }
                   </td>
                 </tr>
 

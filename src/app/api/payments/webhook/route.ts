@@ -4,9 +4,7 @@ import connectDB from "@/lib/mongodb";
 import Order from "@/models/Order";
 import Settings from "@/models/Settings";
 import { decryptPassword } from "@/lib/encryption";
-import { generateInvoiceHTML } from "@/lib/invoice-generator";
-import { generatePDFFromHTML } from "@/lib/pdf-generator";
-import { sendOrderConfirmationEmail } from "@/lib/email-service";
+// Dynamic imports used below to avoid crashing on servers without chromium
 import { revalidatePath } from "next/cache";
 
 // Helper: get decrypted webhook secret
@@ -98,8 +96,18 @@ export async function POST(req: Request) {
               console.log(
                 `📧 [Webhook] Generating invoice for order ${order._id}...`,
               );
-              const invoiceHTML = await generateInvoiceHTML(populatedOrder);
-              const pdfBuffer = await generatePDFFromHTML(invoiceHTML);
+              const { sendOrderConfirmationEmail } = await import("@/lib/email-service");
+
+              let pdfBuffer = null;
+              try {
+                const { generateInvoiceHTML } = await import("@/lib/invoice-generator");
+                const { generatePDFFromHTML } = await import("@/lib/pdf-generator");
+                const invoiceHTML = await generateInvoiceHTML(populatedOrder);
+                pdfBuffer = await generatePDFFromHTML(invoiceHTML);
+              } catch (pdfError) {
+                console.warn("⚠️ PDF generation failed, sending email without attachment:", (pdfError as Error).message);
+              }
+
               await sendOrderConfirmationEmail(populatedOrder, pdfBuffer);
               console.log(
                 `✅ [Webhook] Invoice email sent for order ${order._id}`,

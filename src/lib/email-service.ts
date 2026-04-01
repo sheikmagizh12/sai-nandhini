@@ -71,7 +71,7 @@ async function getEmailConfig() {
  */
 export const sendOrderConfirmationEmail = async (
   order: any,
-  invoicePDFBuffer: Buffer | Uint8Array,
+  invoicePDFBuffer: Buffer | Uint8Array | null,
 ) => {
   try {
     // Get email configuration (exact ref repo pattern)
@@ -102,13 +102,15 @@ export const sendOrderConfirmationEmail = async (
         subject ||
         `Order Confirmation – #${order._id.toString().slice(-6).toUpperCase()}`,
       html,
-      attachments: [
-        {
-          filename: `Invoice-${order._id.toString().slice(-6).toUpperCase()}.pdf`,
-          content: Buffer.from(invoicePDFBuffer),
-          contentType: "application/pdf",
-        },
-      ],
+      attachments: invoicePDFBuffer
+        ? [
+            {
+              filename: `Invoice-${order._id.toString().slice(-6).toUpperCase()}.pdf`,
+              content: Buffer.from(invoicePDFBuffer),
+              contentType: "application/pdf",
+            },
+          ]
+        : [],
     };
 
     const info = await transporter.sendMail(mailOptions);

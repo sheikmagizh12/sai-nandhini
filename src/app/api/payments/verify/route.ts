@@ -94,20 +94,28 @@ export async function POST(req: Request) {
         );
 
         if (!order.invoiceEmailSent) {
-          // Fire and forget - don't await this. Dynamic imports to avoid crashing route on load.
+          // Fire and forget - don't await this
           (async () => {
             try {
-              const { generateInvoiceHTML } = await import("@/lib/invoice-generator");
-              const { generatePDFFromHTML } = await import("@/lib/pdf-generator");
               const { sendOrderConfirmationEmail } = await import("@/lib/email-service");
 
               const populatedOrder =
                 await Order.findById(orderId).populate("user");
               console.log(
-                `📧 Generating invoice and sending confirmation email for order ${order._id}...`,
+                `📧 Sending confirmation email for order ${order._id}...`,
               );
-              const invoiceHTML = await generateInvoiceHTML(populatedOrder);
-              const pdfBuffer = await generatePDFFromHTML(invoiceHTML);
+
+              // Try PDF generation, but send email without it if it fails (e.g. no chromium on Hostinger)
+              let pdfBuffer = null;
+              try {
+                const { generateInvoiceHTML } = await import("@/lib/invoice-generator");
+                const { generatePDFFromHTML } = await import("@/lib/pdf-generator");
+                const invoiceHTML = await generateInvoiceHTML(populatedOrder);
+                pdfBuffer = await generatePDFFromHTML(invoiceHTML);
+              } catch (pdfError) {
+                console.warn("⚠️ PDF generation failed (no chromium?), sending email without attachment:", (pdfError as Error).message);
+              }
+
               await sendOrderConfirmationEmail(populatedOrder, pdfBuffer);
 
               // Mark email as sent

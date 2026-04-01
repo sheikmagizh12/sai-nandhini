@@ -40,7 +40,7 @@ function getImageUrl(image: string): string {
   }
   // If it's a Cloudinary public ID, convert to full URL
   if (image.includes("/")) {
-    return `https://res.cloudinary.com/dn4qntb9r/image/upload/${image}`;
+    return `https://res.cloudinary.com/dn4qntb9r/image/upload/f_auto,q_auto/${image}`;
   }
   // Fallback
   return image;

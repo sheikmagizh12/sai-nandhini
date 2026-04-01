@@ -860,7 +860,18 @@ export default function DashboardClient({
                   className="text-[#f8bf51] group-hover/btn:translate-x-1 transition-transform"
                 />
               </Link>
-              <button className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-red-500/10 rounded-2xl border border-white/10 transition-colors group/exit focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none touch-manipulation">
+              <button 
+                onClick={async () => {
+                  await authClient.signOut({
+                    fetchOptions: {
+                      onSuccess: () => {
+                        window.location.href = "/admin/login";
+                      },
+                    },
+                  });
+                }}
+                className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-red-500/10 rounded-2xl border border-white/10 transition-colors group/exit focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none touch-manipulation"
+              >
                 <span className="text-[10px] font-black uppercase tracking-widest text-red-300">
                   Terminate Session
                 </span>

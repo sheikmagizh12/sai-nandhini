@@ -1,4 +1,4 @@
-import { getProductsData, getSettingsData } from "@/lib/admin-data";
+import { getProductsData, getSettingsData, getCategoriesData } from "@/lib/admin-data";
 import ProductsClient from "./ProductsClient";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -13,12 +13,13 @@ export default async function AdminProductsPage() {
     redirect("/admin/login");
   }
 
-  const [products, settings] = await Promise.all([
+  const [products, settings, categories] = await Promise.all([
     getProductsData(),
     getSettingsData(),
+    getCategoriesData(),
   ]);
 
   return (
-    <ProductsClient initialProducts={products} initialSettings={settings} />
+    <ProductsClient initialProducts={products} initialSettings={settings} initialCategories={categories} />
   );
 }

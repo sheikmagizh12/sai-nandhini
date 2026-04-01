@@ -26,9 +26,11 @@ import ConfirmationModal from "@/components/admin/ConfirmationModal";
 export default function ProductsClient({
   initialProducts,
   initialSettings,
+  initialCategories,
 }: {
   initialProducts: any[];
   initialSettings: any;
+  initialCategories: any[];
 }) {
   const [products, setProducts] = useState<any[]>(initialProducts);
   const [loading, setLoading] = useState(false);
@@ -138,9 +140,15 @@ export default function ProductsClient({
   });
 
   // KPI Calculations
-  const totalProducts = products.length;
-  const allCategories = Array.from(new Set(products.map((p) => p.category)));
+  const allCategories = initialCategories?.map((c) => c.name) || Array.from(new Set(products.map((p) => p.category)));
   const totalCategories = allCategories.length;
+
+  const totalPhysicalStock = manageInventory
+    ? products.reduce((acc, p) => {
+        const stock = p.variants?.reduce((sAcc: number, v: any) => sAcc + (v.stock || 0), 0) || p.stock || 0;
+        return acc + stock;
+      }, 0)
+    : products.length;
   const lowStockCount = manageInventory
     ? products.filter((p) => {
         const stock =
@@ -207,11 +215,11 @@ export default function ProductsClient({
   return (
     <div className="space-y-8 font-sans">
       {/* KPI Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         {[
           {
-            label: "Stock Total",
-            value: totalProducts,
+            label: "Total SKUs",
+            value: products.length,
             icon: Package,
             color: "text-emerald-700",
             bg: "bg-emerald-50",
@@ -224,15 +232,8 @@ export default function ProductsClient({
             bg: "bg-amber-50",
           },
           {
-            label: "Low Alert",
-            value: lowStockCount,
-            icon: AlertTriangle,
-            color: "text-orange-700",
-            bg: "bg-orange-50",
-          },
-          {
-            label: "Revenue",
-            value: "₹45.2k",
+            label: "Physical Units",
+            value: totalPhysicalStock,
             icon: Activity,
             color: "text-indigo-700",
             bg: "bg-indigo-50",

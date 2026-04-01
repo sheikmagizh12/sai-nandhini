@@ -4,9 +4,6 @@ import connectDB from "@/lib/mongodb";
 import Order from "@/models/Order";
 import Settings from "@/models/Settings";
 import { decryptPassword } from "@/lib/encryption";
-import { generateInvoiceHTML } from "@/lib/invoice-generator";
-import { generatePDFFromHTML } from "@/lib/pdf-generator";
-import { sendOrderConfirmationEmail } from "@/lib/email-service";
 import { revalidatePath } from "next/cache";
 
 // Helper: get decrypted payment config from DB (exact ref repo pattern)
@@ -97,9 +94,13 @@ export async function POST(req: Request) {
         );
 
         if (!order.invoiceEmailSent) {
-          // Fire and forget - don't await this
+          // Fire and forget - don't await this. Dynamic imports to avoid crashing route on load.
           (async () => {
             try {
+              const { generateInvoiceHTML } = await import("@/lib/invoice-generator");
+              const { generatePDFFromHTML } = await import("@/lib/pdf-generator");
+              const { sendOrderConfirmationEmail } = await import("@/lib/email-service");
+
               const populatedOrder =
                 await Order.findById(orderId).populate("user");
               console.log(

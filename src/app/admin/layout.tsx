@@ -87,7 +87,7 @@ export default function AdminLayout({
   const navItems = [
     { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
     { href: "/admin/products", label: "Product Master", icon: Package },
-    { href: "/admin/inventory", label: "Inventory", icon: ClipboardList },
+    // { href: "/admin/inventory", label: "Inventory", icon: ClipboardList },
     { href: "/admin/categories", label: "Categories", icon: LayoutGrid },
     { href: "/admin/uom", label: "UOM Master", icon: Scale },
     { href: "/admin/orders", label: "Orders", icon: ShoppingBag },

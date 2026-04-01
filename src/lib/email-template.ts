@@ -816,7 +816,7 @@ export function getEmailTemplate(
   const total = fmt(order.totalPrice);
   const domain = resolved.domain;
   const orderUrl = order.user
-    ? `${domain}/profile/orders`
+    ? `${domain}/orders`
     : `${domain}/track?orderId=${order._id.toString()}&email=${encodeURIComponent(order.shippingAddress.email)}`;
 
   const cfg = buildStatusConfig(

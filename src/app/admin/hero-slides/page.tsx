@@ -114,7 +114,7 @@ export default function HeroSlidesPage() {
     if (!editingSlide) return;
     const validation = validateForm(heroSlideSchema, {
       title: editingSlide?.title || "",
-      image: editingSlide?.image || "",
+      image: (editingSlide?.image as any) instanceof File ? "file_uploaded" : (editingSlide?.image || ""),
     });
     if (!validation.success) {
       setFieldErrors(validation.errors);
@@ -412,7 +412,7 @@ export default function HeroSlidesPage() {
                       setEditingSlide({ ...editingSlide, image: val as any })
                     }
                   />
-                  {!editingSlide.image && <FormError message={fieldErrors.image} />}
+                  {fieldErrors.image && <FormError message={fieldErrors.image} />}
 
                   {/* Title + Title Accent */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

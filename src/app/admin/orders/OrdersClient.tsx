@@ -149,9 +149,6 @@ export default function OrdersClient({
     const totalRevenue = orders
       .filter((o) => o.isPaid)
       .reduce((acc, o) => acc + o.totalPrice, 0);
-    const pendingRevenue = orders
-      .filter((o) => !o.isPaid)
-      .reduce((acc, o) => acc + o.totalPrice, 0);
     const activeOrders = orders.filter((o) => o.status !== "Delivered").length;
     const todayOrders = orders.filter(
       (o) => new Date(o.createdAt).toDateString() === new Date().toDateString(),
@@ -159,7 +156,6 @@ export default function OrdersClient({
 
     return {
       totalRevenue,
-      pendingRevenue,
       activeOrders,
       todayOrders,
       totalOrders: orders.length,
@@ -194,7 +190,7 @@ export default function OrdersClient({
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-4 sm:p-6 rounded-2xl border border-primary/10">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-lg sm:rounded-xl flex items-center justify-center">
@@ -209,23 +205,6 @@ export default function OrdersClient({
             </p>
             <p className="text-[10px] sm:text-xs text-gray-400 mt-1 font-medium">
               From {orders.filter((o) => o.isPaid).length} paid orders
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100/50 p-4 sm:p-6 rounded-2xl border border-orange-100">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 rounded-lg sm:rounded-xl flex items-center justify-center">
-                <Clock className="text-orange-600" size={16} />
-              </div>
-              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400">
-                Pending Payment
-              </span>
-            </div>
-            <p className="text-2xl sm:text-3xl font-serif font-black text-orange-600 tabular-nums">
-              ₹{stats.pendingRevenue.toLocaleString()}
-            </p>
-            <p className="text-[10px] sm:text-xs text-gray-400 mt-1 font-medium">
-              From {orders.filter((o) => !o.isPaid).length} unpaid orders
             </p>
           </div>
 

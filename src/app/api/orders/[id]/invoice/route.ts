@@ -39,26 +39,34 @@ export async function GET(
     }
 
     // Generate PDF
-    const { generateInvoiceHTML } = await import("@/lib/invoice-generator");
-    const { generatePDFFromHTML } = await import("@/lib/pdf-generator");
+    try {
+      const { generateInvoiceHTML } = await import("@/lib/invoice-generator");
+      const { generatePDFFromHTML } = await import("@/lib/pdf-generator");
 
-    const invoiceHTML = await generateInvoiceHTML(order);
-    const pdfBuffer = Buffer.from(await generatePDFFromHTML(invoiceHTML));
+      const invoiceHTML = await generateInvoiceHTML(order);
+      const pdfBuffer = Buffer.from(await generatePDFFromHTML(invoiceHTML));
 
-    const filename = `invoice-${(order as any)._id.toString().slice(-8).toUpperCase()}.pdf`;
+      const filename = `invoice-${(order as any)._id.toString().slice(-8).toUpperCase()}.pdf`;
 
-    return new NextResponse(pdfBuffer, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-        "Content-Length": pdfBuffer.length.toString(),
-      },
-    });
+      return new NextResponse(pdfBuffer, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${filename}"`,
+          "Content-Length": pdfBuffer.length.toString(),
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
+      });
+    } catch (pdfError: any) {
+      console.error("PDF generation failed:", pdfError);
+      // If PDF generation fails, redirect to the invoice page where user can print
+      const redirectUrl = `/orders/${id}/invoice?format=a4${emailParam ? `&email=${encodeURIComponent(emailParam)}` : ''}`;
+      return NextResponse.redirect(new URL(redirectUrl, request.url));
+    }
   } catch (err: any) {
     console.error("Invoice download error:", err);
     return NextResponse.json(
-      { error: "Failed to generate invoice" },
+      { error: "Failed to generate invoice", details: err.message },
       { status: 500 }
     );
   }

@@ -43,9 +43,12 @@ export default function ShopClient({
   const [products] = useState<any[]>(initialProducts);
   const [categories] = useState<any[]>(initialCategories);
   const [loading] = useState(false);
+  const [subCategories, setSubCategories] = useState<any[]>([]);
+  const [loadingSubCategories, setLoadingSubCategories] = useState(false);
 
   // Filters & Sorting
   const [activeCategory, setActiveCategory] = useState(urlCategory);
+  const [activeSubCategory, setActiveSubCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState(urlSearch);
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [minRating, setMinRating] = useState(0);
@@ -63,11 +66,46 @@ export default function ShopClient({
     setSearchQuery(urlSearch);
   }, [searchParams]);
 
+  // Fetch subcategories when category changes
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      if (activeCategory === "All") {
+        setSubCategories([]);
+        setActiveSubCategory("All");
+        return;
+      }
+
+      setLoadingSubCategories(true);
+      try {
+        const category = categories.find((c) => c.name === activeCategory);
+        if (category) {
+          const res = await fetch(`/api/admin/subcategories?categoryId=${category._id}`);
+          const data = await res.json();
+          setSubCategories(data);
+          setActiveSubCategory("All");
+        }
+      } catch (error) {
+        console.error("Failed to fetch subcategories", error);
+        setSubCategories([]);
+      } finally {
+        setLoadingSubCategories(false);
+      }
+    };
+
+    fetchSubCategories();
+  }, [activeCategory, categories]);
+
   const filteredProducts = useMemo(() => {
     return products
       .filter((p) => {
         const matchesCategory =
           activeCategory === "All" || p.category === activeCategory;
+        const matchesSubCategory =
+          activeSubCategory === "All" || 
+          (p.subCategory && (
+            p.subCategory === activeSubCategory || 
+            p.subCategory._id === activeSubCategory
+          ));
         const matchesSearch = p.name
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
@@ -76,6 +114,7 @@ export default function ShopClient({
         const matchesRating = (p.rating || 4.5) >= minRating;
         return (
           matchesCategory &&
+          matchesSubCategory &&
           matchesSearch &&
           matchesPrice &&
           matchesRating
@@ -90,6 +129,7 @@ export default function ShopClient({
   }, [
     products,
     activeCategory,
+    activeSubCategory,
     searchQuery,
     priceRange,
     minRating,
@@ -162,7 +202,7 @@ export default function ShopClient({
           {/* 2. Modern Sidebar Filters (Hidden on Mobile) */}
           <aside className="hidden lg:block lg:w-72 shrink-0 space-y-8 bg-white/50 p-6 rounded-[2rem] border border-primary/5 h-fit sticky top-24">
             {/* Active Filters Summary */}
-            {(activeCategory !== "All" || minRating > 0) && (
+            {(activeCategory !== "All" || activeSubCategory !== "All" || minRating > 0) && (
               <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
                 <div className="flex justify-between items-center mb-3">
                   <h4 className="text-[10px] font-sans font-black uppercase tracking-widest text-primary-dark">
@@ -171,6 +211,7 @@ export default function ShopClient({
                   <button
                     onClick={() => {
                       setActiveCategory("All");
+                      setActiveSubCategory("All");
                       setMinRating(0);
                     }}
                     className="text-[9px] font-sans font-bold text-primary hover:underline"
@@ -185,7 +226,20 @@ export default function ShopClient({
                       <X
                         size={10}
                         className="cursor-pointer"
-                        onClick={() => setActiveCategory("All")}
+                        onClick={() => {
+                          setActiveCategory("All");
+                          setActiveSubCategory("All");
+                        }}
+                      />
+                    </span>
+                  )}
+                  {activeSubCategory !== "All" && (
+                    <span className="px-2 py-1 bg-white text-[9px] font-sans font-bold rounded-lg border border-primary/20 text-primary flex items-center gap-1">
+                      {subCategories.find(s => s._id === activeSubCategory || s.name === activeSubCategory)?.name || activeSubCategory}{" "}
+                      <X
+                        size={10}
+                        className="cursor-pointer"
+                        onClick={() => setActiveSubCategory("All")}
                       />
                     </span>
                   )}
@@ -210,7 +264,10 @@ export default function ShopClient({
               </h3>
               <div className="space-y-1.5">
                 <button
-                  onClick={() => setActiveCategory("All")}
+                  onClick={() => {
+                    setActiveCategory("All");
+                    setActiveSubCategory("All");
+                  }}
                   className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition-all ${activeCategory === "All" ? "bg-primary-dark text-white" : "text-primary/60 hover:bg-white hover:text-primary-dark"}`}
                 >
                   All Collection
@@ -218,7 +275,10 @@ export default function ShopClient({
                 {categories.map((cat) => (
                   <button
                     key={cat._id}
-                    onClick={() => setActiveCategory(cat.name)}
+                    onClick={() => {
+                      setActiveCategory(cat.name);
+                      setActiveSubCategory("All");
+                    }}
                     className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition-all ${activeCategory === cat.name ? "bg-primary-dark text-white" : "text-primary/60 hover:bg-white hover:text-primary-dark"}`}
                   >
                     {cat.name}
@@ -226,6 +286,40 @@ export default function ShopClient({
                 ))}
               </div>
             </div>
+
+            {/* SubCategories */}
+            {activeCategory !== "All" && (
+              <div>
+                <h3 className="text-[11px] font-sans font-black text-primary-dark uppercase tracking-widest mb-4 flex items-center justify-between">
+                  Sub Categories <ChevronDown size={14} className="text-primary/30" />
+                </h3>
+                {loadingSubCategories ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 size={16} className="animate-spin text-primary/40" />
+                  </div>
+                ) : subCategories.length > 0 ? (
+                  <div className="space-y-1.5">
+                    <button
+                      onClick={() => setActiveSubCategory("All")}
+                      className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition-all ${activeSubCategory === "All" ? "bg-primary text-white" : "text-primary/60 hover:bg-white hover:text-primary-dark"}`}
+                    >
+                      All {activeCategory}
+                    </button>
+                    {subCategories.map((sub) => (
+                      <button
+                        key={sub._id}
+                        onClick={() => setActiveSubCategory(sub._id)}
+                        className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition-all ${activeSubCategory === sub._id ? "bg-primary text-white" : "text-primary/60 hover:bg-white hover:text-primary-dark"}`}
+                      >
+                        {sub.name}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-primary/40 italic px-4">No subcategories</p>
+                )}
+              </div>
+            )}
 
             {/* Price Range Filter */}
             <div>
@@ -399,6 +493,7 @@ export default function ShopClient({
                 <button
                   onClick={() => {
                     setActiveCategory("All");
+                    setActiveSubCategory("All");
                     setPriceRange([0, 2000]);
                     setMinRating(0);
                     setSearchQuery("");
@@ -653,6 +748,7 @@ export default function ShopClient({
                       <button
                         onClick={() => {
                           setActiveCategory("All");
+                          setActiveSubCategory("All");
                           setMinRating(0);
                         }}
                         className="text-[9px] font-sans font-bold text-primary hover:underline"
@@ -661,7 +757,7 @@ export default function ShopClient({
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {activeCategory === "All" && (
+                      {activeCategory === "All" && activeSubCategory === "All" && (
                         <span className="text-[10px] text-gray-400 font-bold uppercase italic">
                           None Active
                         </span>
@@ -672,7 +768,20 @@ export default function ShopClient({
                           <X
                             size={12}
                             className="cursor-pointer"
-                            onClick={() => setActiveCategory("All")}
+                            onClick={() => {
+                              setActiveCategory("All");
+                              setActiveSubCategory("All");
+                            }}
+                          />
+                        </span>
+                      )}
+                      {activeSubCategory !== "All" && (
+                        <span className="px-3 py-1.5 bg-white text-[10px] font-sans font-bold rounded-lg border border-primary/20 text-primary flex items-center gap-2">
+                          {subCategories.find(s => s._id === activeSubCategory)?.name || activeSubCategory}{" "}
+                          <X
+                            size={12}
+                            className="cursor-pointer"
+                            onClick={() => setActiveSubCategory("All")}
                           />
                         </span>
                       )}
@@ -686,7 +795,10 @@ export default function ShopClient({
                     </h3>
                     <div className="grid grid-cols-2 gap-2">
                       <button
-                        onClick={() => setActiveCategory("All")}
+                        onClick={() => {
+                          setActiveCategory("All");
+                          setActiveSubCategory("All");
+                        }}
                         className={`text-left px-4 py-3 rounded-xl text-xs font-sans font-bold transition-all ${activeCategory === "All" ? "bg-primary-dark text-white shadow-lg" : "bg-gray-50 text-primary/60"}`}
                       >
                         All
@@ -694,7 +806,10 @@ export default function ShopClient({
                       {categories.map((cat) => (
                         <button
                           key={cat._id}
-                          onClick={() => setActiveCategory(cat.name)}
+                          onClick={() => {
+                            setActiveCategory(cat.name);
+                            setActiveSubCategory("All");
+                          }}
                           className={`text-left px-4 py-3 rounded-xl text-xs font-sans font-bold transition-all ${activeCategory === cat.name ? "bg-primary-dark text-white shadow-lg" : "bg-gray-50 text-primary/60"}`}
                         >
                           {cat.name}
@@ -702,6 +817,40 @@ export default function ShopClient({
                       ))}
                     </div>
                   </div>
+
+                  {/* SubCategories */}
+                  {activeCategory !== "All" && (
+                    <div>
+                      <h3 className="text-[12px] font-sans font-black text-primary-dark uppercase tracking-widest mb-4">
+                        Sub Categories
+                      </h3>
+                      {loadingSubCategories ? (
+                        <div className="flex items-center justify-center py-4">
+                          <Loader2 size={16} className="animate-spin text-primary/40" />
+                        </div>
+                      ) : subCategories.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => setActiveSubCategory("All")}
+                            className={`text-left px-4 py-3 rounded-xl text-xs font-sans font-bold transition-all ${activeSubCategory === "All" ? "bg-primary text-white shadow-lg" : "bg-gray-50 text-primary/60"}`}
+                          >
+                            All
+                          </button>
+                          {subCategories.map((sub) => (
+                            <button
+                              key={sub._id}
+                              onClick={() => setActiveSubCategory(sub._id)}
+                              className={`text-left px-4 py-3 rounded-xl text-xs font-sans font-bold transition-all ${activeSubCategory === sub._id ? "bg-primary text-white shadow-lg" : "bg-gray-50 text-primary/60"}`}
+                            >
+                              {sub.name}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-primary/40 italic">No subcategories available</p>
+                      )}
+                    </div>
+                  )}
 
                   {/* Price */}
                   <div>

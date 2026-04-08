@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Product from "@/models/Product";
+import SubCategory from "@/models/SubCategory";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { uploadToCloudinary } from "@/lib/cloudinary";
@@ -39,7 +40,7 @@ export async function GET(req: Request) {
       }
     }
 
-    let productsQuery = Product.find(query);
+    let productsQuery = Product.find(query).sort({ createdAt: -1 }).populate('subCategory', 'name slug');
 
     // Apply limit if specified
     if (limit) {

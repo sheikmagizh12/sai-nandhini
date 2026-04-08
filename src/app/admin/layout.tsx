@@ -96,7 +96,7 @@ export default function AdminLayout({
     { href: "/admin/customers", label: "Customer Base", icon: Users },
     { href: "/admin/enquiries", label: "Event Enquiries", icon: ClipboardList },
     { href: "/admin/legal", label: "Legal Pages", icon: FileText },
-    { href: "/admin/about", label: "About Us Page", icon: Users },
+    { href: "/admin/cms", label: "CMS", icon: FileText },
   ];
 
   const bottomNavItems = [

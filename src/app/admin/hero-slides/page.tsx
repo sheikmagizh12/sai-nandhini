@@ -407,6 +407,7 @@ export default function HeroSlidesPage() {
                   {/* Image Upload */}
                   <ImageUpload
                     label="Slide Image"
+                    hint="1920×1080px, landscape 16:9 — subject centred, dark background works best"
                     value={editingSlide.image || ""}
                     onChange={(val) =>
                       setEditingSlide({ ...editingSlide, image: val as any })

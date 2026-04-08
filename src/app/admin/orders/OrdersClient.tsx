@@ -50,9 +50,7 @@ export default function OrdersClient({
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState("All");
-  const [paymentFilter, setPaymentFilter] = useState("All");
   const [dateRange, setDateRange] = useState("AllTime");
-  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [viewingOrder, setViewingOrder] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -106,47 +104,6 @@ export default function OrdersClient({
     }
   };
 
-  const handleBulkStatusChange = async (newStatus: string) => {
-    if (selectedOrders.length === 0) return;
-
-    const previousOrders = [...orders];
-    setOrders(
-      orders.map((o) =>
-        selectedOrders.includes(o._id) ? { ...o, status: newStatus } : o,
-      ),
-    );
-
-    try {
-      const res = await fetch("/api/admin/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderIds: selectedOrders, status: newStatus }),
-      });
-      if (!res.ok) throw new Error();
-      toast.success(
-        `Bulk updated ${selectedOrders.length} orders to ${newStatus}`,
-      );
-      setSelectedOrders([]);
-    } catch (err) {
-      setOrders(previousOrders);
-      toast.error("Bulk update failed");
-    }
-  };
-
-  const toggleSelectOrder = (id: string) => {
-    setSelectedOrders((prev) =>
-      prev.includes(id) ? prev.filter((oid) => oid !== id) : [...prev, id],
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedOrders.length === filteredOrders.length) {
-      setSelectedOrders([]);
-    } else {
-      setSelectedOrders(filteredOrders.map((o) => o._id));
-    }
-  };
-
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const matchesSearch =
@@ -165,9 +122,6 @@ export default function OrdersClient({
 
       const matchesStatus =
         statusFilter === "All" || order.status === statusFilter;
-      const matchesPayment =
-        paymentFilter === "All" ||
-        (paymentFilter === "Paid" ? order.isPaid : !order.isPaid);
 
       let matchesDate = true;
       if (dateRange !== "AllTime") {
@@ -186,9 +140,9 @@ export default function OrdersClient({
         }
       }
 
-      return matchesSearch && matchesStatus && matchesPayment && matchesDate;
+      return matchesSearch && matchesStatus && matchesDate;
     });
-  }, [orders, searchTerm, statusFilter, paymentFilter, dateRange]);
+  }, [orders, searchTerm, statusFilter, dateRange]);
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -345,24 +299,8 @@ export default function OrdersClient({
           ))}
         </div>
 
-        {/* Payment & Date Filters */}
+        {/* Date Filter */}
         <div className="flex gap-2 bg-[#ece0cc] p-1 rounded-lg sm:rounded-xl w-full sm:w-auto">
-          <div className="relative flex-1 sm:flex-none">
-            <select
-              value={paymentFilter}
-              onChange={(e) => setPaymentFilter(e.target.value)}
-              className="appearance-none w-full bg-white border-none rounded-md sm:rounded-lg py-1.5 sm:py-2 pl-2 sm:pl-3 pr-6 sm:pr-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary-dark outline-none cursor-pointer hover:bg-gray-50 transition-colors shadow-sm"
-            >
-              <option value="All">All Payments</option>
-              <option value="Paid">Paid</option>
-              <option value="Unpaid">Unpaid</option>
-            </select>
-            <ChevronDown
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-              size={10}
-            />
-          </div>
-
           <div className="relative flex-1 sm:flex-none">
             <select
               value={dateRange}
@@ -382,52 +320,7 @@ export default function OrdersClient({
         </div>
       </div>
 
-      {/* Bulk Actions */}
-      <AnimatePresence>
-        {selectedOrders.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 sm:bottom-10 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-50 bg-primary text-white p-4 sm:px-8 sm:py-4 rounded-2xl sm:rounded-full shadow-2xl border border-white/10 flex flex-col sm:flex-row items-center gap-4 sm:gap-8"
-          >
-            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-              <div className="flex items-center gap-3">
-                <span className="bg-accent text-primary-dark px-3 py-1 rounded-full text-xs font-black">
-                  {selectedOrders.length}
-                </span>
-                <span className="text-[10px] font-black uppercase tracking-widest">
-                  Selected
-                </span>
-              </div>
-              <button
-                className="sm:hidden text-white/50 hover:text-white"
-                onClick={() => setSelectedOrders([])}
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="hidden sm:block h-6 w-px bg-white/10" />
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {ORDER_STAGES.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => handleBulkStatusChange(s)}
-                  className="px-3 sm:px-4 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-            <button
-              className="hidden sm:block text-white/50 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none rounded"
-              onClick={() => setSelectedOrders([])}
-            >
-              <X size={20} />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
 
       {/* Orders Table */}
       {/* Orders View */}
@@ -437,17 +330,6 @@ export default function OrdersClient({
           <table className="w-full text-left">
             <thead className="bg-[#ece0cc] border-b border-gray-100">
               <tr className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                <th className="px-6 py-5 w-12">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-300 text-primary focus:ring-primary cursor-pointer w-4 h-4"
-                    checked={
-                      selectedOrders.length > 0 &&
-                      selectedOrders.length === filteredOrders.length
-                    }
-                    onChange={toggleSelectAll}
-                  />
-                </th>
                 <th className="px-6 py-5">Order Details</th>
                 <th className="px-6 py-5">Customer</th>
                 <th className="px-6 py-5">Items</th>
@@ -462,14 +344,14 @@ export default function OrdersClient({
                   .fill(0)
                   .map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="px-6 py-8" colSpan={8}>
+                      <td className="px-6 py-8" colSpan={6}>
                         <div className="h-12 bg-gray-50 rounded-2xl w-full" />
                       </td>
                     </tr>
                   ))
               ) : filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-32 text-center">
+                  <td colSpan={6} className="px-6 py-32 text-center">
                     <div className="flex flex-col items-center gap-4 opacity-30">
                       <Package size={48} className="text-primary" />
                       <span className="text-sm font-black uppercase tracking-widest text-primary-dark">
@@ -485,20 +367,8 @@ export default function OrdersClient({
                     layout
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className={`group hover:bg-[#ece0cc]/30 transition-colors ${
-                      selectedOrders.includes(order._id)
-                        ? "bg-[#ece0cc]/50"
-                        : ""
-                    }`}
+                    className="group hover:bg-[#ece0cc]/30 transition-colors"
                   >
-                    <td className="px-6 py-5">
-                      <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-primary focus:ring-primary cursor-pointer w-4 h-4"
-                        checked={selectedOrders.includes(order._id)}
-                        onChange={() => toggleSelectOrder(order._id)}
-                      />
-                    </td>
                     <td className="px-6 py-5">
                       <div className="flex flex-col gap-1">
                         <span className="text-sm font-black text-primary-dark">
@@ -643,23 +513,15 @@ export default function OrdersClient({
               className="p-4 bg-white hover:bg-gray-50 transition-colors"
             >
               <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-300 text-primary w-5 h-5"
-                    checked={selectedOrders.includes(order._id)}
-                    onChange={() => toggleSelectOrder(order._id)}
-                  />
-                  <div>
-                    <span className="text-sm font-black text-primary-dark block leading-none">
-                      #{order._id.slice(-8).toUpperCase()}
-                    </span>
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1 block">
-                      {mounted
-                        ? new Date(order.createdAt).toLocaleDateString()
-                        : "..."}
-                    </span>
-                  </div>
+                <div>
+                  <span className="text-sm font-black text-primary-dark block leading-none">
+                    #{order._id.slice(-8).toUpperCase()}
+                  </span>
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1 block">
+                    {mounted
+                      ? new Date(order.createdAt).toLocaleDateString()
+                      : "..."}
+                  </span>
                 </div>
                 <div className="flex flex-col items-end">
                   <span className="text-base font-black text-primary-dark tabular-nums">

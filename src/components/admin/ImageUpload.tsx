@@ -9,6 +9,7 @@ interface ImageUploadProps {
   value: string | File;
   onChange: (value: string | File) => void;
   label?: string;
+  hint?: string;
   className?: string;
 }
 
@@ -16,6 +17,7 @@ export default function ImageUpload({
   value,
   onChange,
   label,
+  hint,
   className = "",
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string>("");
@@ -95,6 +97,12 @@ export default function ImageUpload({
           </label>
         )}
       </div>
+      {hint && (
+        <p className="text-[10px] text-gray-400 mt-1.5 flex items-center gap-1">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#f8bf51] shrink-0"></span>
+          Recommended: {hint}
+        </p>
+      )}
     </div>
   );
 }

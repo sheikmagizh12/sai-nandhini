@@ -13,11 +13,13 @@ export const CometCard = ({
   rotateDepth = 17.5,
   translateDepth = 20,
   className,
+  containerClassName,
   children,
 }: {
   rotateDepth?: number;
   translateDepth?: number;
   className?: string;
+  containerClassName?: string;
   children: React.ReactNode;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -79,7 +81,7 @@ export const CometCard = ({
   };
 
   return (
-    <div className={cn("perspective-distant transform-3d", className)}>
+    <div className={cn("perspective-distant transform-3d", containerClassName)}>
       <motion.div
         ref={ref}
         onMouseMove={handleMouseMove}
@@ -98,7 +100,7 @@ export const CometCard = ({
           z: 50,
           transition: { duration: 0.2 },
         }}
-        className="relative rounded-2xl"
+        className={cn("relative rounded-2xl", className)}
       >
         {children}
         <motion.div

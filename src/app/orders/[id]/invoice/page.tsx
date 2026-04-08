@@ -41,11 +41,17 @@ export default async function InvoicePage(props: {
   // 1. If user is admin, allow access
   // 2. If order has a user and session exists, check if they match
   // 3. If order is a guest order (no user), allow access (invoice link sent via email)
+  // 4. If a valid email query param matches the shipping address (track page flow), allow access
   const isAdmin = session && (session.user as any).role === "admin";
   const isOrderOwner = order.user && session && order.user.toString() === session.user.id;
   const isGuestOrder = !order.user;
+  const emailParam = typeof searchParams.email === "string" ? searchParams.email.trim().toLowerCase() : null;
+  const isEmailVerified =
+    emailParam &&
+    order.shippingAddress &&
+    (order.shippingAddress as any).email?.trim().toLowerCase() === emailParam;
 
-  if (!isAdmin && !isOrderOwner && !isGuestOrder) {
+  if (!isAdmin && !isOrderOwner && !isGuestOrder && !isEmailVerified) {
     return (
       <div className="p-10 text-center font-bold text-red-500">
         Unauthorized access

@@ -1,6 +1,7 @@
 import connectDB from "@/lib/mongodb";
 import Product from "@/models/Product";
 import Category from "@/models/Category";
+import SubCategory from "@/models/SubCategory";
 import Settings from "@/models/Settings";
 import HeroSlide from "@/models/HeroSlide";
 import { cached, CACHE_KEYS } from "@/lib/cache";
@@ -17,6 +18,7 @@ export async function getProducts() {
     await connectDB();
     const products = await Product.find({ isActive: { $ne: false } })
       .select(PRODUCT_LIST_FIELDS)
+      .populate('subCategory', 'name slug')
       .sort({ createdAt: -1 })
       .lean();
     return JSON.parse(JSON.stringify(products));

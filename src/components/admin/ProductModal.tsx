@@ -485,22 +485,27 @@ export default function ProductModal({
 
                       {/* Upload Button */}
                       {formData.images.length < 4 && (
-                        <label className="aspect-square border-2 border-dashed border-gray-200 hover:border-[#f8bf51] rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer bg-[#ece0cc] hover:bg-[#ece0cc]/50 transition-all group">
-                          <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-gray-300 group-hover:text-[#f8bf51] group-hover:scale-110 transition-all mb-2">
-                            <Upload size={16} />
-                          </div>
-                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest group-hover:text-[#f8bf51]">
-                            Add Image
-                          </span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="hidden"
-                            onChange={handleImageUpload}
-                            disabled={uploading}
-                          />
-                        </label>
+                        <div className="flex flex-col gap-2">
+                          <label className="aspect-square border-2 border-dashed border-gray-200 hover:border-[#f8bf51] rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer bg-[#ece0cc] hover:bg-[#ece0cc]/50 transition-all group">
+                            <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-gray-300 group-hover:text-[#f8bf51] group-hover:scale-110 transition-all mb-2">
+                              <Upload size={16} />
+                            </div>
+                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest group-hover:text-[#f8bf51]">
+                              Add Image
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              onChange={handleImageUpload}
+                              disabled={uploading}
+                            />
+                          </label>
+                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider text-center">
+                            800×800px recommended
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>

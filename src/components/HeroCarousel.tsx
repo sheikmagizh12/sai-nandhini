@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import { CometCard } from "@/components/ui/comet-card";
 
 /* ═══════════════════════════════════════════════════════════════
    Types
@@ -294,19 +295,19 @@ export default function HeroCarousel({
               className="relative flex items-center justify-center"
             >
               <div className="relative w-full max-w-lg lg:max-w-xl mx-auto">
-                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl shadow-black/40 border border-white/5 group">
-                  <Image
-                    src={getImageUrl(slide.image)}
-                    alt={`${slide.title} ${slide.titleAccent}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#234d1b]/20 via-transparent to-transparent" />
-                </div>
-
-
+                <CometCard className="h-full">
+                  <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl shadow-black/40 border border-white/5 group">
+                    <Image
+                      src={getImageUrl(slide.image)}
+                      alt={`${slide.title} ${slide.titleAccent}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+                      fill
+                      priority
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#234d1b]/20 via-transparent to-transparent" />
+                  </div>
+                </CometCard>
               </div>
             </motion.div>
           </AnimatePresence>

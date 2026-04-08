@@ -343,6 +343,7 @@ export default function CategoriesClient({
                   <ImageUpload
                     value={newCategoryImage}
                     onChange={(val) => setNewCategoryImage(val)}
+                    hint="600×600px, square format, transparent background optional"
                   />
 
                   {(!newCategory || !newCategoryImage) && (
@@ -637,6 +638,7 @@ export default function CategoriesClient({
                   <ImageUpload
                     value={editCategoryImage}
                     onChange={(val) => setEditCategoryImage(val)}
+                    hint="600×600px, square format, transparent background optional"
                   />
                 </div>
 

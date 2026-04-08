@@ -82,6 +82,32 @@ const SettingsSchema = new Schema(
       happyCustomers: { type: String, default: "10k+" },
       secretRecipes: { type: String, default: "50+" },
     },
+    ourStory: {
+      title: { type: String, default: "Bringing the Authentic Taste of Madurai to Your Table." },
+      highlightWord: { type: String, default: "Taste of Madurai" },
+      description: { type: String, default: "What started as a small family kitchen has grown into Madurai's most loved destination for premium sweets and savories. At Sai Nandhini, we don't just bake; we craft memories using traditional wood-fired techniques and locally sourced, pure ingredients." },
+      image: { type: String, default: "https://images.pexels.com/photos/3983674/pexels-photo-3983674.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+      yearsExcellence: { type: String, default: "25+" },
+      bullets: [{ type: String, default: ["100% Natural Ingredients, No Preservatives", "Traditional Wood-Fired Baking Methods", "Daily Fresh Batches, Made with Love"] }]
+    },
+    whyChooseUs: {
+      title: { type: String, default: "No Shortcuts.\nNo Compromises." },
+      highlightWord: { type: String, default: "Compromises." },
+      description: { type: String, default: "Every product we make carries a promise — pure, authentic, and crafted the traditional way." },
+      image: { type: String, default: "https://images.pexels.com/photos/4686958/pexels-photo-4686958.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+      badge1Value: { type: String, default: "25+" },
+      badge1Label: { type: String, default: "Years of Heritage" },
+      badge2Value: { type: String, default: "10K+" },
+      badge2Label: { type: String, default: "Happy Customers" },
+      features: {
+        type: [{ title: String, desc: String }],
+        default: [
+          { title: "Traditional Recipes", desc: "Heritage bakes refined over 25 years. Our recipes are family heirlooms — not from a lab or an algorithm." },
+          { title: "Premium Ingredients", desc: "Stone-ground whole wheat, native millets, and farm-sourced jaggery. You'll taste the real difference." },
+          { title: "Wood-Fired Freshness", desc: "Baked in traditional wood-fired ovens every morning. From our kitchen to your table in hours, not days." }
+        ]
+      }
+    },
   },
   {
     timestamps: true,

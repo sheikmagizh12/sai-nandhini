@@ -1,5 +1,5 @@
 import { getSettingsData } from "@/lib/admin-data";
-import AboutClient from "./AboutClient";
+import CmsClient from "./CmsClient";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function AdminAboutPage() {
+export default async function AdminCmsPage() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -19,5 +19,5 @@ export default async function AdminAboutPage() {
 
   const settings = await getSettingsData();
 
-  return <AboutClient initialSettings={settings} />;
+  return <CmsClient initialSettings={settings} />;
 }

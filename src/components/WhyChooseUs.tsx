@@ -2,30 +2,58 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Coffee, Leaf, Flame } from "lucide-react";
 
-const features = [
+const defaultFeatures = [
   {
-    icon: Coffee,
     title: "Traditional Recipes",
     desc: "Heritage bakes refined over 25 years. Our recipes are family heirlooms — not from a lab or an algorithm.",
     num: "01",
   },
   {
-    icon: Leaf,
     title: "Premium Ingredients",
     desc: "Stone-ground whole wheat, native millets, and farm-sourced jaggery. You'll taste the real difference.",
     num: "02",
   },
   {
-    icon: Flame,
     title: "Wood-Fired Freshness",
     desc: "Baked in traditional wood-fired ovens every morning. From our kitchen to your table in hours, not days.",
     num: "03",
   },
 ];
 
-export default function WhyChooseUs() {
+export default function WhyChooseUs({ configuration }: { configuration?: any }) {
+  // Safe fallbacks for config
+  const title = configuration?.title || "No Shortcuts.\nNo Compromises.";
+  const highlightWord = configuration?.highlightWord || "Compromises.";
+  const description = configuration?.description || "Every product we make carries a promise — pure, authentic, and crafted the traditional way.";
+  const image = configuration?.image || "https://images.pexels.com/photos/4686958/pexels-photo-4686958.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+  const badge1Value = configuration?.badge1Value || "25+";
+  const badge1Label = configuration?.badge1Label || "Years of Heritage";
+  const badge2Value = configuration?.badge2Value || "10K+";
+  const badge2Label = configuration?.badge2Label || "Happy Customers";
+  
+  // Merge dynamic feature text with static icons/numbers
+  const features = defaultFeatures.map((def, i) => {
+    const dynamicFeature = configuration?.features?.[i];
+    return {
+      ...def,
+      title: dynamicFeature && dynamicFeature.title ? dynamicFeature.title : def.title,
+      desc: dynamicFeature && dynamicFeature.desc ? dynamicFeature.desc : def.desc,
+    };
+  });
+
+  const renderTitle = () => {
+    if (!highlightWord) return title;
+    const parts = title.split(new RegExp(`(${highlightWord})`, "i"));
+    return parts.map((part: string, i: number) => 
+      part.toLowerCase() === highlightWord.toLowerCase() ? (
+        <span key={i} className="text-[#f8bf51] italic">{part}</span>
+      ) : (
+        <span key={i}>{part}</span>
+      )
+    );
+  };
+
   return (
     <section className="py-28 bg-[#234d1b] relative overflow-hidden">
       {/* Decorative elements */}
@@ -55,14 +83,12 @@ export default function WhyChooseUs() {
               <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#f8bf51] mb-5 block">
                 Why Choose Us
               </span>
-              <h2 className="text-4xl md:text-6xl font-serif font-black text-white tracking-tight leading-[1.05] mb-3">
-                No Shortcuts. <br className="hidden md:block" />
-                No <span className="text-[#f8bf51] italic">Compromises.</span>
+              <h2 className="text-4xl md:text-6xl font-serif font-black text-white tracking-tight leading-[1.05] mb-3 whitespace-pre-line">
+                {renderTitle()}
               </h2>
               <div className="w-16 h-1 bg-[#f8bf51] rounded-full mb-8" />
-              <p className="text-white/40 text-base leading-relaxed mb-12 max-w-md">
-                Every product we make carries a promise — pure, authentic, and
-                crafted the traditional way.
+              <p className="text-white/40 text-base leading-relaxed mb-12 max-w-md whitespace-pre-line">
+                {description}
               </p>
             </motion.div>
 
@@ -77,16 +103,12 @@ export default function WhyChooseUs() {
                   className="flex gap-5 group p-5 rounded-2xl hover:bg-white/5 transition-all duration-300 border border-transparent hover:border-white/10"
                 >
                   <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-[#f8bf51] group-hover:scale-105 transition-all duration-300 shadow-lg shadow-black/10">
-                    <item.icon
-                      size={24}
-                      className="text-[#f8bf51] group-hover:text-[#234d1b] transition-colors"
-                    />
+                    <span className="text-xl font-serif font-black text-[#f8bf51] group-hover:text-[#234d1b] transition-colors delay-75">
+                      {item.num}
+                    </span>
                   </div>
                   <div>
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-[10px] font-bold text-[#f8bf51]/30 tracking-widest">
-                        {item.num}
-                      </span>
                       <h4 className="text-xl font-bold text-white">
                         {item.title}
                       </h4>
@@ -110,9 +132,9 @@ export default function WhyChooseUs() {
           >
             <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden border-2 border-white/10 shadow-2xl shadow-black/30 relative">
               <Image
-                src="https://images.pexels.com/photos/4686958/pexels-photo-4686958.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                src={image}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
-                alt="Our kitchen in action"
+                alt="Section Image"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
@@ -122,20 +144,20 @@ export default function WhyChooseUs() {
             {/* Stats badge */}
             <div className="absolute -bottom-6 -left-6 bg-[#f8bf51] p-7 rounded-3xl shadow-2xl shadow-black/20">
               <p className="text-4xl font-serif font-black text-[#234d1b] mb-1">
-                25+
+                {badge1Value}
               </p>
               <p className="text-[10px] font-bold uppercase tracking-wider text-[#234d1b]/70">
-                Years of Heritage
+                {badge1Label}
               </p>
             </div>
 
             {/* Secondary badge */}
             <div className="absolute -top-4 -right-4 bg-white p-5 rounded-2xl shadow-2xl shadow-black/10">
               <p className="text-2xl font-serif font-black text-[#234d1b] mb-0.5">
-                10K+
+                {badge2Value}
               </p>
               <p className="text-[9px] font-bold uppercase tracking-wider text-[#234d1b]/50">
-                Happy Customers
+                {badge2Label}
               </p>
             </div>
           </motion.div>

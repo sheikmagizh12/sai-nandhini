@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import CorporateEnquiry from "@/components/CorporateEnquiry";
 import GoogleReviewsCarousel from "@/components/GoogleReviewsCarousel";
 import { getHeroSlides, getCategories, getFeaturedProducts } from "@/lib/data";
+import { getSettingsData } from "@/lib/admin-data";
 
 export const metadata = {
   title: "Sai Nandhini | Authentic Homemade Sweets & Snacks",
@@ -37,6 +38,16 @@ async function ProductsSection() {
   return <FeaturedProducts initialProducts={products} />;
 }
 
+async function StorySection() {
+  const settings = await getSettingsData();
+  return <AboutUs ourStory={settings?.ourStory} />;
+}
+
+async function WhyChooseSection() {
+  const settings = await getSettingsData();
+  return <WhyChooseUs configuration={settings?.whyChooseUs} />;
+}
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#ece0cc]">
@@ -61,8 +72,12 @@ export default function Home() {
       </Suspense>
 
       {/* Static sections — render instantly */}
-      <WhyChooseUs />
-      <AboutUs />
+      <Suspense fallback={<div className="h-[60vh] bg-[#234d1b] animate-pulse" />}>
+        <WhyChooseSection />
+      </Suspense>
+      <Suspense fallback={<div className="h-[60vh] bg-[#ece0cc] animate-pulse" />}>
+        <StorySection />
+      </Suspense>
       <GoogleReviewsCarousel />
       <CorporateEnquiry />
       <CTASection />

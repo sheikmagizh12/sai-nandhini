@@ -348,8 +348,9 @@ export default function SettingsClient({
                       </label>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1.5">
-                    Recommended: PNG or SVG format, transparent background
+                  <p className="text-[10px] text-gray-400 mt-1.5 flex items-center gap-1">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#f8bf51] shrink-0"></span>
+                    Recommended: 200×60px, PNG or SVG format, transparent background
                   </p>
                 </div>
 
@@ -409,8 +410,9 @@ export default function SettingsClient({
                       </label>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1.5">
-                    Recommended: 32x32px or 64x64px, ICO or PNG format
+                  <p className="text-[10px] text-gray-400 mt-1.5 flex items-center gap-1">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#f8bf51] shrink-0"></span>
+                    Recommended: 32×32px or 64×64px, ICO or PNG format
                   </p>
                 </div>
 
@@ -971,8 +973,9 @@ export default function SettingsClient({
                         <p className="text-xs font-bold text-primary-dark">
                           Upload OG Image
                         </p>
-                        <p className="text-[10px] text-gray-400">
-                          1200x630px recommended
+                        <p className="text-[10px] text-gray-400 mt-1.5 flex items-center gap-1">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#f8bf51] shrink-0"></span>
+                          Recommended: 1200×630px
                         </p>
                         <input
                           type="file"

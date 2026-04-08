@@ -4,14 +4,36 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { CometCard } from "@/components/ui/comet-card";
 
-const highlights = [
-  "100% Natural Ingredients, No Preservatives",
-  "Traditional Wood-Fired Baking Methods",
-  "Daily Fresh Batches, Made with Love",
-];
+export default function AboutUs({ ourStory }: { ourStory?: any }) {
+  // Use data from admin if available, else fallback
+  const title = ourStory?.title || "Bringing the Authentic Taste of Madurai to Your Table.";
+  const highlightWord = ourStory?.highlightWord || "Taste of Madurai";
+  const desc = ourStory?.description || "What started as a small family kitchen has grown into Madurai's most loved destination for premium sweets and savories. At Sai Nandhini, we don't just bake; we craft memories using traditional wood-fired techniques and locally sourced, pure ingredients.";
+  const image = ourStory?.image || "https://images.pexels.com/photos/3983674/pexels-photo-3983674.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
+  const badge = ourStory?.yearsExcellence || "25+";
+  const bullets = ourStory?.bullets && ourStory.bullets.length > 0 
+    ? ourStory.bullets 
+    : [
+        "100% Natural Ingredients, No Preservatives",
+        "Traditional Wood-Fired Baking Methods",
+        "Daily Fresh Batches, Made with Love",
+      ];
 
-export default function AboutUs() {
+  // Helper to safely highlight word in title
+  const renderTitle = () => {
+    if (!highlightWord) return title;
+    const parts = title.split(new RegExp(`(${highlightWord})`, "i"));
+    return parts.map((part: string, i: number) => 
+      part.toLowerCase() === highlightWord.toLowerCase() ? (
+        <span key={i} className="italic text-[#f8bf51]">{part}</span>
+      ) : (
+        <span key={i}>{part}</span>
+      )
+    );
+  };
+
   return (
     <section className="py-28 bg-[#ece0cc] relative overflow-hidden">
       {/* Background accents */}
@@ -39,24 +61,26 @@ export default function AboutUs() {
             transition={{ duration: 0.8 }}
             className="relative"
           >
-            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl shadow-[#234d1b]/10 border-4 border-white">
-              <Image
-                src="https://images.pexels.com/photos/3983674/pexels-photo-3983674.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-                alt="Our Chef Baking"
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-              {/* Floating Badge */}
-              <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-md p-5 rounded-2xl shadow-xl max-w-[180px] border border-white/50">
-                <p className="text-3xl font-serif font-black text-[#234d1b] mb-0.5">
-                  25+
-                </p>
-                <p className="text-[10px] uppercase font-bold tracking-widest text-[#234d1b]/50">
-                  Years of Culinary Excellence
-                </p>
+            <CometCard className="h-full">
+              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl shadow-[#234d1b]/10 border-4 border-white">
+                <Image
+                  src={image}
+                  alt="Our Story"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+                {/* Floating Badge */}
+                <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-md p-5 rounded-2xl shadow-xl max-w-[180px] border border-white/50 z-10">
+                  <p className="text-3xl font-serif font-black text-[#234d1b] mb-0.5">
+                    {badge}
+                  </p>
+                  <p className="text-[10px] uppercase font-bold tracking-widest text-[#234d1b]/50">
+                    Years of Culinary Excellence
+                  </p>
+                </div>
               </div>
-            </div>
+            </CometCard>
 
             {/* Decorative frame element */}
             <div className="absolute -top-4 -left-4 w-24 h-24 border-l-4 border-t-4 border-[#f8bf51]/30 rounded-tl-3xl pointer-events-none" />
@@ -74,21 +98,15 @@ export default function AboutUs() {
               Our Story
             </span>
             <h2 className="text-4xl md:text-5xl font-serif font-black text-[#234d1b] leading-tight mb-3 tracking-tight">
-              Bringing the Authentic <br className="hidden md:block" />
-              <span className="italic text-[#f8bf51]">Taste of Madurai</span> to
-              Your Table.
+              {renderTitle()}
             </h2>
             <div className="w-16 h-1 bg-[#f8bf51] rounded-full mb-6" />
-            <p className="text-lg text-[#234d1b]/50 mb-8 leading-relaxed font-medium">
-              What started as a small family kitchen has grown into
-              Madurai&apos;s most loved destination for premium sweets and
-              savories. At Sai Nandhini, we don&apos;t just bake; we craft
-              memories using traditional wood-fired techniques and locally
-              sourced, pure ingredients.
+            <p className="text-lg text-[#234d1b]/50 mb-8 leading-relaxed font-medium whitespace-pre-line">
+              {desc}
             </p>
 
             <div className="space-y-4 mb-10">
-              {highlights.map((item, i) => (
+              {bullets.map((item: string, i: number) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, x: 20 }}

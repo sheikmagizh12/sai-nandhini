@@ -15,7 +15,7 @@ import {
     ArrowRight,
     ShieldCheck,
     AlertCircle,
-    Printer,
+    Download,
     Receipt
 } from "lucide-react";
 import Link from "next/link";
@@ -190,14 +190,14 @@ export default function TrackOrderClient() {
                                     </p>
                                 </div>
                                 <div className="flex gap-3">
-                                    <Link
-                                        href={`/orders/${order._id}/invoice?format=a4`}
-                                        target="_blank"
+                                    <a
+                                        href={`/api/orders/${order._id}/invoice?email=${encodeURIComponent(email)}`}
+                                        download
                                         className="p-3 bg-gray-50 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all border border-transparent hover:border-primary/20"
-                                        title="Print Invoice"
+                                        title="Download Invoice"
                                     >
-                                        <Printer size={18} />
-                                    </Link>
+                                        <Download size={18} />
+                                    </a>
                                 </div>
                             </div>
 

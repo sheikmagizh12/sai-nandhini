@@ -717,7 +717,7 @@ export default function ProductClient({
                       const diffTime = Math.abs(
                         now.getTime() - reviewDate.getTime(),
                       );
-                      const diffDays = Math.ceil(
+                      const diffDays = Math.floor(
                         diffTime / (1000 * 60 * 60 * 24),
                       );
 

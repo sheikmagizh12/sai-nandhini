@@ -46,17 +46,19 @@ export default function AboutPublicClient({ initialAboutUs }: { initialAboutUs: 
             animate={{ opacity: 1, scale: 1 }}
             className="relative"
           >
-            <div className="w-full aspect-square rounded-[4rem] overflow-hidden shadow-2xl skew-y-3 bg-gray-100 relative">
-              <Image
-                src={aboutUs.heroImage || "https://images.pexels.com/photos/4134783/pexels-photo-4134783.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"}
-                alt="Our Traditional Kitchen"
-                className="w-full h-full object-cover"
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
-              />
-            </div>
-            <div className="absolute -bottom-10 -left-10 bg-white p-8 rounded-3xl shadow-xl max-w-xs -skew-y-3 border border-gray-100">
+            <CometCard className="h-full">
+              <div className="w-full aspect-square rounded-[4rem] overflow-hidden shadow-2xl skew-y-3 bg-gray-100 relative">
+                <Image
+                  src={aboutUs.heroImage || "https://images.pexels.com/photos/4134783/pexels-photo-4134783.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"}
+                  alt="Our Traditional Kitchen"
+                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
+              </div>
+            </CometCard>
+            <div className="absolute -bottom-10 -left-10 bg-white p-8 rounded-3xl shadow-xl max-w-xs -skew-y-3 border border-gray-100 z-10">
               <p className="text-primary-dark font-serif font-bold text-lg leading-relaxed">
                 {aboutUs.heroQuote || '"The secret ingredient is always love and a pinch of tradition."'}
               </p>
@@ -165,14 +167,9 @@ export default function AboutPublicClient({ initialAboutUs }: { initialAboutUs: 
               >
                 <CometCard className="h-full">
                   <div className={cn(
-                    "group relative p-10 rounded-[3rem] bg-white/[0.03] border border-white/10 backdrop-blur-xl h-full flex flex-col items-start transition-all duration-500 hover:bg-white/[0.06] hover:border-white/20",
+                    "group relative p-10 rounded-[3rem] bg-white/[0.03] border border-white/10 backdrop-blur-xl h-full flex flex-col items-center text-center transition-all duration-500 hover:bg-white/[0.06] hover:border-white/20",
                     val.glow
                   )}>
-                    {/* Floating Counter */}
-                    <div className="absolute top-8 right-10 text-5xl font-serif font-black text-white/[0.05] group-hover:text-accent/10 transition-colors duration-500">
-                      {val.num}
-                    </div>
-
                     <div className={cn(
                       "w-16 h-16 rounded-2xl flex items-center justify-center mb-10 bg-gradient-to-br border border-white/10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500",
                       val.color
@@ -208,24 +205,28 @@ export default function AboutPublicClient({ initialAboutUs }: { initialAboutUs: 
       <section className="py-32 max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
         <div className="order-2 lg:order-1 relative">
           <div className="grid grid-cols-2 gap-4">
-            <div className="relative aspect-square mt-10">
-              <Image
-                src={aboutUs.journeyImage1 || "https://images.pexels.com/photos/674483/pexels-photo-674483.jpeg?auto=compress&cs=tinysrgb&w=800"}
-                className="rounded-3xl shadow-lg w-full h-full object-cover"
-                alt="Spices"
-                fill
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
-            </div>
-            <div className="relative aspect-square">
-              <Image
-                src={aboutUs.journeyImage2 || "https://images.pexels.com/photos/1055271/pexels-photo-1055271.jpeg?auto=compress&cs=tinysrgb&w=800"}
-                className="rounded-3xl shadow-lg w-full h-full object-cover"
-                alt="Sweets"
-                fill
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
-            </div>
+            <CometCard className="h-full mt-10">
+              <div className="relative aspect-square">
+                <Image
+                  src={aboutUs.journeyImage1 || "https://images.pexels.com/photos/674483/pexels-photo-674483.jpeg?auto=compress&cs=tinysrgb&w=800"}
+                  className="rounded-3xl shadow-lg w-full h-full object-cover"
+                  alt="Spices"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+              </div>
+            </CometCard>
+            <CometCard className="h-full">
+              <div className="relative aspect-square">
+                <Image
+                  src={aboutUs.journeyImage2 || "https://images.pexels.com/photos/1055271/pexels-photo-1055271.jpeg?auto=compress&cs=tinysrgb&w=800"}
+                  className="rounded-3xl shadow-lg w-full h-full object-cover"
+                  alt="Sweets"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+              </div>
+            </CometCard>
           </div>
         </div>
         <div className="order-1 lg:order-2">

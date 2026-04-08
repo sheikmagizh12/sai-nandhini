@@ -1,5 +1,8 @@
 import mongoose, { Schema, model, models } from "mongoose";
 
+// Import SubCategory to ensure it's registered before Product model uses it
+import "./SubCategory";
+
 const ProductSchema = new Schema({
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true },

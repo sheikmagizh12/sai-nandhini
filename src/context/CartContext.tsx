@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import { authClient } from "@/lib/auth-client";
 
 interface CartItem {
   _id: string;
@@ -27,6 +28,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const isInitialLoad = useRef(true);
+  const { data: session } = authClient.useSession();
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -49,10 +51,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [cartItems]);
 
   const addToCart = (product: any, qty: number) => {
+    if (session?.user?.role === "admin") {
+      toast.error("Admin cannot make orders");
+      return;
+    }
+
     const existing = cartItems.find(
       (item) => item._id === product._id && item.uom === product.uom,
     );
-    
+
     if (existing) {
       setCartItems((prev) =>
         prev.map((item) =>
@@ -67,7 +74,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         { ...product, qty, image: product.images?.[0] || product.image || "" },
       ]);
     }
-    
+
     toast.success(`${qty} item(s) added to cart!`);
   };
 

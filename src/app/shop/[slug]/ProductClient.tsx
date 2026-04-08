@@ -172,6 +172,10 @@ export default function ProductClient({
   };
 
   const handleBuyNow = () => {
+    if (session?.user?.role === "admin") {
+      toast.error("Admin cannot make orders");
+      return;
+    }
     addToCart({ ...product, price: price, uom: currentUom }, qty);
     router.push("/checkout");
   };
@@ -336,11 +340,10 @@ export default function ProductClient({
                         setSelectedVariant(v);
                         setPrice(v.price);
                       }}
-                      className={`px-6 py-3 rounded-xl text-sm font-bold uppercase tracking-wide border-2 transition-all duration-200 ${
-                        selectedVariant?.uom === v.uom
+                      className={`px-6 py-3 rounded-xl text-sm font-bold uppercase tracking-wide border-2 transition-all duration-200 ${selectedVariant?.uom === v.uom
                           ? "bg-primary border-primary text-white shadow-md"
                           : "bg-white border-gray-200 text-gray-700 hover:border-primary/50"
-                      }`}
+                        }`}
                     >
                       {v.uom}
                     </button>
@@ -385,11 +388,10 @@ export default function ProductClient({
                     }
                   }}
                   disabled={isOutOfStock}
-                  className={`flex-grow px-8 py-3 rounded-xl font-bold uppercase tracking-wide text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
-                    isOutOfStock
+                  className={`flex-grow px-8 py-3 rounded-xl font-bold uppercase tracking-wide text-sm transition-all duration-300 flex items-center justify-center gap-2 ${isOutOfStock
                       ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                       : "bg-primary text-white hover:bg-primary-dark shadow-lg hover:shadow-xl"
-                  }`}
+                    }`}
                 >
                   <ShoppingCart size={18} />
                   {isOutOfStock ? "Sold Out" : "Add to Cart"}
@@ -400,11 +402,10 @@ export default function ProductClient({
               <button
                 onClick={() => !isOutOfStock && handleBuyNow()}
                 disabled={isOutOfStock}
-                className={`w-full py-4 rounded-xl font-bold uppercase tracking-wide text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
-                  isOutOfStock
+                className={`w-full py-4 rounded-xl font-bold uppercase tracking-wide text-sm transition-all duration-300 flex items-center justify-center gap-2 ${isOutOfStock
                     ? "bg-gray-100 text-gray-300 cursor-not-allowed"
                     : "bg-accent text-white hover:bg-accent-hover shadow-md hover:shadow-lg"
-                }`}
+                  }`}
               >
                 <Zap size={18} fill={isOutOfStock ? "gray" : "white"} />
                 {isOutOfStock ? "Out of Stock" : "Buy It Now"}
@@ -679,7 +680,7 @@ export default function ProductClient({
                       {[5, 4, 3, 2, 1].map((stars) => {
                         const count =
                           reviewStats.ratingBreakdown[
-                            stars as keyof typeof reviewStats.ratingBreakdown
+                          stars as keyof typeof reviewStats.ratingBreakdown
                           ];
                         const percentage =
                           reviewStats.totalReviews > 0
@@ -821,11 +822,10 @@ export default function ProductClient({
               }
             }}
             disabled={isOutOfStock}
-            className={`flex-grow font-bold uppercase tracking-wide text-xs py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 ${
-              isOutOfStock
+            className={`flex-grow font-bold uppercase tracking-wide text-xs py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 ${isOutOfStock
                 ? "bg-gray-200 text-gray-400"
                 : "bg-primary text-white"
-            }`}
+              }`}
           >
             {isOutOfStock ? (
               "Out of Stock"

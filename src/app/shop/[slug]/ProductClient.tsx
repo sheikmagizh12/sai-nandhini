@@ -65,7 +65,6 @@ export default function ProductClient({
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [price, setPrice] = useState(0);
   const { settings: navSettings } = useNavbarData();
-  const [manageInventory] = useState(true);
   const [pincode, setPincode] = useState("");
   const [pincodeStatus, setPincodeStatus] = useState<
     "idle" | "checking" | "valid" | "invalid"
@@ -192,18 +191,8 @@ export default function ProductClient({
       </div>
     );
 
-  const totalStock =
-    product.variants && product.variants.length > 0
-      ? product.variants.reduce(
-          (acc: number, v: any) => acc + (v.stock || 0),
-          0,
-        )
-      : product.stock || 0;
-  const currentStock = selectedVariant ? selectedVariant.stock : product.stock;
-  const isOutOfStock =
-    manageInventory &&
-    (selectedVariant ? currentStock === 0 : totalStock === 0);
   const currentUom = selectedVariant ? selectedVariant.uom : product.uom;
+  const isOutOfStock = false;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-secondary/30 selection:bg-primary selection:text-white">
@@ -378,13 +367,7 @@ export default function ProductClient({
                     {qty}
                   </span>
                   <button
-                    onClick={() =>
-                      setQty(
-                        manageInventory
-                          ? Math.min(currentStock, qty + 1)
-                          : qty + 1,
-                      )
-                    }
+                    onClick={() => setQty(qty + 1)}
                     className="text-gray-500 hover:text-primary transition-colors"
                   >
                     <Plus size={18} strokeWidth={2.5} />
@@ -428,22 +411,7 @@ export default function ProductClient({
               </button>
             </div>
 
-            {/* Stock & Social Proof */}
-            {!isOutOfStock && (
-              <div className="space-y-3">
-                {manageInventory && currentStock < 10 && currentStock > 0 && (
-                  <div className="bg-orange-50 border border-orange-200 flex items-center gap-3 px-4 py-3 rounded-xl">
-                    <ShieldAlert
-                      size={18}
-                      className="text-orange-600 flex-shrink-0"
-                    />
-                    <p className="text-sm font-medium text-orange-800">
-                      Only {currentStock} left in stock - Order soon!
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Social Proof */}
 
             {/* Product Features Grid */}
             <div className="bg-white border border-gray-200 rounded-xl p-5">
@@ -839,11 +807,7 @@ export default function ProductClient({
             </button>
             <span className="font-bold text-lg w-6 text-center">{qty}</span>
             <button
-              onClick={() =>
-                setQty(
-                  manageInventory ? Math.min(currentStock, qty + 1) : qty + 1,
-                )
-              }
+              onClick={() => setQty(qty + 1)}
               disabled={isOutOfStock}
               className="text-gray-600 disabled:opacity-50"
             >

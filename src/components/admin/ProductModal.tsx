@@ -28,7 +28,6 @@ export default function ProductModal({
     price: "" as any,
     category: "",
     subCategory: "",
-    stock: "" as any,
     badge: "",
     isFeatured: false,
     variants: [] as any[],
@@ -46,7 +45,6 @@ export default function ProductModal({
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
-  const [manageInventory, setManageInventory] = useState(true);
 
   // Fetch master data
   useEffect(() => {
@@ -63,7 +61,6 @@ export default function ProductModal({
           const settings = await settingsRes.json();
           setCategories(cats);
           setUoms(uomsData);
-          setManageInventory(settings.manageInventory ?? true);
         } catch (error) {
           console.error("Failed to fetch master data", error);
         } finally {
@@ -110,7 +107,6 @@ export default function ProductModal({
         price: product.price || "",
         category: product.category || "",
         subCategory: product.subCategory || "",
-        stock: product.stock || "",
         badge: product.badge || "",
         isFeatured: product.isFeatured || false,
         variants: product.variants || [],
@@ -129,7 +125,6 @@ export default function ProductModal({
         price: "",
         category: "",
         subCategory: "",
-        stock: "",
         badge: "",
         isFeatured: false,
         variants: [],
@@ -153,7 +148,7 @@ export default function ProductModal({
 
   const handleVariantChange = (
     uomName: string,
-    field: "price" | "stock" | "checked",
+    field: "price" | "checked",
     value: any,
   ) => {
     let newVariants = [...formData.variants];
@@ -162,7 +157,7 @@ export default function ProductModal({
     if (field === "checked") {
       if (value) {
         if (existingIndex === -1) {
-          newVariants.push({ uom: uomName, price: 0, stock: 0 });
+          newVariants.push({ uom: uomName, price: 0 });
         }
       } else {
         if (existingIndex !== -1) {
@@ -179,18 +174,15 @@ export default function ProductModal({
     }
 
     let basePrice = formData.price;
-    let baseStock = formData.stock;
 
     if (newVariants.length > 0) {
       basePrice = newVariants[0].price;
-      baseStock = newVariants.reduce((acc, curr) => acc + (curr.stock || 0), 0);
     }
 
     setFormData({
       ...formData,
       variants: newVariants,
       price: basePrice,
-      stock: baseStock,
     });
   };
 
@@ -537,7 +529,7 @@ export default function ProductModal({
                         );
                         const variant = formData.variants.find(
                           (v) => v.uom === uom.name,
-                        ) || { price: 0, stock: 0 };
+                        ) || { price: 0 };
 
                         return (
                           <div
@@ -592,25 +584,7 @@ export default function ProductModal({
                                     className="w-full bg-[#f0ede6] border-none rounded-xl py-3 px-4 text-sm font-bold text-[#234d1b] outline-none focus:ring-2 focus:ring-[#f8bf51]/30"
                                   />
                                 </div>
-                                {manageInventory && (
-                                  <div className="flex-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 block">
-                                      Stock
-                                    </label>
-                                    <input
-                                      type="number"
-                                      value={variant.stock}
-                                      onChange={(e) =>
-                                        handleVariantChange(
-                                          uom.name,
-                                          "stock",
-                                          e.target.value,
-                                        )
-                                      }
-                                      className="w-full bg-[#f0ede6] border-none rounded-xl py-3 px-4 text-sm font-bold text-[#234d1b] outline-none focus:ring-2 focus:ring-[#f8bf51]/30"
-                                    />
-                                  </div>
-                                )}
+
                               </div>
                             )}
                           </div>
@@ -624,8 +598,7 @@ export default function ProductModal({
                       !
                     </div>
                     <p className="text-[10px] text-[#8a6d2b] font-bold leading-relaxed uppercase tracking-wide">
-                      Pricing updates sync immediately. Ensure correct stock
-                      levels to prevent oversight.
+                      Pricing updates sync immediately.
                     </p>
                   </div>
                 </div>

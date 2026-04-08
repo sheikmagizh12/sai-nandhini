@@ -321,7 +321,7 @@ export default function CheckoutClient({
             <Loader2 size={48} className="animate-spin-slow" />
           </div>
           <h1 className="text-3xl font-serif font-bold text-primary-dark">
-            Your basket is empty
+            Your cart is empty
           </h1>
           <Link
             href="/shop"

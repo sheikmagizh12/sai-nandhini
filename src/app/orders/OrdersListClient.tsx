@@ -255,7 +255,7 @@ export default function OrdersListClient({
             <p className="text-gray-500 mb-8 max-w-md mx-auto font-medium">
               {searchQuery || statusFilter !== "all"
                 ? "Try adjusting your search or filters"
-                : "Your basket is waiting to be filled with authentic South Indian flavors"}
+                : "Your cart is waiting to be filled with authentic South Indian flavors"}
             </p>
             {!searchQuery && statusFilter === "all" && (
               <Link

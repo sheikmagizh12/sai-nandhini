@@ -63,68 +63,8 @@ export async function POST(req: Request) {
     console.log("Connecting to database");
     await connectDB();
     
-    console.log("Fetching settings");
-    const settings = await Settings.findOne();
-    const manageInventory = settings?.manageInventory ?? true;
-
-    console.log("Inventory management:", manageInventory);
-
-    // Check and reduce stock if inventory management is enabled
-    if (manageInventory) {
-      const productsToUpdate = [];
-
-      // 1. Validation Loop
-      for (const item of orderItems) {
-        const product = await Product.findById(item.productId);
-        if (!product) {
-          return NextResponse.json(
-            { error: `Product ${item.name} not found` },
-            { status: 404 },
-          );
-        }
-
-        if (item.uom && product.variants && product.variants.length > 0) {
-          const variantIndex = product.variants.findIndex(
-            (v: any) => v.uom === item.uom,
-          );
-          if (variantIndex !== -1) {
-            if (product.variants[variantIndex].stock < item.qty) {
-              return NextResponse.json(
-                {
-                  error: `Insufficient stock for ${product.name} (${item.uom})`,
-                },
-                { status: 400 },
-              );
-            }
-            product.variants[variantIndex].stock -= item.qty;
-          } else {
-            // If UOM specified but not found in variants, fall back to base stock if it exists
-            if (product.stock < item.qty) {
-              return NextResponse.json(
-                { error: `Insufficient stock for ${product.name}` },
-                { status: 400 },
-              );
-            }
-            product.stock -= item.qty;
-          }
-        } else {
-          if (product.stock < item.qty) {
-            return NextResponse.json(
-              { error: `Insufficient stock for ${product.name}` },
-              { status: 400 },
-            );
-          }
-          product.stock -= item.qty;
-        }
-        productsToUpdate.push(product);
-      }
-
-      // 2. Saving Loop (Only run if all items validated)
-      console.log("Updating product stock");
-      for (const product of productsToUpdate) {
-        await product.save();
-      }
-    }
+    // Inventory management checks have been completely removed.
+    // Unlimited orders are now allowed by default.
 
     // Fix for "admin-fallback" or missing user ID
     let userId = session?.user?.id || null;

@@ -37,12 +37,9 @@ export default function ProductsClient({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [threshold] = useState(initialSettings.lowStockThreshold || 10);
-  const [manageInventory] = useState(initialSettings.manageInventory ?? true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedStockStatus, setSelectedStockStatus] = useState<string>("all");
 
   const fetchProducts = async () => {
     try {
@@ -119,48 +116,14 @@ export default function ProductsClient({
     const matchesCategory =
       selectedCategory === "all" || p.category === selectedCategory;
 
-    // Stock status filter
-    let matchesStock = true;
-    if (selectedStockStatus !== "all" && manageInventory) {
-      const stock =
-        p.variants?.reduce((acc: number, v: any) => acc + (v.stock || 0), 0) ||
-        p.stock ||
-        0;
-
-      if (selectedStockStatus === "in-stock") {
-        matchesStock = stock > threshold;
-      } else if (selectedStockStatus === "low-stock") {
-        matchesStock = stock > 0 && stock <= threshold;
-      } else if (selectedStockStatus === "out-of-stock") {
-        matchesStock = stock === 0;
-      }
-    }
-
-    return matchesSearch && matchesCategory && matchesStock;
+    return matchesSearch && matchesCategory;
   });
 
   // KPI Calculations
   const allCategories = initialCategories?.map((c) => c.name) || Array.from(new Set(products.map((p) => p.category)));
   const totalCategories = allCategories.length;
 
-  const totalPhysicalStock = manageInventory
-    ? products.reduce((acc, p) => {
-        const stock = p.variants?.reduce((sAcc: number, v: any) => sAcc + (v.stock || 0), 0) || p.stock || 0;
-        return acc + stock;
-      }, 0)
-    : products.length;
-  const lowStockCount = manageInventory
-    ? products.filter((p) => {
-        const stock =
-          p.variants?.reduce(
-            (acc: number, v: any) => acc + (v.stock || 0),
-            0,
-          ) ||
-          p.stock ||
-          0;
-        return stock <= threshold && stock > 0;
-      }).length
-    : 0;
+
 
   const {
     currentPage,
@@ -171,46 +134,7 @@ export default function ProductsClient({
     itemsPerPage,
   } = usePagination(filteredProducts, 15);
 
-  // Derived logic for display
-  const getStockStatus = (p: any) => {
-    if (!manageInventory) {
-      return {
-        label: "Inventory Off",
-        color: "bg-gray-400",
-        text: "text-gray-500",
-        bg: "bg-gray-50",
-        value: "N/A",
-      };
-    }
 
-    const stock =
-      p.variants?.reduce((acc: number, v: any) => acc + (v.stock || 0), 0) ||
-      p.stock ||
-      0;
-    if (stock === 0)
-      return {
-        label: "Out of Stock",
-        color: "bg-red-500",
-        text: "text-red-500",
-        bg: "bg-red-50",
-        value: 0,
-      };
-    if (stock <= threshold)
-      return {
-        label: "Low Stock",
-        color: "bg-orange-500",
-        text: "text-orange-600",
-        bg: "bg-orange-50",
-        value: stock,
-      };
-    return {
-      label: "In Stock",
-      color: "bg-green-600",
-      text: "text-green-700",
-      bg: "bg-green-50",
-      value: stock,
-    };
-  };
 
   return (
     <div className="space-y-8 font-sans">
@@ -231,13 +155,7 @@ export default function ProductsClient({
             color: "text-amber-700",
             bg: "bg-amber-50",
           },
-          {
-            label: "Physical Units",
-            value: totalPhysicalStock,
-            icon: Activity,
-            color: "text-indigo-700",
-            bg: "bg-indigo-50",
-          },
+
         ].map((kpi, i) => (
           <motion.div
             key={i}
@@ -310,7 +228,7 @@ export default function ProductsClient({
             }`}
           >
             <Filter size={14} /> <span>Show Filter</span>
-            {(selectedCategory !== "all" || selectedStockStatus !== "all") && (
+            {selectedCategory !== "all" && (
               <span className="w-1.5 h-1.5 bg-[#f8bf51] rounded-full animate-pulse" />
             )}
           </button>
@@ -341,7 +259,6 @@ export default function ProductsClient({
                 <button
                   onClick={() => {
                     setSelectedCategory("all");
-                    setSelectedStockStatus("all");
                   }}
                   className="text-xs font-bold text-[#f8bf51] hover:underline uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation rounded"
                 >
@@ -382,64 +299,11 @@ export default function ProductsClient({
                   </div>
                 </div>
 
-                {/* Stock Status Filter */}
-                {manageInventory && (
-                  <div>
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">
-                      Stock Status
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        { value: "all", label: "All", color: "gray" },
-                        {
-                          value: "in-stock",
-                          label: "In Stock",
-                          color: "green",
-                        },
-                        {
-                          value: "low-stock",
-                          label: "Low Stock",
-                          color: "orange",
-                        },
-                        {
-                          value: "out-of-stock",
-                          label: "Out of Stock",
-                          color: "red",
-                        },
-                      ].map((status) => (
-                        <button
-                          key={status.value}
-                          onClick={() => setSelectedStockStatus(status.value)}
-                          className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation ${
-                            selectedStockStatus === status.value
-                              ? "bg-[#234d1b] text-white shadow-md"
-                              : "bg-gray-50 text-gray-500 hover:bg-gray-100"
-                          }`}
-                        >
-                          {status.value !== "all" && (
-                            <div
-                              className={`w-2 h-2 rounded-full ${
-                                status.color === "green"
-                                  ? "bg-green-500"
-                                  : status.color === "orange"
-                                    ? "bg-orange-500"
-                                    : status.color === "red"
-                                      ? "bg-red-500"
-                                      : "bg-gray-400"
-                              }`}
-                            />
-                          )}
-                          {status.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+
               </div>
 
               {/* Active Filters Summary */}
-              {(selectedCategory !== "all" ||
-                selectedStockStatus !== "all") && (
+              {selectedCategory !== "all" && (
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <p className="text-xs text-gray-500 mb-2 font-medium">
                     Active Filters:
@@ -456,21 +320,7 @@ export default function ProductsClient({
                         </button>
                       </span>
                     )}
-                    {selectedStockStatus !== "all" && (
-                      <span className="px-3 py-1 bg-[#ece0cc] text-[#234d1b] text-xs font-bold rounded-full flex items-center gap-2">
-                        Status:{" "}
-                        {selectedStockStatus
-                          .split("-")
-                          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                          .join(" ")}
-                        <button
-                          onClick={() => setSelectedStockStatus("all")}
-                          className="hover:text-red-500"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    )}
+
                   </div>
                 </div>
               )}
@@ -508,14 +358,7 @@ export default function ProductsClient({
         ) : (
           <AnimatePresence>
             {paginatedProducts.map((p, i) => {
-              const status = getStockStatus(p);
-              const totalStock =
-                p.variants?.reduce(
-                  (acc: number, v: any) => acc + (v.stock || 0),
-                  0,
-                ) ||
-                p.stock ||
-                0;
+
               const minPrice = p.variants?.length
                 ? Math.min(...p.variants.map((v: any) => v.price))
                 : p.price;
@@ -586,22 +429,7 @@ export default function ProductsClient({
                         </p>
                       </div>
 
-                      {/* Stock Status */}
-                      <div className="text-left sm:text-right min-w-[70px] sm:min-w-[100px]">
-                        <p className="text-[8px] sm:text-[10px] font-black text-gray-300 uppercase tracking-widest mb-0.5 sm:mb-1">
-                          Stock
-                        </p>
-                        <div className="flex items-center justify-start sm:justify-end gap-1.5 sm:gap-2">
-                          <div
-                            className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${status.color} animate-pulse`}
-                          />
-                          <span
-                            className={`font-bold text-[11px] sm:text-sm ${status.text}`}
-                          >
-                            {status.value}
-                          </span>
-                        </div>
-                      </div>
+
 
                       {/* Actions */}
                       <div className="flex gap-1 sm:gap-2 shrink-0">

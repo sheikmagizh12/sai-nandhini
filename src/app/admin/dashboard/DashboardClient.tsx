@@ -327,20 +327,9 @@ export default function DashboardClient({
                 {data.stats.products.total}
               </h3>
               <div className="flex flex-wrap gap-2 mt-2.5">
-                {data.stats.products.outOfStock > 0 ? (
-                  <span className="text-[8px] sm:text-[9px] font-black px-2 py-1 bg-red-50 text-red-600 rounded-lg border border-red-100">
-                    {data.stats.products.outOfStock} Empty
-                  </span>
-                ) : (
-                  <span className="text-[8px] sm:text-[9px] font-black px-2 py-1 bg-green-50 text-green-600 rounded-lg">
-                    Stocked
-                  </span>
-                )}
-                {data.stats.products.lowStock > 0 && (
-                  <span className="text-[8px] sm:text-[9px] font-black px-2 py-1 bg-amber-50 text-amber-600 rounded-lg border border-amber-100">
-                    {data.stats.products.lowStock} Low
-                  </span>
-                )}
+                <span className="text-[8px] sm:text-[9px] font-black px-2 py-1 bg-green-50 text-green-600 rounded-lg">
+                  Active Online
+                </span>
               </div>
             </div>
           </div>
@@ -827,11 +816,11 @@ export default function DashboardClient({
         </div>
       </motion.div>
 
-      {/* Action Hub & Alerts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Action Hub */}
+      <div className="flex justify-center mt-8">
         <motion.div
           variants={itemVariants}
-          className="lg:col-span-1 bg-[#234d1b] p-6 md:p-10 rounded-[40px] text-white shadow-2xl relative overflow-hidden group"
+          className="w-full max-w-md bg-[#234d1b] p-6 md:p-10 rounded-[40px] text-white shadow-2xl relative overflow-hidden group"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#f8bf51]/10 rounded-full blur-[100px] -mr-32 -mt-32 group-hover:scale-150 transition-transform duration-1000" />
           <div className="relative z-10 flex flex-col h-full">
@@ -884,102 +873,7 @@ export default function DashboardClient({
           </div>
         </motion.div>
 
-        <motion.div
-          variants={itemVariants}
-          className="lg:col-span-2 bg-white p-5 md:p-10 rounded-[40px] shadow-sm border border-gray-100"
-        >
-          <div className="flex justify-between items-center mb-6 md:mb-10">
-            <div>
-              <h3 className="text-xl md:text-2xl font-serif font-black text-[#234d1b] text-balance">
-                Operational Alerts
-              </h3>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">
-                Resource Vigilance
-              </p>
-            </div>
-            <div className="p-3 bg-red-50 text-red-600 rounded-2xl">
-              <AlertTriangle size={20} />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">
-                Critical Depletion (0)
-              </p>
-              {data.stockAlerts.out.length === 0 ? (
-                <div className="p-8 rounded-[32px] bg-green-50/50 border border-green-100 text-center">
-                  <p className="text-xs font-black text-green-700 uppercase tracking-widest">
-                    Inventory Secured
-                  </p>
-                </div>
-              ) : (
-                data.stockAlerts.out.map((item) => (
-                  <div
-                    key={item._id}
-                    className="flex gap-4 p-4 bg-red-50/30 rounded-3xl border border-red-50"
-                  >
-                    <div className="w-12 h-12 bg-white rounded-xl overflow-hidden shadow-sm relative shrink-0">
-                      <Image
-                        src={item.images?.[0] || "/placeholder.png"}
-                        alt={item.name}
-                        width={48}
-                        height={48}
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-black text-[#234d1b] tracking-tight">
-                        {item.name}
-                      </h4>
-                      <p className="text-[9px] font-black text-red-600 uppercase tracking-widest mt-1">
-                        Sold Out
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2">
-                Low Reserve Levels
-              </p>
-              {data.stockAlerts.low.length === 0 ? (
-                <div className="p-8 rounded-[32px] bg-gray-50 border border-gray-100 text-center">
-                  <p className="text-xs font-black text-gray-400 uppercase tracking-widest">
-                    Fully Optimised
-                  </p>
-                </div>
-              ) : (
-                data.stockAlerts.low.map((item) => (
-                  <div
-                    key={item._id}
-                    className="flex gap-4 p-4 bg-amber-50/30 rounded-3xl border border-amber-50"
-                  >
-                    <div className="w-12 h-12 bg-white rounded-xl overflow-hidden shadow-sm relative shrink-0">
-                      <Image
-                        src={item.images?.[0] || "/placeholder.png"}
-                        alt={item.name}
-                        width={48}
-                        height={48}
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-black text-[#234d1b] tracking-tight">
-                        {item.name}
-                      </h4>
-                      <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mt-1">
-                        {item.stock} {item.uom} Remaining
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </motion.div>
       </div>
     </motion.div>
   );

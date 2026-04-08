@@ -49,8 +49,6 @@ export default function ShopClient({
   const [searchQuery, setSearchQuery] = useState(urlSearch);
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [minRating, setMinRating] = useState(0);
-  const [inStockOnly, setInStockOnly] = useState(false);
-  const [manageInventory] = useState(initialManageInventory);
   const [sortBy, setSortBy] = useState("Recommended");
   const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -76,17 +74,11 @@ export default function ShopClient({
         const matchesPrice =
           p.price >= priceRange[0] && p.price <= priceRange[1];
         const matchesRating = (p.rating || 4.5) >= minRating;
-        const matchesStock =
-          !manageInventory ||
-          !inStockOnly ||
-          p.stock > 0 ||
-          (p.variants && p.variants.some((v: any) => v.stock > 0));
         return (
           matchesCategory &&
           matchesSearch &&
           matchesPrice &&
-          matchesRating &&
-          matchesStock
+          matchesRating
         );
       })
       .sort((a, b) => {
@@ -101,7 +93,6 @@ export default function ShopClient({
     searchQuery,
     priceRange,
     minRating,
-    inStockOnly,
     sortBy,
   ]);
 
@@ -171,7 +162,7 @@ export default function ShopClient({
           {/* 2. Modern Sidebar Filters (Hidden on Mobile) */}
           <aside className="hidden lg:block lg:w-72 shrink-0 space-y-8 bg-white/50 p-6 rounded-[2rem] border border-primary/5 h-fit sticky top-24">
             {/* Active Filters Summary */}
-            {(activeCategory !== "All" || inStockOnly || minRating > 0) && (
+            {(activeCategory !== "All" || minRating > 0) && (
               <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
                 <div className="flex justify-between items-center mb-3">
                   <h4 className="text-[10px] font-sans font-black uppercase tracking-widest text-primary-dark">
@@ -180,7 +171,6 @@ export default function ShopClient({
                   <button
                     onClick={() => {
                       setActiveCategory("All");
-                      setInStockOnly(false);
                       setMinRating(0);
                     }}
                     className="text-[9px] font-sans font-bold text-primary hover:underline"
@@ -196,16 +186,6 @@ export default function ShopClient({
                         size={10}
                         className="cursor-pointer"
                         onClick={() => setActiveCategory("All")}
-                      />
-                    </span>
-                  )}
-                  {inStockOnly && (
-                    <span className="px-2 py-1 bg-white text-[9px] font-sans font-bold rounded-lg border border-primary/20 text-primary flex items-center gap-1">
-                      In Stock{" "}
-                      <X
-                        size={10}
-                        className="cursor-pointer"
-                        onClick={() => setInStockOnly(false)}
                       />
                     </span>
                   )}
@@ -349,27 +329,7 @@ export default function ShopClient({
               </div>
             </div>
 
-            {/* Availability */}
-            {manageInventory && (
-              <div>
-                <h3 className="text-[11px] font-sans font-black text-primary-dark uppercase tracking-widest mb-4">
-                  Availability
-                </h3>
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div
-                    className={`w-10 h-6 rounded-full p-1 transition-all ${inStockOnly ? "bg-primary" : "bg-gray-200"}`}
-                    onClick={() => setInStockOnly(!inStockOnly)}
-                  >
-                    <div
-                      className={`w-4 h-4 bg-white rounded-full transition-transform ${inStockOnly ? "translate-x-4" : "translate-x-0"}`}
-                    ></div>
-                  </div>
-                  <span className="text-xs font-sans font-bold text-gray-500 group-hover:text-primary-dark">
-                    Hide Out of Stock
-                  </span>
-                </label>
-              </div>
-            )}
+
           </aside>
 
           {/* 3. High-Density Product Grid (Bringing Items Above Fold) */}
@@ -453,14 +413,6 @@ export default function ShopClient({
                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <AnimatePresence mode="popLayout">
                     {paginatedProducts.map((p, idx) => {
-                      const totalStock =
-                        p.variants && p.variants.length > 0
-                          ? p.variants.reduce(
-                              (acc: number, v: any) => acc + (v.stock || 0),
-                              0,
-                            )
-                          : p.stock || 0;
-                      const isOutOfStock = manageInventory && totalStock === 0;
                       return (
                         <motion.div
                           layout
@@ -471,7 +423,7 @@ export default function ShopClient({
                           className="group relative"
                         >
                           <div
-                            className={`h-full bg-white rounded-[2rem] p-2.5 md:p-4 border border-primary/5 hover:border-accent/30 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col ${isOutOfStock ? "opacity-70 grayscale-[0.5]" : ""}`}
+                            className={`h-full bg-white rounded-[2rem] p-2.5 md:p-4 border border-primary/5 hover:border-accent/30 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col`}
                           >
                             {/* Product Image Wrapper */}
                             <Link href={`/shop/${p.slug || p._id}`} className="block">
@@ -515,13 +467,7 @@ export default function ShopClient({
                                   <Heart size={14} fill={isInWishlist(p._id) ? 'currentColor' : 'none'} />
                                 </button>
 
-                                {isOutOfStock && (
-                                  <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
-                                    <span className="bg-primary-dark text-white px-4 py-2 rounded-full text-[10px] font-sans font-black uppercase tracking-widest shadow-xl">
-                                      Sold Out
-                                    </span>
-                                  </div>
-                                )}
+
                               </div>
                             </Link>
 
@@ -555,19 +501,12 @@ export default function ShopClient({
                                 </div>
                               </Link>
 
-                              {/* Add to Cart Button - Outside Link to prevent nested links */}
                               <button
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  if (isOutOfStock) return;
                                   if (p.variants && p.variants.length > 0) {
-                                    // Find first in-stock variant, or default to first if none found (fallback)
-                                    const bestVariant =
-                                      p.variants.find(
-                                        (v: any) =>
-                                          !manageInventory || v.stock > 0,
-                                      ) || p.variants[0];
+                                    const bestVariant = p.variants[0];
                                     addToCart(
                                       {
                                         ...p,
@@ -580,15 +519,10 @@ export default function ShopClient({
                                     addToCart(p, 1);
                                   }
                                 }}
-                                disabled={isOutOfStock}
-                                className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl flex items-center justify-center gap-2 transition-all active:scale-95 ${
-                                  isOutOfStock
-                                    ? "bg-gray-100 text-gray-300 cursor-not-allowed"
-                                    : "bg-primary text-white hover:bg-primary-dark"
-                                }`}
+                                className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl flex items-center justify-center gap-2 transition-all active:scale-95 bg-primary text-white hover:bg-primary-dark`}
                               >
                                 <ShoppingCart size={14} />
-                                {isOutOfStock ? "Sold Out" : "Add to Basket"}
+                                Add to Cart
                               </button>
                             </div>
                           </div>
@@ -719,7 +653,6 @@ export default function ShopClient({
                       <button
                         onClick={() => {
                           setActiveCategory("All");
-                          setInStockOnly(false);
                           setMinRating(0);
                         }}
                         className="text-[9px] font-sans font-bold text-primary hover:underline"
@@ -728,7 +661,7 @@ export default function ShopClient({
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {activeCategory === "All" && !inStockOnly && (
+                      {activeCategory === "All" && (
                         <span className="text-[10px] text-gray-400 font-bold uppercase italic">
                           None Active
                         </span>
@@ -740,16 +673,6 @@ export default function ShopClient({
                             size={12}
                             className="cursor-pointer"
                             onClick={() => setActiveCategory("All")}
-                          />
-                        </span>
-                      )}
-                      {inStockOnly && (
-                        <span className="px-3 py-1.5 bg-white text-[10px] font-sans font-bold rounded-lg border border-primary/20 text-primary flex items-center gap-2">
-                          In Stock{" "}
-                          <X
-                            size={12}
-                            className="cursor-pointer"
-                            onClick={() => setInStockOnly(false)}
                           />
                         </span>
                       )}
@@ -823,21 +746,7 @@ export default function ShopClient({
                     </div>
                   </div>
 
-                  {/* Availability */}
-                  <label className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl cursor-pointer">
-                    <span className="text-sm font-sans font-black text-primary-dark uppercase tracking-wider">
-                      In Stock Only
-                    </span>
-                    <div
-                      className={`w-12 h-6.5 rounded-full p-1 transition-all ${inStockOnly ? "bg-primary" : "bg-gray-300"}`}
-                      onClick={() => setInStockOnly(!inStockOnly)}
-                    >
-                      <motion.div
-                        animate={{ x: inStockOnly ? 22 : 0 }}
-                        className="w-4.5 h-4.5 bg-white rounded-full shadow-sm"
-                      />
-                    </div>
-                  </label>
+
 
                   <button
                     onClick={() => setShowMobileFilters(false)}

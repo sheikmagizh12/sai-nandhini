@@ -103,6 +103,12 @@ export async function POST(req: Request) {
       }
 
       body.images = [...(body.images || []), ...uploadedUrls];
+      
+      // Clean subCategory: convert empty string to undefined
+      if (body.subCategory === "" || body.subCategory === null) {
+        delete body.subCategory;
+      }
+      
       const product = await Product.create(body);
 
       // Revalidate affected pages

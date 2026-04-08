@@ -70,6 +70,11 @@ export async function PUT(
       body = await req.json();
     }
 
+    // Clean subCategory: convert empty string to undefined
+    if (body.subCategory === "" || body.subCategory === null) {
+      delete body.subCategory;
+    }
+
     const product = await Product.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,

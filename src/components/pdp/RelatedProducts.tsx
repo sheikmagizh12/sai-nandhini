@@ -28,9 +28,11 @@ interface Product {
 export default function RelatedProducts({
   currentId,
   category,
+  manageInventory = false,
 }: {
   currentId: string;
   category?: string;
+  manageInventory?: boolean;
 }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,7 +111,7 @@ export default function RelatedProducts({
           const totalStock = p.variants?.length
             ? p.variants.reduce((acc, v) => acc + (v.stock || 0), 0)
             : p.stock || 0;
-          const isOutOfStock = totalStock === 0;
+          const isOutOfStock = manageInventory && totalStock === 0;
 
           return (
             <motion.div

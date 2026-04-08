@@ -792,7 +792,7 @@ export default function ProductClient({
           <TrustBadges />
 
           {/* Related Products */}
-          <RelatedProducts currentId={product._id} />
+          <RelatedProducts currentId={product._id} manageInventory={false} />
         </div>
       </div>
 

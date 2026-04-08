@@ -51,7 +51,7 @@ export async function getSettings() {
   return cached(CACHE_KEYS.SETTINGS_PUBLIC, 60_000, async () => {
     await connectDB();
     const settings = await Settings.findOne()
-      .select("manageInventory")
+      .select("manageInventory aboutUs")
       .lean();
     return JSON.parse(JSON.stringify(settings || {}));
   });

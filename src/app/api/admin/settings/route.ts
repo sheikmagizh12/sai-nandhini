@@ -111,6 +111,20 @@ export async function POST(req: Request) {
       data.seo.ogImage = ogResult.secure_url;
     }
 
+    // Process About Us images
+    if (data.aboutUs?.heroImage && data.aboutUs.heroImage.startsWith("data:")) {
+      const heroResult = await uploadToCloudinary(data.aboutUs.heroImage, "sainandhini/about");
+      data.aboutUs.heroImage = heroResult.secure_url;
+    }
+    if (data.aboutUs?.journeyImage1 && data.aboutUs.journeyImage1.startsWith("data:")) {
+      const journey1Result = await uploadToCloudinary(data.aboutUs.journeyImage1, "sainandhini/about");
+      data.aboutUs.journeyImage1 = journey1Result.secure_url;
+    }
+    if (data.aboutUs?.journeyImage2 && data.aboutUs.journeyImage2.startsWith("data:")) {
+      const journey2Result = await uploadToCloudinary(data.aboutUs.journeyImage2, "sainandhini/about");
+      data.aboutUs.journeyImage2 = journey2Result.secure_url;
+    }
+
     await connectDB();
 
     // Handle Sensitive fields
@@ -188,6 +202,9 @@ export async function POST(req: Request) {
     if (data.logo && data.logo.startsWith("data:")) delete data.logo;
     if (data.favicon && data.favicon.startsWith("data:")) delete data.favicon;
     if (data.seo?.ogImage && data.seo.ogImage.startsWith("data:")) delete data.seo.ogImage;
+    if (data.aboutUs?.heroImage && data.aboutUs.heroImage.startsWith("data:")) delete data.aboutUs.heroImage;
+    if (data.aboutUs?.journeyImage1 && data.aboutUs.journeyImage1.startsWith("data:")) delete data.aboutUs.journeyImage1;
+    if (data.aboutUs?.journeyImage2 && data.aboutUs.journeyImage2.startsWith("data:")) delete data.aboutUs.journeyImage2;
 
     const settings = await Settings.findOneAndUpdate({}, data, {
       returnDocument: "after",

@@ -190,13 +190,44 @@ export default function TrackOrderClient() {
                                     </p>
                                 </div>
                                 <div className="flex gap-3">
-                                    <a
-                                        href={`/api/orders/${order._id}/invoice?email=${encodeURIComponent(email)}`}
-                                        download
-                                        className="p-3 bg-gray-50 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all border border-transparent hover:border-primary/20"
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                const response = await fetch(`/api/orders/${order._id}/invoice?email=${encodeURIComponent(email)}`);
+                                                
+                                                if (response.ok && response.headers.get('content-type')?.includes('application/pdf')) {
+                                                    const blob = await response.blob();
+                                                    const url = window.URL.createObjectURL(blob);
+                                                    const a = document.createElement('a');
+                                                    a.href = url;
+                                                    a.download = `invoice-${order._id.slice(-8).toUpperCase()}.pdf`;
+                                                    document.body.appendChild(a);
+                                                    a.click();
+                                                    window.URL.revokeObjectURL(url);
+                                                    document.body.removeChild(a);
+                                                } else {
+                                                    // If PDF generation failed, open the invoice page in new tab
+                                                    window.open(`/orders/${order._id}/invoice?format=a4&email=${encodeURIComponent(email)}`, '_blank');
+                                                }
+                                            } catch (error) {
+                                                console.error('Download failed:', error);
+                                                // Fallback to opening invoice page
+                                                window.open(`/orders/${order._id}/invoice?format=a4&email=${encodeURIComponent(email)}`, '_blank');
+                                            }
+                                        }}
+                                        className="p-3 bg-gray-50 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all border border-transparent hover:border-primary/20 cursor-pointer"
                                         title="Download Invoice"
                                     >
                                         <Download size={18} />
+                                    </button>
+                                    <a
+                                        href={`/orders/${order._id}/invoice?format=a4&email=${encodeURIComponent(email)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-3 bg-gray-50 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all border border-transparent hover:border-blue-200"
+                                        title="View Invoice"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                                     </a>
                                 </div>
                             </div>

@@ -97,7 +97,7 @@ export async function POST(req: Request) {
           // Fire and forget - don't await this
           (async () => {
             try {
-              const { sendOrderConfirmationEmail } = await import("@/lib/email-service");
+              const { sendOrderConfirmationEmail, sendAdminNewOrderEmail } = await import("@/lib/email-service");
 
               const populatedOrder =
                 await Order.findById(orderId).populate("user");
@@ -117,6 +117,9 @@ export async function POST(req: Request) {
               }
 
               await sendOrderConfirmationEmail(populatedOrder, pdfBuffer);
+              
+              // Send the explicit admin notification email
+              await sendAdminNewOrderEmail(populatedOrder, pdfBuffer);
 
               // Mark email as sent
               const orderToUpdate = await Order.findById(orderId);

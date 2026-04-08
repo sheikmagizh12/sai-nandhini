@@ -96,7 +96,7 @@ export async function POST(req: Request) {
               console.log(
                 `📧 [Webhook] Generating invoice for order ${order._id}...`,
               );
-              const { sendOrderConfirmationEmail } = await import("@/lib/email-service");
+              const { sendOrderConfirmationEmail, sendAdminNewOrderEmail } = await import("@/lib/email-service");
 
               let pdfBuffer = null;
               try {
@@ -109,8 +109,10 @@ export async function POST(req: Request) {
               }
 
               await sendOrderConfirmationEmail(populatedOrder, pdfBuffer);
+              await sendAdminNewOrderEmail(populatedOrder, pdfBuffer);
+              
               console.log(
-                `✅ [Webhook] Invoice email sent for order ${order._id}`,
+                `✅ [Webhook] Invoice & Admin emails sent for order ${order._id}`,
               );
             } catch (emailError) {
               console.error(

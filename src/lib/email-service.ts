@@ -179,3 +179,75 @@ export const sendStatusUpdateEmail = async (order: any) => {
     return { success: false, error: error };
   }
 };
+
+/**
+ * Send new order notification explicitly to the admin
+ */
+export const sendAdminNewOrderEmail = async (order: any, invoicePDFBuffer: Buffer | Uint8Array | null) => {
+  try {
+    const emailConfig = await getEmailConfig();
+
+    if (!emailConfig.host || !emailConfig.auth.user || !emailConfig.auth.pass) {
+      return { success: false, message: "SMTP config missing" };
+    }
+
+    const transporter = nodemailer.createTransport(emailConfig as any);
+    const settings = await Settings.findOne();
+    const companyEmail = settings?.contactEmail || emailConfig.auth.user;
+
+    const itemsHtml = order.orderItems.map((item: any) => 
+      `<li>${item.qty}x ${item.name} ${item.uom ? `(${item.uom})` : ''} - ₹${item.price}</li>`
+    ).join('');
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h2 style="color: #234d1b;">New Order Received!</h2>
+        <p>A new order has been confirmed from <strong>${order.shippingAddress?.fullName}</strong>.</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+          <tr>
+            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Order ID:</strong></td>
+            <td style="padding: 10px; border: 1px solid #ddd;">#${order._id.toString().slice(-6).toUpperCase()}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Total Amount:</strong></td>
+            <td style="padding: 10px; border: 1px solid #ddd; color: #234d1b; font-weight: bold;">₹${order.totalPrice}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Customer Email:</strong></td>
+            <td style="padding: 10px; border: 1px solid #ddd;">${order.shippingAddress?.email}</td>
+          </tr>
+        </table>
+
+        <h3 style="margin-top: 20px; color: #234d1b;">Order Items</h3>
+        <ul>${itemsHtml}</ul>
+
+        <p style="margin-top: 30px; padding: 15px; background: #fff5e6; border-radius: 8px;">
+          Log in to the Admin Dashboard to process this order and update its status.
+        </p>
+      </div>
+    `;
+
+    const mailOptions = {
+      from: emailConfig.from || emailConfig.auth.user,
+      to: companyEmail, // Admin email
+      subject: `🚨 Action Required: New Order #${order._id.toString().slice(-6).toUpperCase()}`,
+      html,
+      attachments: invoicePDFBuffer ? [
+        {
+          filename: `Invoice-${order._id.toString().slice(-6).toUpperCase()}.pdf`,
+          content: Buffer.from(invoicePDFBuffer),
+          contentType: "application/pdf",
+        },
+      ] : [],
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("New order admin notification sent:", info.messageId);
+
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("Failed to send admin order email:", error);
+    return { success: false, error: error };
+  }
+};

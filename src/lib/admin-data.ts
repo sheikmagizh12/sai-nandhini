@@ -121,18 +121,19 @@ export async function getCustomersWithStats() {
 
   const customersWithStats = customers.map((customer) => {
     const idStr = customer._id.toString();
-    const stat = statsById.get(idStr) || statsByEmail.get(customer.email) || {
-      orderCount: 0,
-      totalSpent: 0,
-      latestPhone: undefined,
-    };
+    const statById = statsById.get(idStr) || { orderCount: 0, totalSpent: 0, latestPhone: undefined };
+    // Try to match email exactly, and as fallback try lowercase/trim
+    const statByEmail = statsByEmail.get(customer.email) || 
+                        statsByEmail.get(customer.email?.toLowerCase()) || 
+                        statsByEmail.get(customer.email?.trim()) || 
+                        { orderCount: 0, totalSpent: 0, latestPhone: undefined };
 
     return {
       ...customer,
-      phone: customer.phone || stat.latestPhone,
+      phone: customer.phone || statById.latestPhone || statByEmail.latestPhone,
       _id: idStr,
-      orderCount: stat.orderCount,
-      totalSpent: stat.totalSpent,
+      orderCount: statById.orderCount + statByEmail.orderCount,
+      totalSpent: statById.totalSpent + statByEmail.totalSpent,
     };
   });
 

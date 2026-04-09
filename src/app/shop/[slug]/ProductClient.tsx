@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import ProductGallery from "@/components/pdp/ProductGallery";
 import TrustBadges from "@/components/pdp/TrustBadges";
 import RelatedProducts from "@/components/pdp/RelatedProducts";
+import ProductGoogleReviews from "@/components/pdp/ProductGoogleReviews";
 import {
   Star,
   ShoppingCart,
@@ -784,6 +785,9 @@ export default function ProductClient({
                     </div>
                   )}
                 </div>
+
+                {/* Google Reviews – matched by product name */}
+                <ProductGoogleReviews productName={product.name} limit={3} />
               </>
             )}
           </section>

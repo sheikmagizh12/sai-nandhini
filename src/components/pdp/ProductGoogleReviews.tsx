@@ -24,6 +24,7 @@ interface ProductGoogleReviewsData {
   productName: string;
   averageRating: number;
   totalReviewCount: number;
+  placeId?: string;
   error?: string;
 }
 
@@ -254,7 +255,19 @@ export default function ProductGoogleReviews({ productName, limit = 3 }: Props) 
         </div>
 
         {/* CTA */}
-        <div className="mt-5 text-center">
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          {data.placeId && (
+            <a
+              href={`https://search.google.com/local/writereview?placeid=${data.placeId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-primary-dark transition-all shadow-md hover:shadow-lg"
+            >
+              <Star size={16} className="fill-white" />
+              Write a Google Review
+            </a>
+          )}
+          
           <a
             href="https://www.google.com/search?q=sai+nandhini+tasty+world+madurai+reviews"
             target="_blank"

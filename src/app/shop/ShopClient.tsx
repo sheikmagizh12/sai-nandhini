@@ -51,7 +51,6 @@ export default function ShopClient({
   const [activeSubCategory, setActiveSubCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState(urlSearch);
   const [priceRange, setPriceRange] = useState([0, 2000]);
-  const [minRating, setMinRating] = useState(0);
   const [sortBy, setSortBy] = useState("Recommended");
   const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -111,19 +110,16 @@ export default function ShopClient({
           .includes(searchQuery.toLowerCase());
         const matchesPrice =
           p.price >= priceRange[0] && p.price <= priceRange[1];
-        const matchesRating = (p.rating || 4.5) >= minRating;
         return (
           matchesCategory &&
           matchesSubCategory &&
           matchesSearch &&
-          matchesPrice &&
-          matchesRating
+          matchesPrice
         );
       })
       .sort((a, b) => {
         if (sortBy === "Price: Low to High") return a.price - b.price;
         if (sortBy === "Price: High to Low") return b.price - a.price;
-        if (sortBy === "Top Rated") return (b.rating || 0) - (a.rating || 0);
         return 0; // "Recommended"
       });
   }, [
@@ -132,7 +128,6 @@ export default function ShopClient({
     activeSubCategory,
     searchQuery,
     priceRange,
-    minRating,
     sortBy,
   ]);
 
@@ -202,7 +197,7 @@ export default function ShopClient({
           {/* 2. Modern Sidebar Filters (Hidden on Mobile) */}
           <aside className="hidden lg:block lg:w-72 shrink-0 space-y-8 bg-white/50 p-6 rounded-[2rem] border border-primary/5 h-fit sticky top-24">
             {/* Active Filters Summary */}
-            {(activeCategory !== "All" || activeSubCategory !== "All" || minRating > 0) && (
+            {(activeCategory !== "All" || activeSubCategory !== "All") && (
               <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
                 <div className="flex justify-between items-center mb-3">
                   <h4 className="text-[10px] font-sans font-black uppercase tracking-widest text-primary-dark">
@@ -212,7 +207,6 @@ export default function ShopClient({
                     onClick={() => {
                       setActiveCategory("All");
                       setActiveSubCategory("All");
-                      setMinRating(0);
                     }}
                     className="text-[9px] font-sans font-bold text-primary hover:underline"
                   >
@@ -243,16 +237,7 @@ export default function ShopClient({
                       />
                     </span>
                   )}
-                  {minRating > 0 && (
-                    <span className="px-2 py-1 bg-white text-[9px] font-sans font-bold rounded-lg border border-primary/20 text-primary flex items-center gap-1">
-                      {minRating}+ Stars{" "}
-                      <X
-                        size={10}
-                        className="cursor-pointer"
-                        onClick={() => setMinRating(0)}
-                      />
-                    </span>
-                  )}
+
                 </div>
               </div>
             )}
@@ -397,31 +382,7 @@ export default function ShopClient({
               </div>
             </div>
 
-            {/* Rating Filter */}
-            <div>
-              <h3 className="text-[11px] font-sans font-black text-primary-dark uppercase tracking-widest mb-4">
-                Customer Rating
-              </h3>
-              <div className="space-y-2">
-                {[4, 3, 2].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => setMinRating(star)}
-                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-sans font-bold transition-all ${minRating === star ? "border border-primary bg-primary/5 text-primary-dark" : "border border-transparent text-gray-400 hover:text-primary-dark hover:bg-white"}`}
-                  >
-                    <div className="flex text-accent">
-                      {[...Array(star)].map((_, i) => (
-                        <Star key={i} size={12} fill="currentColor" />
-                      ))}
-                      {[...Array(5 - star)].map((_, i) => (
-                        <Star key={i} size={12} className="text-gray-200" />
-                      ))}
-                    </div>
-                    & Up
-                  </button>
-                ))}
-              </div>
-            </div>
+
 
 
           </aside>
@@ -458,7 +419,6 @@ export default function ShopClient({
                   onChange={(e) => setSortBy(e.target.value)}
                 >
                   <option value="Recommended">Recommended</option>
-                  <option value="Top Rated">Top Rated</option>
                   <option value="Price: Low to High">Price: Low to High</option>
                   <option value="Price: High to Low">Price: High to Low</option>
                 </select>
@@ -495,7 +455,6 @@ export default function ShopClient({
                     setActiveCategory("All");
                     setActiveSubCategory("All");
                     setPriceRange([0, 2000]);
-                    setMinRating(0);
                     setSearchQuery("");
                   }}
                   className="mt-6 px-8 py-3 bg-primary-dark text-white rounded-full text-[10px] font-sans font-black uppercase tracking-widest shadow-xl hover:bg-primary transition-colors"
@@ -573,12 +532,6 @@ export default function ShopClient({
                                   <p className="text-[10px] font-sans font-black text-primary/60 uppercase tracking-widest truncate">
                                     {p.category}
                                   </p>
-                                  <div className="flex items-center gap-1 text-accent">
-                                    <Star size={10} fill="currentColor" />
-                                    <span className="text-[10px] font-sans font-bold text-primary-dark">
-                                      {p.rating || 4.5}
-                                    </span>
-                                  </div>
                                 </div>
                                 <h3 className="text-sm font-serif font-black text-primary-dark line-clamp-2 min-h-[2.5rem] leading-snug group-hover:text-primary transition-colors mb-4">
                                   {p.name}
@@ -749,7 +702,6 @@ export default function ShopClient({
                         onClick={() => {
                           setActiveCategory("All");
                           setActiveSubCategory("All");
-                          setMinRating(0);
                         }}
                         className="text-[9px] font-sans font-bold text-primary hover:underline"
                       >
@@ -877,23 +829,7 @@ export default function ShopClient({
                     </div>
                   </div>
 
-                  {/* Ratings */}
-                  <div>
-                    <h3 className="text-[12px] font-sans font-black text-primary-dark uppercase tracking-widest mb-4">
-                      Min Rating
-                    </h3>
-                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-                      {[4, 3, 2].map((star) => (
-                        <button
-                          key={star}
-                          onClick={() => setMinRating(star)}
-                          className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition-all border-2 ${minRating === star ? "border-primary bg-primary/5 text-primary-dark" : "border-gray-100 text-gray-500 hover:border-primary/30"}`}
-                        >
-                          {star}★ & Up
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+
 
 
 

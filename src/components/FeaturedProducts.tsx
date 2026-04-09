@@ -134,23 +134,15 @@ export default function FeaturedProducts({
                   <h3 className="text-base font-bold text-[#234d1b] leading-snug line-clamp-2 group-hover:text-[#f8bf51] transition-colors duration-300 mb-2">
                     {product.name}
                   </h3>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-black text-[#234d1b]">
-                        ₹{product.price}
+                  <div className="flex items-baseline gap-2 mb-3">
+                    <span className="text-xl font-black text-[#234d1b]">
+                      ₹{product.price}
+                    </span>
+                    {product.mrp && product.mrp > product.price && (
+                      <span className="text-xs text-[#234d1b]/30 line-through font-medium">
+                        ₹{product.mrp}
                       </span>
-                      {product.mrp && product.mrp > product.price && (
-                        <span className="text-xs text-[#234d1b]/30 line-through font-medium">
-                          ₹{product.mrp}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 bg-[#f8bf51]/15 px-2.5 py-1 rounded-full">
-                      <Star size={12} className="text-[#f8bf51] fill-[#f8bf51]" />
-                      <span className="text-xs font-bold text-[#234d1b]">
-                        {product.rating || "4.8"}
-                      </span>
-                    </div>
+                    )}
                   </div>
                 </div>
               </Link>

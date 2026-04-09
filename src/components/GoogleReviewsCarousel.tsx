@@ -20,6 +20,7 @@ interface GoogleReviewsData {
   reviews: GoogleReview[];
   averageRating: number;
   totalReviewCount: number;
+  placeId?: string;
   cached?: boolean;
   error?: string;
 }
@@ -336,8 +337,20 @@ export default function GoogleReviewsCarousel() {
           )}
         </div>
 
-        {/* View All on Google CTA */}
-        <div className="text-center mt-12">
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
+          {data.placeId && (
+            <a
+              href={`https://search.google.com/local/writereview?placeid=${data.placeId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 bg-[#234d1b] hover:bg-[#1a3a14] text-white px-8 py-4 rounded-xl font-bold uppercase tracking-wider text-xs transition-all duration-300 shadow-xl hover:shadow-2xl"
+            >
+              <Star size={16} className="fill-white" />
+              Write a Google Review
+            </a>
+          )}
+
           <a
             href="https://www.google.com/search?q=sai+nandhini+tasty+world+madurai+reviews"
             target="_blank"

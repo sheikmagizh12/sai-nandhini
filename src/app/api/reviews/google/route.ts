@@ -18,6 +18,7 @@ export async function GET() {
         reviews: cachedReviews.reviews,
         averageRating: cachedReviews.averageRating,
         totalReviewCount: cachedReviews.totalReviewCount,
+        placeId: cachedReviews.placeId,
         cached: true,
       });
     }
@@ -100,6 +101,7 @@ export async function GET() {
       reviews: transformedReviews,
       averageRating: result.rating || 0,
       totalReviewCount: result.user_ratings_total || 0,
+      placeId,
     };
     cacheTimestamp = now;
 
@@ -107,6 +109,7 @@ export async function GET() {
       reviews: transformedReviews,
       averageRating: result.rating || 0,
       totalReviewCount: result.user_ratings_total || 0,
+      placeId,
       cached: false,
     });
   } catch (error: any) {

@@ -17,6 +17,7 @@ async function getGoogleReviews(): Promise<{
   reviews: any[];
   averageRating: number;
   totalReviewCount: number;
+  placeId?: string;
   error?: string;
 }> {
   await connectDB();
@@ -72,6 +73,7 @@ async function getGoogleReviews(): Promise<{
     reviews: transformedReviews,
     averageRating: result.rating || 0,
     totalReviewCount: result.user_ratings_total || 0,
+    placeId,
   };
 
   cache.set(placeId, { data: responseData, timestamp: Date.now() });
@@ -137,6 +139,7 @@ export async function GET(request: NextRequest) {
       productName,
       averageRating: googleData.averageRating,
       totalReviewCount: googleData.totalReviewCount,
+      placeId: googleData.placeId,
     });
   } catch (error: any) {
     console.error("Error in product google reviews:", error);

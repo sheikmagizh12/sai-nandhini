@@ -298,8 +298,35 @@ export default function TrackOrderClient() {
                                             {order.awbNumber && (
                                                 <div className="mt-6 pt-6 border-t border-gray-100">
                                                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-3">AWB Tracking</p>
-                                                    <div className="flex items-center gap-3 text-blue-600 bg-blue-50 px-4 py-3 rounded-xl border border-blue-100 font-mono font-bold">
-                                                        <Truck size={16} /> {order.awbNumber}
+                                                    <div className="flex flex-col gap-3">
+                                                        <div className="flex items-center gap-3 text-blue-800 bg-blue-50 px-4 py-3 rounded-xl border border-blue-100">
+                                                            <Truck size={20} className="text-blue-500" />
+                                                            <div>
+                                                              <p className="text-sm font-bold font-mono tracking-tight">{order.awbNumber}</p>
+                                                              {order.courierName && <p className="text-[10px] uppercase font-bold text-blue-500 tracking-wider">{order.courierName}</p>}
+                                                            </div>
+                                                            {order.trackingLink && (
+                                                                <a 
+                                                                  href={order.trackingLink.replace('{trackingNumber}', order.awbNumber)} 
+                                                                  target="_blank" 
+                                                                  rel="noopener noreferrer"
+                                                                  className="ml-auto bg-white border border-blue-100 px-4 py-2 rounded-lg text-[10px] font-bold uppercase transition-colors hover:bg-blue-600 hover:text-white"
+                                                                >
+                                                                    Track
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                        {order.estimatedDeliveryDate && (
+                                                            <p className="text-xs text-gray-500 font-medium">
+                                                                Expected Delivery: <span className="font-bold text-gray-800">{mounted ? new Date(order.estimatedDeliveryDate).toLocaleDateString() : '...'}</span>
+                                                            </p>
+                                                        )}
+                                                        {order.shippingNotes && (
+                                                            <div className="bg-[#fffdfa] p-4 rounded-xl text-xs text-gray-600 border border-[#f5e6d3]">
+                                                                <span className="font-bold uppercase text-[10px] tracking-widest block mb-1 text-[#b08b5e]">Tracking Note</span>
+                                                                {order.shippingNotes}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )}

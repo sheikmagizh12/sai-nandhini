@@ -27,6 +27,7 @@ import {
   PackageCheck,
   TrendingUp,
   DollarSign,
+  Truck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -53,6 +54,15 @@ export default function OrdersClient({
   const [dateRange, setDateRange] = useState("AllTime");
   const [viewingOrder, setViewingOrder] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
+  const [trackingModalOpen, setTrackingModalOpen] = useState(false);
+  const [trackingOrder, setTrackingOrder] = useState<any>(null);
+  const [trackingData, setTrackingData] = useState({
+    courierName: "",
+    awbNumber: "",
+    trackingLink: "",
+    estimatedDeliveryDate: "",
+    shippingNotes: "",
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -77,6 +87,21 @@ export default function OrdersClient({
   };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    if (newStatus === "Shipping") {
+      const order = orders.find((o) => o._id === orderId);
+      setTrackingOrder(order);
+      setTrackingData({
+        courierName: order?.courierName || "",
+        awbNumber: order?.awbNumber || "",
+        trackingLink: order?.trackingLink || "",
+        estimatedDeliveryDate: order?.estimatedDeliveryDate ? new Date(order.estimatedDeliveryDate).toISOString().split('T')[0] : "",
+        shippingNotes: order?.shippingNotes || "",
+      });
+      setTrackingModalOpen(true);
+      // Wait for modal save to make API call
+      return;
+    }
+
     const previousOrders = [...orders];
     const updatedOrders = orders.map((o) =>
       o._id === orderId ? { ...o, status: newStatus } : o,
@@ -101,6 +126,40 @@ export default function OrdersClient({
         setViewingOrder(viewingOrder);
       }
       toast.error("Failed to update status");
+    }
+  };
+
+  const handleSaveTracking = async () => {
+    if (!trackingOrder) return;
+    const orderId = trackingOrder._id;
+    const newStatus = "Shipping";
+
+    const previousOrders = [...orders];
+    const updatedOrders = orders.map((o) =>
+      o._id === orderId ? { ...o, status: newStatus, ...trackingData } : o,
+    );
+    setOrders(updatedOrders);
+
+    if (viewingOrder?._id === orderId) {
+      setViewingOrder({ ...viewingOrder, status: newStatus, ...trackingData });
+    }
+
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus, ...trackingData }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success(`Tracking info saved and status updated to ${newStatus}`);
+      setTrackingModalOpen(false);
+      setTrackingOrder(null);
+    } catch (err) {
+      setOrders(previousOrders);
+      if (viewingOrder?._id === orderId) {
+        setViewingOrder(previousOrders.find(o => o._id === viewingOrder._id) || viewingOrder);
+      }
+      toast.error("Failed to update status and tracking info");
     }
   };
 
@@ -860,6 +919,113 @@ export default function OrdersClient({
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Tracking Modal */}
+      <AnimatePresence>
+        {trackingModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6"
+          >
+            <div
+              className="absolute inset-0 bg-primary-dark/80 backdrop-blur-sm"
+              onClick={() => setTrackingModalOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-lg bg-white rounded-[2rem] shadow-2xl overflow-y-auto max-h-[90vh]"
+            >
+              <div className="p-6 sm:p-8">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <div className="flex items-center gap-2 text-primary mb-2">
+                       <Truck size={20} />
+                       <h3 className="text-xl font-serif font-black text-primary-dark">Courier Tracking Setup</h3>
+                    </div>
+                    <p className="text-xs sm:text-sm text-gray-500 font-medium">
+                      Configure tracking information for order <span className="font-bold text-primary">#{trackingOrder?._id?.slice(-8).toUpperCase()}</span>
+                    </p>
+                  </div>
+                  <button onClick={() => setTrackingModalOpen(false)} className="text-gray-400 hover:text-red-500 transition-colors shrink-0">
+                    <X size={24} />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Courier Partner Name *</label>
+                    <input 
+                      type="text" 
+                      placeholder="Enter courier partner name (e.g., Blue Dart, DTDC, FedEx)"
+                      value={trackingData.courierName}
+                      onChange={(e) => setTrackingData({...trackingData, courierName: e.target.value})}
+                      className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold text-primary-dark outline-none border border-transparent focus:border-primary/20 focus:bg-[#ece0cc]/30 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Tracking Number *</label>
+                    <input 
+                      type="text" 
+                      placeholder="Enter tracking number"
+                      value={trackingData.awbNumber}
+                      onChange={(e) => setTrackingData({...trackingData, awbNumber: e.target.value})}
+                      className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold text-primary-dark outline-none border border-transparent focus:border-primary/20 focus:bg-[#ece0cc]/30 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Courier Tracking Link *</label>
+                     <textarea 
+                      placeholder="https://courier-website.com/tracking?trackingNumber={trackingNumber}"
+                      value={trackingData.trackingLink}
+                      onChange={(e) => setTrackingData({...trackingData, trackingLink: e.target.value})}
+                      className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold text-primary-dark outline-none border border-transparent focus:border-primary/20 focus:bg-[#ece0cc]/30 transition-colors min-h-[80px]"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1 font-medium">Use <span className="text-primary font-bold">{'{trackingNumber}'}</span> as placeholder for the tracking number</p>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Estimated Delivery Date (Optional)</label>
+                    <input 
+                      type="date" 
+                      value={trackingData.estimatedDeliveryDate}
+                      onChange={(e) => setTrackingData({...trackingData, estimatedDeliveryDate: e.target.value})}
+                      className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold text-primary-dark outline-none border border-transparent focus:border-primary/20 focus:bg-[#ece0cc]/30 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Additional Notes (Optional)</label>
+                    <textarea 
+                      placeholder="Any additional information for the customer..."
+                      value={trackingData.shippingNotes}
+                      onChange={(e) => setTrackingData({...trackingData, shippingNotes: e.target.value})}
+                      className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm font-bold text-primary-dark outline-none border border-transparent focus:border-primary/20 focus:bg-[#ece0cc]/30 transition-colors min-h-[80px]"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-gray-100">
+                   <button 
+                     onClick={() => setTrackingModalOpen(false)}
+                     className="px-6 py-3 rounded-xl border border-gray-200 text-gray-500 font-bold text-sm hover:bg-gray-50 transition-colors"
+                   >
+                     Cancel
+                   </button>
+                   <button 
+                     onClick={handleSaveTracking}
+                     disabled={!trackingData.courierName || !trackingData.awbNumber || !trackingData.trackingLink}
+                     className="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                   >
+                     Save & Send Email
+                   </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

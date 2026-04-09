@@ -47,9 +47,11 @@ export async function PUT(
       }
     }
 
-    if (body.awbNumber) {
-      updateData.awbNumber = body.awbNumber;
-    }
+    if (body.awbNumber) updateData.awbNumber = body.awbNumber;
+    if (body.courierName) updateData.courierName = body.courierName;
+    if (body.trackingLink) updateData.trackingLink = body.trackingLink;
+    if (body.estimatedDeliveryDate) updateData.estimatedDeliveryDate = body.estimatedDeliveryDate;
+    if (body.shippingNotes !== undefined) updateData.shippingNotes = body.shippingNotes;
 
     // Only allow manual isDelivered/isPaid updates if status wasn't explicitly changed
     if (body.isDelivered !== undefined && !body.status) {

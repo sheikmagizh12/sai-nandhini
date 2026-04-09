@@ -169,18 +169,48 @@ export default function OrderDetailsClient({
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-3">
                     Shipment Tracking
                   </p>
-                  <div className="flex items-center gap-4 bg-blue-50 p-5 rounded-2xl border border-blue-100 text-blue-700">
-                    <div className="bg-white p-2 rounded-lg shadow-sm">
-                      <Truck size={20} className="text-blue-500" />
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-4 bg-blue-50 p-5 rounded-2xl border border-blue-100 text-blue-800">
+                      <div className="bg-white p-2 rounded-lg shadow-sm shrink-0">
+                        <Truck size={20} className="text-blue-500" />
+                      </div>
+                      <div className="flex-grow">
+                        <p className="text-[10px] uppercase font-bold text-blue-400 mb-1 tracking-wider">
+                          {order.courierName ? order.courierName : "AWB Number"}
+                        </p>
+                        <span className="font-mono font-bold text-xl tracking-tight">
+                          {order.awbNumber}
+                        </span>
+                      </div>
+                      {order.trackingLink && (
+                        <a 
+                          href={order.trackingLink.replace('{trackingNumber}', order.awbNumber)} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="shrink-0 bg-white border border-blue-100 px-5 py-2.5 rounded-xl text-xs font-bold uppercase transition-colors hover:bg-blue-600 hover:text-white shadow-sm"
+                        >
+                          Track Package
+                        </a>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-blue-400 mb-1">
-                        AWB Number
-                      </p>
-                      <span className="font-mono font-bold text-xl tracking-tight">
-                        {order.awbNumber}
-                      </span>
-                    </div>
+                    
+                    {order.estimatedDeliveryDate && (
+                      <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-center gap-3 text-sm">
+                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0">
+                          <CheckCircle2 size={16} className="text-green-500" />
+                        </div>
+                        <p className="font-medium text-gray-500">
+                           Estimated Delivery Date: <span className="font-bold text-primary-dark">{mounted ? new Date(order.estimatedDeliveryDate).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '...'}</span>
+                        </p>
+                      </div>
+                    )}
+                    
+                    {order.shippingNotes && (
+                      <div className="bg-[#fffdfa] p-5 rounded-xl text-sm text-gray-600 border border-[#f5e6d3]">
+                        <span className="font-bold uppercase text-[10px] tracking-widest block mb-2 text-[#b08b5e]">Important Note</span>
+                        <p className="leading-relaxed">{order.shippingNotes}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

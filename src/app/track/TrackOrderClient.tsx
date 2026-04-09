@@ -296,33 +296,33 @@ export default function TrackOrderClient() {
                                             </div>
 
                                             {order.awbNumber && (
-                                                <div className="mt-6 pt-6 border-t border-gray-100">
-                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-3">AWB Tracking</p>
-                                                    <div className="flex flex-col gap-3">
-                                                        <div className="flex items-center gap-3 text-blue-800 bg-blue-50 px-4 py-3 rounded-xl border border-blue-100">
-                                                            <Truck size={20} className="text-blue-500" />
-                                                            <div>
-                                                              <p className="text-sm font-bold font-mono tracking-tight">{order.awbNumber}</p>
-                                                              {order.courierName && <p className="text-[10px] uppercase font-bold text-blue-500 tracking-wider">{order.courierName}</p>}
+                                                <div className="mt-8 pt-6 border-t border-gray-100">
+                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-4">AWB Tracking</p>
+                                                    <div className="flex flex-col gap-4">
+                                                        <div className="flex items-center gap-4 bg-[#f4f8ff] px-6 py-4 rounded-2xl border border-blue-100/50 shadow-sm shadow-blue-500/5">
+                                                            <Truck size={22} className="text-blue-500 shrink-0" />
+                                                            <div className="flex-grow flex flex-col justify-center">
+                                                              <p className="text-xl font-bold text-blue-800 tracking-tight leading-none mb-1.5">{order.awbNumber}</p>
+                                                              {order.courierName && <p className="text-[10px] uppercase font-black text-blue-500 tracking-widest leading-none">{order.courierName}</p>}
                                                             </div>
                                                             {order.trackingLink && (
                                                                 <a 
                                                                   href={order.trackingLink.replace('{trackingNumber}', order.awbNumber)} 
                                                                   target="_blank" 
                                                                   rel="noopener noreferrer"
-                                                                  className="ml-auto bg-white border border-blue-100 px-4 py-2 rounded-lg text-[10px] font-bold uppercase transition-colors hover:bg-blue-600 hover:text-white"
+                                                                  className="shrink-0 bg-white border border-gray-100 px-6 py-3 rounded-xl text-[10px] font-black text-blue-800 uppercase tracking-widest transition-all hover:border-blue-200 hover:shadow-sm"
                                                                 >
                                                                     Track
                                                                 </a>
                                                             )}
                                                         </div>
                                                         {order.estimatedDeliveryDate && (
-                                                            <p className="text-xs text-gray-500 font-medium">
-                                                                Expected Delivery: <span className="font-bold text-gray-800">{mounted ? new Date(order.estimatedDeliveryDate).toLocaleDateString() : '...'}</span>
+                                                            <p className="text-[15px] text-gray-500 font-medium px-1">
+                                                                Expected Delivery: <span className="font-bold text-gray-900">{mounted ? new Date(order.estimatedDeliveryDate).toLocaleDateString(undefined, { day: 'numeric', month: 'numeric', year: 'numeric' }) : '...'}</span>
                                                             </p>
                                                         )}
                                                         {order.shippingNotes && (
-                                                            <div className="bg-[#fffdfa] p-4 rounded-xl text-xs text-gray-600 border border-[#f5e6d3]">
+                                                            <div className="bg-[#fffdfa] p-4 rounded-xl text-xs text-gray-600 border border-[#f5e6d3] mt-2">
                                                                 <span className="font-bold uppercase text-[10px] tracking-widest block mb-1 text-[#b08b5e]">Tracking Note</span>
                                                                 {order.shippingNotes}
                                                             </div>

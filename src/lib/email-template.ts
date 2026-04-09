@@ -55,6 +55,8 @@ export interface Order {
   shippingPrice: number;
   totalPrice: number;
   awbNumber?: string;
+  courierName?: string;
+  trackingLink?: string;
   cancelReason?: string;
   deliveredAt?: string | Date;
   user?: any;
@@ -183,7 +185,25 @@ function buildStatusConfig(
           : "Carrier tracking details will appear in the app.",
         cardTitle: "📍 Tracking Information",
         cardBody: order.awbNumber
-          ? `<strong>Tracking number:</strong> ${esc(order.awbNumber)}<br/>Use this number on the carrier's website for real-time updates.`
+          ? `<strong style="color:#234d1b;">Courier:</strong> ${esc(order.courierName || "Standard Shipping")}<br/>
+             <strong style="color:#234d1b;">Tracking Number:</strong> <span style="font-family:monospace;">${esc(order.awbNumber)}</span>
+             ${order.trackingLink ? `<div style="margin-top:16px;">
+                 <!--[if mso]>
+                 <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
+                   href="${esc(order.trackingLink.replace('{trackingNumber}', order.awbNumber))}"
+                   style="height:36px;v-text-anchor:middle;width:150px;" arcsize="16%" stroke="f" fillcolor="#234d1b">
+                   <w:anchorlock/>
+                   <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:13px;font-weight:700;">AWB Tracking</center>
+                 </v:roundrect>
+                 <![endif]-->
+                 <!--[if !mso]><!-->
+                 <a href="${esc(order.trackingLink.replace('{trackingNumber}', order.awbNumber))}" 
+                    target="_blank" 
+                    style="display:inline-block;background-color:#234d1b;color:#ffffff;font-family:Arial,sans-serif;font-size:13px;font-weight:700;text-decoration:none;padding:10px 24px;border-radius:6px;mso-padding-alt:0;">
+                   AWB Tracking
+                 </a>
+                 <!--<![endif]-->
+               </div>` : '<br/><br/>Use this number on the carrier\'s website for real-time updates.'}`
           : "Tracking details will be updated shortly. Check the app for live status.",
         progressWidth: "50%",
         preheader: "Your order has shipped and is on its way to you!",

@@ -20,11 +20,11 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
   biscuit: ["biscuit", "biscuits", "cookie", "cookies", "crispy", "crunchy", "snack"],
 
   // Cakes
-  cake: ["cake", "cakes", "pastry", "sweet", "dessert", "celebration", "birthday", "layered"],
+  cake: ["cake", "cakes", "pastry", "sweet", "dessert", "birthday"],
   cupcake: ["cupcake", "cupcakes", "cake", "frosting", "icing", "sweet"],
 
   // Bread / roti
-  bread: ["bread", "loaf", "toast", "soft", "fresh", "baked", "wheat", "multigrain"],
+  bread: ["bread", "loaf", "toast", "soft", "baked", "wheat", "multigrain"],
   roti: ["roti", "chapati", "flatbread", "wheat", "fresh"],
 
   // Sweets / traditional

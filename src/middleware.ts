@@ -3,12 +3,16 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
-  const url = request.nextUrl.clone();
-
+  
   // Redirect www to non-www for consistency
   if (hostname.startsWith('www.')) {
+    const url = request.nextUrl.clone();
     const newHostname = hostname.replace('www.', '');
-    url.host = newHostname;
+    
+    // Build the redirect URL properly
+    url.hostname = newHostname.split(':')[0]; // Remove port if present
+    // Keep the same protocol, path, and search params
+    
     return NextResponse.redirect(url, 301);
   }
 

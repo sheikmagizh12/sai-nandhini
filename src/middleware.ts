@@ -2,20 +2,6 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const hostname = request.headers.get('host') || '';
-  
-  // Redirect www to non-www for consistency
-  if (hostname.startsWith('www.')) {
-    const url = request.nextUrl.clone();
-    const newHostname = hostname.replace('www.', '');
-    
-    // Build the redirect URL properly
-    url.hostname = newHostname.split(':')[0]; // Remove port if present
-    // Keep the same protocol, path, and search params
-    
-    return NextResponse.redirect(url, 301);
-  }
-
   // Handle CORS for API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
     const response = NextResponse.next();

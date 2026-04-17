@@ -80,15 +80,7 @@ export default async function LegalPage({ params }: PageProps) {
       <div className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-            {/* Content Header */}
-            <div className="bg-gradient-to-r from-primary/5 to-accent/5 px-8 py-6 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <FileText className="text-primary" size={24} />
-                <h2 className="text-xl font-bold text-primary-dark">
-                  Document Content
-                </h2>
-              </div>
-            </div>
+
 
             {/* Content Body */}
             <div className="p-8 md:p-12">

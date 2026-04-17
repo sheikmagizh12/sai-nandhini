@@ -715,8 +715,6 @@ function buildFooter(settings: ResolvedSettings, domain: string): string {
         ${esc(settings.address)}<br/>${esc(settings.city)}
       </div>
       <div style="font-size:11.5px;margin-bottom:12px;">
-        <a href="${esc(domain)}/unsubscribe" target="_blank" style="color:#f8bf51;text-decoration:underline;">Unsubscribe</a>
-        <span style="color:#6b6256;">&nbsp;&bull;&nbsp;</span>
         <a href="${esc(domain)}/privacy" target="_blank" style="color:#f8bf51;text-decoration:underline;">Privacy Policy</a>
         <span style="color:#6b6256;">&nbsp;&bull;&nbsp;</span>
         <a href="${esc(domain)}/terms" target="_blank" style="color:#f8bf51;text-decoration:underline;">Terms</a>

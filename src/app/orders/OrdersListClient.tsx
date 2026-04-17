@@ -365,16 +365,7 @@ export default function OrdersListClient({
                                 <p className="text-[10px] font-bold text-gray-600 line-clamp-2 w-20 leading-tight">
                                   {item.name}
                                 </p>
-                                {(order.status === "Delivered" ||
-                                  order.isDelivered) &&
-                                  item.product?.slug && (
-                                    <Link
-                                      href={`/shop/${item.product.slug}#reviews-section`}
-                                      className="mt-2 block text-center text-[9px] bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors font-bold uppercase tracking-widest px-2 py-1 rounded-lg w-full"
-                                    >
-                                      Review
-                                    </Link>
-                                  )}
+
                               </div>
                             ))}
                           {order.orderItems.length > 4 && (

@@ -91,7 +91,6 @@ export default function AdminLayout({
     { href: "/admin/categories", label: "Categories", icon: LayoutGrid },
     { href: "/admin/uom", label: "UOM Master", icon: Scale },
     { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
-    { href: "/admin/reviews", label: "Product Reviews", icon: Star },
     { href: "/admin/coupons", label: "Promo Codes", icon: Ticket },
     { href: "/admin/customers", label: "Customer Base", icon: Users },
     { href: "/admin/enquiries", label: "Event Enquiries", icon: ClipboardList },

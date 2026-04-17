@@ -127,15 +127,6 @@ export default function OrderDetailsClient({
                           Qty: {item.qty}
                         </span>
                         <div className="flex items-center gap-4">
-                          {currentStatus === "Delivered" &&
-                            item.product?.slug && (
-                              <Link
-                                href={`/shop/${item.product.slug}#reviews-section`}
-                                className="text-xs text-primary font-bold uppercase tracking-widest hover:text-primary-dark transition-colors border border-primary/20 hover:border-primary px-4 py-2 rounded-xl hover:bg-primary/5 flex items-center gap-2"
-                              >
-                                Write Review
-                              </Link>
-                            )}
                           <span className="font-bold">₹{item.price}</span>
                         </div>
                       </div>

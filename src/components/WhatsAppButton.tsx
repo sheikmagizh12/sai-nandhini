@@ -1,9 +1,13 @@
 "use client";
 
 import { useNavbarData } from "@/context/NavbarDataContext";
+import { usePathname } from "next/navigation";
 
 export default function WhatsAppButton() {
   const { settings } = useNavbarData();
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/admin")) return null;
 
   const phone = settings?.contactPhone
     ? settings.contactPhone.replace(/[^0-9]/g, "")

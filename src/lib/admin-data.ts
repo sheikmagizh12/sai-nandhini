@@ -165,8 +165,14 @@ export async function getDashboardStats(range: string = "week") {
   await connectDB();
 
   const now = new Date();
-  const today = new Date(now);
-  today.setHours(0, 0, 0, 0);
+  const istTime = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+  const istMidnightUTC = new Date(Date.UTC(
+    istTime.getUTCFullYear(),
+    istTime.getUTCMonth(),
+    istTime.getUTCDate(),
+    0, 0, 0, 0
+  ));
+  istMidnightUTC.setUTCHours(istMidnightUTC.getUTCHours() - 5, istMidnightUTC.getUTCMinutes() - 30);
 
   // Determine current and comparison period start dates
   let days = 7;
@@ -176,11 +182,11 @@ export async function getDashboardStats(range: string = "week") {
     days = 30;
   }
 
-  const currentPeriodStart = new Date(today);
-  currentPeriodStart.setDate(today.getDate() - (days - 1));
+  const currentPeriodStart = new Date(istMidnightUTC);
+  currentPeriodStart.setUTCDate(istMidnightUTC.getUTCDate() - (days - 1));
 
   const prevPeriodStart = new Date(currentPeriodStart);
-  prevPeriodStart.setDate(currentPeriodStart.getDate() - days);
+  prevPeriodStart.setUTCDate(currentPeriodStart.getUTCDate() - days);
 
   // Run ALL independent queries in parallel (avoid data waterfall)
   const [
@@ -360,7 +366,8 @@ export async function getDashboardStats(range: string = "week") {
   // Fill Trend Data
   const chartData = [];
   if (range === "today") {
-    for (let i = 0; i <= now.getHours(); i++) {
+    const currentIstHour = istTime.getUTCHours();
+    for (let i = 0; i <= currentIstHour; i++) {
       const hour = String(i).padStart(2, "0") + ":00";
       const found = salesTrend.find((item: any) => item._id === hour);
       chartData.push({
@@ -372,7 +379,7 @@ export async function getDashboardStats(range: string = "week") {
   } else {
     for (let i = 0; i < days; i++) {
       const date = new Date(currentPeriodStart);
-      date.setDate(currentPeriodStart.getDate() + i);
+      date.setUTCDate(currentPeriodStart.getUTCDate() + i);
 
       const istDate = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
       const dateStr = istDate.toISOString().split("T")[0];
@@ -381,8 +388,8 @@ export async function getDashboardStats(range: string = "week") {
       chartData.push({
         date:
           days > 7
-            ? `${date.getDate()} ${date.toLocaleString("en-US", { month: "short" })}`
-            : date.toLocaleDateString("en-US", { weekday: "short" }),
+            ? `${istDate.getUTCDate()} ${istDate.toLocaleString("en-US", { month: "short", timeZone: "UTC" })}`
+            : istDate.toLocaleString("en-US", { weekday: "short", timeZone: "UTC" }),
         amount: found ? found.total : 0,
         orders: found ? found.count : 0,
         fullDate: dateStr,

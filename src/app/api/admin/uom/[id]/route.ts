@@ -61,32 +61,10 @@ export async function DELETE(
 
     const { id } = await params;
     await connectDB();
-
-    // Find the UOM first to get its name before deleting
-    const uom = await UOM.findById(id);
+    const uom = await UOM.findByIdAndDelete(id);
     if (!uom) {
       return NextResponse.json({ error: "UOM not found" }, { status: 404 });
     }
-
-    // Check if any product uses this UOM name in variants or top-level uom field
-    const assignedCount = await Product.countDocuments({
-      $or: [
-        { "variants.uom": uom.name },
-        { uom: uom.name },
-      ],
-    });
-
-    if (assignedCount > 0) {
-      return NextResponse.json(
-        {
-          error: `Cannot delete "${uom.name}" — it is assigned to ${assignedCount} product${assignedCount > 1 ? "s" : ""}. Remove it from all products first.`,
-          assignedCount,
-        },
-        { status: 409 },
-      );
-    }
-
-    await UOM.findByIdAndDelete(id);
     return NextResponse.json({ message: "UOM deleted successfully" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

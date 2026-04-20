@@ -13,14 +13,9 @@ import GoogleReviewsCarousel from "@/components/GoogleReviewsCarousel";
 import { getHeroSlides, getCategories, getFeaturedProducts } from "@/lib/data";
 import { getSettingsData } from "@/lib/admin-data";
 
-export const metadata = {
-  title: "Sai Nandhini | Authentic Homemade Sweets & Snacks",
-  description:
-    "Experience the tradition of handcrafted sweets and snacks from Sai Nandhini. Made with love and the finest ingredients.",
-};
+// Force dynamic rendering — prevents MongoDB calls at build/prerender time
+export const dynamic = "force-dynamic";
 
-// Revalidate every 60 seconds (ISR)
-export const revalidate = 60;
 
 // Async server components for Suspense streaming (Next.js data-patterns guideline)
 async function HeroSection() {

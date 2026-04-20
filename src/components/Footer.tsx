@@ -112,6 +112,7 @@ export default function Footer() {
                   { name: "Privacy Policy", link: "/privacy-policy" },
                   { name: "Shipping Policy", link: "/shipping-policy" },
                   { name: "Return & Refund", link: "/return-and-refund" },
+                  { name: "Terms of Service", link: "/terms" },
                 ].map((item) => (
                   <li key={item.name}>
                     <Link
@@ -219,25 +220,11 @@ export default function Footer() {
           </div>
 
           {/* Copyright */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center border-t border-[#234d1b]/10 pt-8">
+          <div className="flex justify-center items-center text-center border-t border-[#234d1b]/10 pt-8">
             <p className="text-[#234d1b]/40 text-xs font-bold uppercase tracking-widest">
               © {new Date().getFullYear()} Sai Nandhini Tasty World. All Rights
               Reserved.
             </p>
-            <div className="flex gap-6 text-[#234d1b]/40 text-xs font-bold uppercase tracking-widest">
-              <Link
-                href="/terms"
-                className="hover:text-[#3d7935] transition-colors"
-              >
-                Terms of Service
-              </Link>
-              <Link
-                href="/privacy"
-                className="hover:text-[#3d7935] transition-colors"
-              >
-                Privacy
-              </Link>
-            </div>
           </div>
         </div>
       </div>

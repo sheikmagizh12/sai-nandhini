@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import {
   Plus,
-  Copy,
   Share2,
   Pencil,
   Trash2,
@@ -14,11 +13,9 @@ import {
   Calendar,
   Ticket,
   Loader2,
-  Settings2,
   ShoppingCart,
   X,
   Save,
-  ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
@@ -38,7 +35,6 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
 
   // Modals state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
@@ -432,9 +428,9 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                           <Calendar size={14} />
                           {mounted
                             ? new Date(coupon.expiresAt).toLocaleDateString(
-                                undefined,
-                                { day: "numeric", month: "short" },
-                              )
+                              undefined,
+                              { day: "numeric", month: "short" },
+                            )
                             : "..."}
                         </div>
                       )}
@@ -526,46 +522,24 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2 relative">
+                      <div className="space-y-2">
                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
                           Discount Type
                         </label>
-                        <button
-                          type="button"
-                          onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-colors font-medium text-gray-700 text-left flex justify-between items-center"
+                        <select
+                          value={currentCoupon.discountType}
+                          onChange={(e: any) =>
+                            setCurrentCoupon({
+                              ...currentCoupon,
+                              discountType: e.target.value,
+                            })
+                          }
+                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-colors font-medium text-gray-700 appearance-none cursor-pointer"
                         >
-                          {currentCoupon.discountType === "percentage" ? "Percentage (%)" : currentCoupon.discountType === "fixed" ? "Fixed Amount (₹)" : "Free Delivery"}
-                          <ChevronDown size={18} className={`transition-transform duration-200 ${isTypeDropdownOpen ? "rotate-180" : ""}`} />
-                        </button>
-                        <AnimatePresence>
-                          {isTypeDropdownOpen && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -10 }}
-                              className="absolute z-50 w-full mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden"
-                            >
-                              {[
-                                { value: "percentage", label: "Percentage (%)" },
-                                { value: "fixed", label: "Fixed Amount (₹)" },
-                                { value: "free-delivery", label: "Free Delivery" },
-                              ].map((option) => (
-                                <button
-                                  key={option.value}
-                                  type="button"
-                                  onClick={() => {
-                                    setCurrentCoupon({ ...currentCoupon, discountType: option.value as any });
-                                    setIsTypeDropdownOpen(false);
-                                  }}
-                                  className={`w-full text-left px-6 py-4 text-sm font-medium transition-colors ${currentCoupon.discountType === option.value ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-50 bg-white"}`}
-                                >
-                                  {option.label}
-                                </button>
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                          <option value="percentage">Percentage (%)</option>
+                          <option value="fixed">Fixed Amount (₹)</option>
+                          <option value="free-delivery">Free Delivery</option>
+                        </select>
                       </div>
 
                       {currentCoupon.discountType !== "free-delivery" && (

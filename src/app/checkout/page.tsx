@@ -7,6 +7,8 @@ import CheckoutClient from "./CheckoutClient";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Checkout | Sai Nandhini",
   description: "Secure checkout for your authentic homemade sweets.",

@@ -137,14 +137,11 @@ export default function UOMPage() {
         method: "DELETE",
       });
 
-      const data = await res.json();
-
       if (res.ok) {
         toast.success("Unit deleted successfully");
         fetchUoms();
       } else {
-        // Show specific error from API (e.g. "assigned to X products")
-        toast.error(data.error || "Failed to delete UOM");
+        toast.error("Failed to delete UOM");
       }
     } catch (error) {
       console.error(error);
@@ -329,8 +326,8 @@ export default function UOMPage() {
                       setFormData({ ...formData, code: e.target.value })
                     }
                     className="w-full bg-gray-50 border border-transparent focus:border-primary/20 rounded-xl px-4 py-3 outline-none transition-shadow font-medium font-mono text-sm focus-visible:ring-2 focus-visible:ring-primary/20 touch-manipulation"
-                    // Disable code editing for new UOMs if backend dictates so, but let's allow it for edits at least.
-                    // Or allow for both if backend is updated.
+                  // Disable code editing for new UOMs if backend dictates so, but let's allow it for edits at least.
+                  // Or allow for both if backend is updated.
                   />
                   <p className="text-[10px] text-gray-400 px-1">
                     Unique identifier for this unit (e.g. kg, box, pcs).

@@ -816,65 +816,6 @@ export default function DashboardClient({
         </div>
       </motion.div>
 
-      {/* Action Hub */}
-      <div className="flex justify-center mt-8">
-        <motion.div
-          variants={itemVariants}
-          className="w-full max-w-md bg-[#234d1b] p-6 md:p-10 rounded-[40px] text-white shadow-2xl relative overflow-hidden group"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#f8bf51]/10 rounded-full blur-[100px] -mr-32 -mt-32 group-hover:scale-150 transition-transform duration-1000" />
-          <div className="relative z-10 flex flex-col h-full">
-            <div className="mb-8">
-              <div className="w-16 h-16 rounded-[24px] bg-white/10 backdrop-blur-md flex items-center justify-center text-3xl font-serif font-black mb-6 border border-white/20">
-                {session?.user?.name?.[0] || "A"}
-              </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f8bf51] mb-1">
-                Authenticated Principal
-              </p>
-              <h3 className="text-3xl font-serif font-black">
-                {session?.user?.name || "Administrator"}
-              </h3>
-            </div>
-
-            <div className="mt-auto space-y-4">
-              <Link
-                href="/admin/settings"
-                className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-colors group/btn"
-              >
-                <span className="text-[10px] font-black uppercase tracking-widest">
-                  Global Governance
-                </span>
-                <ChevronRight
-                  size={16}
-                  className="text-[#f8bf51] group-hover/btn:translate-x-1 transition-transform"
-                />
-              </Link>
-              <button 
-                onClick={async () => {
-                  await authClient.signOut({
-                    fetchOptions: {
-                      onSuccess: () => {
-                        window.location.href = "/admin/login";
-                      },
-                    },
-                  });
-                }}
-                className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-red-500/10 rounded-2xl border border-white/10 transition-colors group/exit focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none touch-manipulation"
-              >
-                <span className="text-[10px] font-black uppercase tracking-widest text-red-300">
-                  Terminate Session
-                </span>
-                <LogOut
-                  size={16}
-                  className="text-red-300 group-hover/exit:-translate-x-1 transition-transform"
-                />
-              </button>
-            </div>
-          </div>
-        </motion.div>
-
-
-      </div>
     </motion.div>
   );
 }

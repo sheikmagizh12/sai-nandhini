@@ -9,16 +9,16 @@ import {
   Loader2,
   Save,
   X,
-  ChevronRight,
   Layers,
-  Scale,
-  AlertCircle,
+  Link2,
+  Tag,
+  ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ImageUpload from "@/components/admin/ImageUpload";
 import toast from "react-hot-toast";
 import ConfirmationModal from "@/components/admin/ConfirmationModal";
-import { validateForm, categorySchema, subCategorySchema, FieldErrors } from "@/lib/validations";
+import { validateForm, categorySchema, FieldErrors } from "@/lib/validations";
 import FormError from "@/components/FormError";
 
 export default function CategoriesClient({
@@ -27,104 +27,103 @@ export default function CategoriesClient({
   initialData: any[];
 }) {
   const [categories, setCategories] = useState<any[]>(initialData);
-  const [subCategories, setSubCategories] = useState<any[]>([]);
+  const [allSubCategories, setAllSubCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [subLoading, setSubLoading] = useState(false);
 
+  // ── Category form ──
   const [newCategory, setNewCategory] = useState("");
   const [newCategoryImage, setNewCategoryImage] = useState<string | File>("");
-  const [newSubCategory, setNewSubCategory] = useState({
-    name: "",
-    parentId: "",
-  });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const [deleteCatId, setDeleteCatId] = useState<string | null>(null);
-  const [deleteSubId, setDeleteSubId] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [isAddingSubCategory, setIsAddingSubCategory] = useState(false);
+  const [deleteCatId, setDeleteCatId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  // Edit state
+  // ── Sub-Category Pool (local state — names only, no parent yet) ──
+  const [poolInput, setPoolInput] = useState("");
+  const [pool, setPool] = useState<string[]>([]);
+
+  // ── Mapping: pick a name from pool + pick a category → create in DB ──
+  const [mapName, setMapName] = useState("");
+  const [mapCategoryId, setMapCategoryId] = useState("");
+  const [isMapping, setIsMapping] = useState(false);
+  const [isMapCatDropdownOpen, setIsMapCatDropdownOpen] = useState(false);
+  const [deleteSubId, setDeleteSubId] = useState<string | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // ── Edit category modal ──
   const [editingCategory, setEditingCategory] = useState<any | null>(null);
   const [editCategoryName, setEditCategoryName] = useState("");
   const [editCategoryImage, setEditCategoryImage] = useState<string | File>("");
   const [editCategorySlug, setEditCategorySlug] = useState("");
   const [editCategoryDescription, setEditCategoryDescription] = useState("");
 
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const subCategoryCounts = categories.reduce((acc, cat) => {
-    // This assumes we have all subcategories or can derive them.
-    // For now, we'll just show the count of current subCategories if the parent matches,
-    // but better would be a count from the DB or a pre-fetched list.
-    return acc;
-  }, {});
+  useEffect(() => {
+    fetchAllSubCategories();
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const catRes = await fetch("/api/admin/categories");
-      setCategories(await catRes.json());
-    } catch (error) {
-      console.error(error);
+      const res = await fetch("/api/admin/categories");
+      setCategories(await res.json());
+    } catch {
       toast.error("Failed to load categories.");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchSubCategories = async (catId: string) => {
+  const fetchAllSubCategories = async () => {
+    setSubLoading(true);
     try {
-      const res = await fetch(`/api/admin/subcategories?categoryId=${catId}`);
+      const res = await fetch("/api/admin/subcategories");
       const json = await res.json();
-      setSubCategories(Array.isArray(json) ? json : []);
-    } catch (error) {
-      console.error(error);
-      setSubCategories([]);
+      const subs = Array.isArray(json) ? json : [];
+      setAllSubCategories(subs);
+      // Sync unique names from DB into the pool
+      const dbNames: string[] = [...new Set<string>(subs.map((s: any) => s.name as string))];
+      setPool((prev) => {
+        const merged = [...prev];
+        dbNames.forEach((n) => { if (!merged.includes(n)) merged.push(n); });
+        return merged;
+      });
+    } catch {
+      setAllSubCategories([]);
+    } finally {
+      setSubLoading(false);
     }
   };
 
+  // ── Category CRUD ──
   const handleAddCategory = async () => {
-    const validation = validateForm(categorySchema, { name: newCategory });
-    if (!validation.success) { setFieldErrors(validation.errors); return; }
+    const v = validateForm(categorySchema, { name: newCategory });
+    if (!v.success) { setFieldErrors(v.errors); return; }
     setFieldErrors({});
 
-    if (!newCategory || !newCategoryImage) {
-      return;
-    }
+    if (!newCategory || !newCategoryImage) return;
 
-    const slug = newCategory
-      .toLowerCase()
-      .trim()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "");
+    const slug = newCategory.toLowerCase().trim().replace(/ /g, "-").replace(/[^\w-]+/g, "");
 
     try {
       setIsAddingCategory(true);
-      const formData = new FormData();
-      formData.append("name", newCategory);
-      formData.append("slug", slug);
+      const fd = new FormData();
+      fd.append("name", newCategory);
+      fd.append("slug", slug);
+      if (newCategoryImage instanceof File) fd.append("file", newCategoryImage);
+      else fd.append("image", newCategoryImage);
 
-      if (newCategoryImage instanceof File) {
-        formData.append("file", newCategoryImage);
-      } else {
-        formData.append("image", newCategoryImage);
-      }
-
-      const res = await fetch("/api/admin/categories", {
-        method: "POST",
-        body: formData,
-      });
-
+      const res = await fetch("/api/admin/categories", { method: "POST", body: fd });
       if (res.ok) {
-        toast.success("Category added successfully");
+        toast.success("Category added");
         setNewCategory("");
         setNewCategoryImage("");
         fetchData();
       } else {
         toast.error("Failed to add category");
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("An error occurred");
     } finally {
       setIsAddingCategory(false);
@@ -135,21 +134,14 @@ export default function CategoriesClient({
     if (!deleteCatId) return;
     setDeleting(true);
     try {
-      const res = await fetch(`/api/admin/categories?id=${deleteCatId}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`/api/admin/categories?id=${deleteCatId}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("Category deleted");
         fetchData();
-        if (newSubCategory.parentId === deleteCatId) {
-          setNewSubCategory({ ...newSubCategory, parentId: "" });
-          setSubCategories([]);
-        }
       } else {
         toast.error("Failed to delete category");
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("An error occurred");
     } finally {
       setDeleting(false);
@@ -157,34 +149,43 @@ export default function CategoriesClient({
     }
   };
 
-  const handleAddSubCategory = async () => {
-    const validation = validateForm(subCategorySchema, newSubCategory);
-    if (!validation.success) { setFieldErrors(validation.errors); return; }
-    setFieldErrors({});
+  // ── Sub-Category Pool actions ──
+  const addToPool = () => {
+    const name = poolInput.trim();
+    if (!name) return;
+    if (pool.includes(name)) { toast.error("Already in pool"); return; }
+    setPool([...pool, name]);
+    setPoolInput("");
+  };
 
-    if (!newSubCategory.name || !newSubCategory.parentId) return;
+  const removeFromPool = (name: string) => {
+    setPool(pool.filter((n) => n !== name));
+    if (mapName === name) setMapName("");
+  };
+
+  // ── Map to category → create in DB ──
+  const handleMap = async () => {
+    if (!mapName) { toast.error("Select a sub-category name from the pool"); return; }
+    if (!mapCategoryId) { toast.error("Select a parent category"); return; }
+
     try {
-      setIsAddingSubCategory(true);
+      setIsMapping(true);
       const res = await fetch("/api/admin/subcategories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: newSubCategory.name,
-          categoryId: newSubCategory.parentId,
-        }),
+        body: JSON.stringify({ name: mapName, categoryId: mapCategoryId }),
       });
       if (res.ok) {
-        toast.success("Sub-category added");
-        setNewSubCategory({ ...newSubCategory, name: "" });
-        fetchSubCategories(newSubCategory.parentId);
+        toast.success(`"${mapName}" mapped successfully`);
+        fetchAllSubCategories();
       } else {
-        toast.error("Failed to add sub-category");
+        const d = await res.json();
+        toast.error(d.error || "Failed to map sub-category");
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("An error occurred");
     } finally {
-      setIsAddingSubCategory(false);
+      setIsMapping(false);
     }
   };
 
@@ -192,17 +193,14 @@ export default function CategoriesClient({
     if (!deleteSubId) return;
     setDeleting(true);
     try {
-      const res = await fetch(`/api/admin/subcategories?id=${deleteSubId}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`/api/admin/subcategories?id=${deleteSubId}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("Sub-category deleted");
-        fetchSubCategories(newSubCategory.parentId);
+        toast.success("Sub-category removed");
+        fetchAllSubCategories();
       } else {
         toast.error("Failed to delete sub-category");
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("An error occurred");
     } finally {
       setDeleting(false);
@@ -210,12 +208,12 @@ export default function CategoriesClient({
     }
   };
 
-  const handleEditCategory = (category: any) => {
-    setEditingCategory(category);
-    setEditCategoryName(category.name);
-    setEditCategoryImage(category.image || "");
-    setEditCategorySlug(category.slug);
-    setEditCategoryDescription(category.description || "");
+  const handleEditCategory = (cat: any) => {
+    setEditingCategory(cat);
+    setEditCategoryName(cat.name);
+    setEditCategoryImage(cat.image || "");
+    setEditCategorySlug(cat.slug);
+    setEditCategoryDescription(cat.description || "");
   };
 
   const handleUpdateCategory = async () => {
@@ -223,41 +221,24 @@ export default function CategoriesClient({
       toast.error("Name and image are required");
       return;
     }
-
     try {
-      const formData = new FormData();
-      formData.append("name", editCategoryName);
-      formData.append("slug", editCategorySlug);
-      formData.append("description", editCategoryDescription);
+      const fd = new FormData();
+      fd.append("name", editCategoryName);
+      fd.append("slug", editCategorySlug);
+      fd.append("description", editCategoryDescription);
+      if (editCategoryImage instanceof File) fd.append("file", editCategoryImage);
+      else fd.append("image", editCategoryImage);
 
-      if (editCategoryImage instanceof File) {
-        formData.append("file", editCategoryImage);
-      } else {
-        formData.append("image", editCategoryImage);
-      }
-
-      const res = await fetch(
-        `/api/admin/categories?id=${editingCategory._id}`,
-        {
-          method: "PUT",
-          body: formData,
-        },
-      );
-
+      const res = await fetch(`/api/admin/categories?id=${editingCategory._id}`, { method: "PUT", body: fd });
       if (res.ok) {
-        toast.success("Category updated successfully");
-        setEditingCategory(null);
-        setEditCategoryName("");
-        setEditCategoryImage("");
-        setEditCategorySlug("");
-        setEditCategoryDescription("");
+        toast.success("Category updated");
+        handleCancelEdit();
         fetchData();
       } else {
-        const data = await res.json();
-        toast.error(data.error || "Failed to update category");
+        const d = await res.json();
+        toast.error(d.error || "Failed to update");
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("An error occurred");
     }
   };
@@ -270,16 +251,26 @@ export default function CategoriesClient({
     setEditCategoryDescription("");
   };
 
+  // Group DB sub-categories by parent
+  const subsByParent = allSubCategories.reduce((acc: Record<string, any[]>, sub) => {
+    const pid = sub.parentCategory?._id || sub.parentCategory || "unknown";
+    if (!acc[pid]) acc[pid] = [];
+    acc[pid].push(sub);
+    return acc;
+  }, {});
+
+  const selectedCatName = categories.find((c) => c._id === mapCategoryId)?.name;
+
   return (
     <div className="space-y-8 pb-20 font-sans">
       {/* Header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 border-b border-[#234d1b]/5 pb-4 sm:pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black text-[#234d1b] tracking-tight text-balance leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black text-[#234d1b] tracking-tight leading-tight">
             Category Management
           </h1>
           <p className="text-gray-400 mt-1 sm:mt-2 font-medium tracking-wide text-[11px] sm:text-xs md:text-sm">
-            Organize and manage your product hierarchy.
+            Organize your product hierarchy with flexible sub-category mapping.
           </p>
         </div>
       </header>
@@ -287,9 +278,7 @@ export default function CategoriesClient({
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <div className="w-12 h-12 border-4 border-[#f8bf51] border-t-transparent rounded-full animate-spin mb-6" />
-          <p className="font-bold text-gray-400 uppercase tracking-widest text-xs">
-            Loading Configuration...
-          </p>
+          <p className="font-bold text-gray-400 uppercase tracking-widest text-xs">Loading Configuration...</p>
         </div>
       ) : (
         <AnimatePresence mode="wait">
@@ -299,40 +288,32 @@ export default function CategoriesClient({
             exit={{ opacity: 0, y: -10 }}
             className="grid grid-cols-1 lg:grid-cols-12 gap-8"
           >
-            {/* Parent Categories */}
+            {/* ──── LEFT: Categories ──── */}
             <div className="lg:col-span-5 space-y-6">
               <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-sm font-black uppercase tracking-widest text-[#234d1b]">
-                    Categories
-                  </h3>
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    {categories.length} Total
-                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-[#234d1b]">Categories</h3>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{categories.length} Total</span>
                 </div>
 
-                {/* Categories Search */}
-                <div className="relative mb-6 group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Layers
-                      size={14}
-                      className="text-gray-300 group-focus-within:text-[#f8bf51] transition-colors"
-                    />
-                  </div>
+                {/* Search */}
+                <div className="relative mb-6">
+                  <Layers size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
                   <input
                     type="text"
                     placeholder="Search categories..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-[#234d1b] outline-none transition-all placeholder:text-gray-400 focus:bg-white focus:border-[#f8bf51]/50 focus:ring-2 focus:ring-[#f8bf51]/10"
+                    className="block w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-[#234d1b] outline-none placeholder:text-gray-400 focus:bg-white focus:border-[#f8bf51]/50 focus:ring-2 focus:ring-[#f8bf51]/10 transition-all"
                   />
                 </div>
 
+                {/* Add Category */}
                 <div className="space-y-4 mb-6">
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="New Name..."
+                      placeholder="New Category Name..."
                       value={newCategory}
                       onChange={(e) => setNewCategory(e.target.value)}
                       className="flex-grow bg-[#ece0cc] border-none rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#f8bf51]/50 transition-shadow font-bold text-[#234d1b] placeholder:font-medium placeholder:text-gray-400 text-sm"
@@ -340,98 +321,39 @@ export default function CategoriesClient({
                     <button
                       onClick={handleAddCategory}
                       disabled={!newCategory || !newCategoryImage || isAddingCategory}
-                      className="bg-[#234d1b] text-white p-3 rounded-xl hover:bg-[#234d1b] transition-transform shadow-lg active:scale-95 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
+                      className="bg-[#234d1b] text-white p-3 rounded-xl shadow-lg active:scale-95 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#1a3614] transition-colors"
                     >
                       {isAddingCategory ? <Loader2 size={20} className="animate-spin" /> : <Plus size={20} />}
                     </button>
                   </div>
                   <FormError message={fieldErrors.name} />
-
-                  {/* Image Upload Area */}
-                  <ImageUpload
-                    value={newCategoryImage}
-                    onChange={(val) => setNewCategoryImage(val)}
-                    hint="600×600px, square format, transparent background optional"
-                  />
-
-                  {(!newCategory || !newCategoryImage) && (
-                    <p className="text-[10px] text-gray-400 pl-1">
-                      * Both fields are required to add a category.
-                    </p>
-                  )}
+                  <ImageUpload value={newCategoryImage} onChange={(val) => setNewCategoryImage(val)} hint="600×600px, square format" />
                 </div>
 
-                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                {/* List */}
+                <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1 custom-scrollbar">
                   {categories
-                    .filter((c) =>
-                      c.name.toLowerCase().includes(searchQuery.toLowerCase()),
-                    )
-                    .map((cat, i) => (
-                      <div
-                        key={cat._id}
-                        onClick={() => {
-                          setNewSubCategory({
-                            ...newSubCategory,
-                            parentId: cat._id,
-                          });
-                          fetchSubCategories(cat._id);
-                          // Mobile auto-scroll
-                          if (window.innerWidth < 1024) {
-                            document
-                              .getElementById("sub-categories-section")
-                              ?.scrollIntoView({ behavior: "smooth" });
-                          }
-                        }}
-                        className={`p-3 sm:p-4 rounded-xl border transition-colors cursor-pointer group flex justify-between items-center ${newSubCategory.parentId === cat._id ? "bg-[#234d1b] border-[#234d1b] text-white shadow-lg sm:ring-4 ring-[#234d1b]/10" : "bg-white border-gray-100 font-medium hover:border-[#234d1b]/5 hover:bg-gray-50"}`}
-                      >
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg overflow-hidden bg-white/10 shrink-0 relative shadow-inner">
-                            <Image
-                              src={cat.image}
-                              className="object-cover"
-                              alt=""
-                              width={40}
-                              height={40}
-                            />
+                    .filter((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map((cat) => (
+                      <div key={cat._id} className="p-4 rounded-xl border border-gray-100 bg-white flex justify-between items-center hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0 relative">
+                            <Image src={cat.image} className="object-cover" alt="" width={40} height={40} />
                           </div>
                           <div className="min-w-0">
-                            <span
-                              className={`font-black text-xs sm:text-sm truncate block ${newSubCategory.parentId === cat._id ? "text-white" : "text-[#234d1b]"}`}
-                            >
-                              {cat.name}
-                            </span>
-                            <span
-                              className={`text-[9px] font-bold uppercase tracking-widest ${newSubCategory.parentId === cat._id ? "text-white/60" : "text-gray-400"}`}
-                            >
-                              Manage Sub-items
+                            <span className="font-black text-xs sm:text-sm truncate block text-[#234d1b]">{cat.name}</span>
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400">
+                              {(subsByParent[cat._id] || []).length} mapped items
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditCategory(cat);
-                            }}
-                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation ${newSubCategory.parentId === cat._id ? "bg-white/10 text-white hover:bg-white/20" : "bg-gray-100 text-gray-400 hover:bg-blue-500 hover:text-white"}`}
-                            aria-label="Edit category"
-                          >
-                            <Edit2 size={12} className="sm:w-3.5 sm:h-3.5" />
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button onClick={() => handleEditCategory(cat)} className="w-8 h-8 rounded-lg flex items-center justify-center bg-gray-100 text-gray-400 hover:bg-blue-500 hover:text-white transition-colors">
+                            <Edit2 size={13} />
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteCatId(cat._id);
-                            }}
-                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation ${newSubCategory.parentId === cat._id ? "bg-white/10 text-white hover:bg-white/20" : "bg-gray-100 text-gray-400 hover:bg-red-500 hover:text-white"}`}
-                            aria-label="Delete category"
-                          >
-                            <Trash2 size={12} className="sm:w-3.5 sm:h-3.5" />
+                          <button onClick={() => setDeleteCatId(cat._id)} className="w-8 h-8 rounded-lg flex items-center justify-center bg-gray-100 text-gray-400 hover:bg-red-500 hover:text-white transition-colors">
+                            <Trash2 size={13} />
                           </button>
-                          <ChevronRight
-                            size={14}
-                            className={`transition-transform shrink-0 ${newSubCategory.parentId === cat._id ? "text-white rotate-90" : "text-gray-300"}`}
-                          />
                         </div>
                       </div>
                     ))}
@@ -439,240 +361,279 @@ export default function CategoriesClient({
               </div>
             </div>
 
-            {/* Sub Categories */}
-            <div
-              className="lg:col-span-7 space-y-6"
-              id="sub-categories-section"
-            >
-              <div className="bg-white p-6 sm:p-8 rounded-[32px] shadow-sm border border-gray-100 h-full flex flex-col relative overflow-hidden">
-                {/* Background decoration */}
-                <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none">
-                  <Layers size={200} className="text-[#234d1b]" />
+            {/* ──── RIGHT: Sub-Category Workflow ──── */}
+            <div className="lg:col-span-7 space-y-6">
+              
+              {/* Step 1: Create/Pick Names */}
+              <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100">
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-7 h-7 rounded-lg bg-[#f8bf51]/10 flex items-center justify-center border border-[#f8bf51]/20">
+                    <Tag size={14} className="text-[#f8bf51]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-[#234d1b]">Step 1 — Create Sub-Category Pool</h3>
+                    <p className="text-[10px] text-gray-400 font-medium mt-0.5">Define names here to reuse across any category.</p>
+                  </div>
                 </div>
 
-                <div className="relative z-10 flex-grow">
-                  <h3 className="text-[10px] sm:text-sm font-black uppercase tracking-widest text-[#234d1b] mb-4 sm:mb-8 flex flex-wrap items-center gap-2">
-                    Sub Categories
-                    {newSubCategory.parentId && (
-                      <span className="bg-[#f8bf51]/10 text-[#f8bf51] px-2 py-0.5 rounded text-[8px] sm:text-[10px]">
-                        {
-                          categories.find(
-                            (c) => c._id === newSubCategory.parentId,
-                          )?.name
-                        }
-                      </span>
-                    )}
-                  </h3>
+                <div className="flex gap-2 mb-4">
+                  <input
+                    type="text"
+                    placeholder="e.g. Chocolate, Vanilla, 1kg..."
+                    value={poolInput}
+                    onChange={(e) => setPoolInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addToPool()}
+                    className="flex-grow bg-[#ece0cc] border-none rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#f8bf51]/50 transition-shadow font-bold text-[#234d1b] placeholder:font-medium placeholder:text-gray-400 text-sm"
+                  />
+                  <button
+                    onClick={addToPool}
+                    disabled={!poolInput.trim()}
+                    className="bg-[#f8bf51] text-white p-3 rounded-xl shadow-lg active:scale-95 flex-shrink-0 disabled:opacity-40 hover:bg-[#b0934e] transition-colors"
+                  >
+                    <Plus size={20} />
+                  </button>
+                </div>
 
-                  {newSubCategory.parentId ? (
-                    <div className="space-y-6">
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <input
-                          type="text"
-                          placeholder="Sub-Category Name..."
-                          value={newSubCategory.name}
-                          onChange={(e) =>
-                            setNewSubCategory({
-                              ...newSubCategory,
-                              name: e.target.value,
-                            })
-                          }
-                          className="flex-grow bg-[#ece0cc] border-none rounded-xl px-4 sm:px-6 py-3 sm:py-4 outline-none focus:ring-2 focus:ring-[#f8bf51]/50 transition-shadow font-bold text-[#234d1b] placeholder:font-medium placeholder:text-gray-400 text-sm"
-                        />
-                        <button
-                          onClick={handleAddSubCategory}
-                          disabled={!newSubCategory.name || isAddingSubCategory}
-                          className="bg-[#f8bf51] text-white px-6 py-3 sm:py-4 rounded-xl hover:bg-[#b0934e] transition-colors shadow-lg active:scale-95 font-bold uppercase tracking-widest text-[10px] sm:text-xs disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation whitespace-nowrap flex items-center gap-2"
+                {/* Pool chips */}
+                {pool.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {pool.map((name) => (
+                      <motion.button
+                        key={name}
+                        initial={{ opacity: 0, scale: 0.85 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        onClick={() => setMapName(mapName === name ? "" : name)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                          mapName === name
+                            ? "bg-[#234d1b] text-white border-[#234d1b] shadow-md ring-2 ring-[#234d1b]/10"
+                            : "bg-gray-50 text-[#234d1b] border-gray-200 hover:border-[#234d1b]/30"
+                        }`}
+                      >
+                        {name}
+                        <span
+                          onClick={(e) => { e.stopPropagation(); removeFromPool(name); }}
+                          className={`ml-1 rounded-full w-4 h-4 flex items-center justify-center text-[10px] transition-colors ${mapName === name ? "bg-white/20 hover:bg-white/40" : "bg-gray-200 hover:bg-red-100 hover:text-red-500"}`}
                         >
-                          {isAddingSubCategory && <Loader2 size={16} className="animate-spin" />}
-                          {isAddingSubCategory ? "Adding..." : "Add Item"}
-                        </button>
-                      </div>
-                      <FormError message={fieldErrors.name} />
-                      <FormError message={fieldErrors.parentId} />
+                          <X size={9} />
+                        </span>
+                      </motion.button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-gray-400 italic py-2">No names in pool yet. Add some above or sync from DB.</p>
+                )}
+              </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        {subCategories.length === 0 ? (
-                          <div className="col-span-full text-center py-8 sm:py-10 border-2 border-dashed border-gray-100 rounded-2xl">
-                            <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
-                              No items found
-                            </p>
-                          </div>
-                        ) : (
-                          subCategories.map((sub, i) => (
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: i * 0.05 }}
-                              key={sub._id}
-                              className="p-3 sm:p-4 bg-[#ece0cc] rounded-xl border border-gray-200/50 flex justify-between items-center group hover:border-[#f8bf51]/30 transition-colors"
-                            >
-                              <span className="font-bold text-[#234d1b] text-xs sm:text-sm truncate pr-2">
-                                {sub.name}
-                              </span>
-                              <button
-                                onClick={() => setDeleteSubId(sub._id)}
-                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center text-gray-300 hover:text-red-500 hover:shadow-sm transition-colors sm:opacity-0 group-hover:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation shrink-0"
-                                aria-label={`Delete sub-category ${sub.name}`}
-                              >
-                                <Trash2
-                                  size={12}
-                                  className="sm:w-3.5 sm:h-3.5"
-                                />
-                              </button>
-                            </motion.div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-center opacity-40 min-h-[300px]">
-                      <Layers size={48} className="mb-4 text-[#234d1b]" />
-                      <p className="text-xs font-black uppercase tracking-widest text-[#234d1b]">
-                        Select a parent category
-                      </p>
-                      <p className="text-[10px] font-bold text-gray-400 mt-1">
-                        to manage its sub-groups
-                      </p>
-                    </div>
-                  )}
+              {/* Step 2: Mapping Selection */}
+              <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 overflow-visible">
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-7 h-7 rounded-lg bg-[#234d1b]/10 flex items-center justify-center border border-[#234d1b]/20">
+                    <Link2 size={14} className="text-[#234d1b]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-[#234d1b]">Step 2 — Map to Category</h3>
+                    <p className="text-[10px] text-gray-400 font-medium mt-0.5">Select a name + choose category → creates in database.</p>
+                  </div>
                 </div>
+
+                <div className="space-y-4">
+                  {/* Selected name preview */}
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sub-Category:</span>
+                      {mapName ? (
+                        <span className="text-xs font-black text-[#234d1b] bg-[#f8bf51]/15 px-3 py-1 rounded-lg border border-[#f8bf51]/20">{mapName}</span>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic font-medium">← Click a chip in Step 1</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Category Selection Dropdown */}
+                  <div className="relative">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 ml-1 mb-1 block">Parent Category</label>
+                    <button
+                      type="button"
+                      onClick={() => setIsMapCatDropdownOpen(!isMapCatDropdownOpen)}
+                      className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3.5 text-left font-bold text-sm flex justify-between items-center transition-all focus:ring-2 focus:ring-[#f8bf51]/50 outline-none hover:border-gray-200"
+                    >
+                      <span className={selectedCatName ? "text-[#234d1b]" : "text-gray-400 font-medium"}>
+                        {selectedCatName || "Select parent category..."}
+                      </span>
+                      <ChevronDown size={18} className={`text-gray-400 transition-transform duration-300 ${isMapCatDropdownOpen ? "rotate-180" : ""}`} />
+                    </button>
+
+                    <AnimatePresence>
+                      {isMapCatDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="absolute z-[60] w-full mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-60 overflow-y-auto custom-scrollbar"
+                        >
+                          {categories.map((cat) => (
+                            <button
+                              key={cat._id}
+                              type="button"
+                              onClick={() => { setMapCategoryId(cat._id); setIsMapCatDropdownOpen(false); }}
+                              className={`w-full text-left px-5 py-4 text-sm font-bold flex items-center gap-4 transition-colors border-b border-gray-50 last:border-0 ${mapCategoryId === cat._id ? "bg-[#234d1b] text-white" : "text-[#234d1b] hover:bg-gray-50"}`}
+                            >
+                              <div className="w-7 h-7 rounded-md overflow-hidden shrink-0 border border-black/5">
+                                <Image src={cat.image} alt="" width={28} height={28} className="object-cover" />
+                              </div>
+                              {cat.name}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Map Action Button */}
+                  <button
+                    onClick={handleMap}
+                    disabled={!mapName || !mapCategoryId || isMapping}
+                    className="w-full bg-[#f8bf51] text-white py-4 rounded-xl hover:bg-[#b0934e] transition-all shadow-lg active:scale-95 font-black uppercase tracking-widest text-xs disabled:opacity-40 disabled:scale-100 flex items-center justify-center gap-2"
+                  >
+                    {isMapping ? <Loader2 size={16} className="animate-spin" /> : <Link2 size={16} />}
+                    {isMapping ? "Mapping..." : `Map "${mapName || "..."}" to ${selectedCatName || "Category"}`}
+                  </button>
+                </div>
+              </div>
+
+              {/* Current Mappings List */}
+              <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100">
+                <h3 className="text-sm font-black uppercase tracking-widest text-[#234d1b] mb-6">Current Database Mappings</h3>
+                {subLoading ? (
+                  <div className="flex flex-col items-center py-10 opacity-40">
+                    <Loader2 size={24} className="animate-spin text-[#234d1b] mb-2" />
+                    <p className="text-[10px] font-bold uppercase tracking-widest">Syncing from DB...</p>
+                  </div>
+                ) : allSubCategories.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center text-center opacity-40 py-12 border-2 border-dashed border-gray-100 rounded-2xl">
+                    <Layers size={40} className="mb-3 text-[#234d1b]" />
+                    <p className="text-xs font-black uppercase tracking-widest text-[#234d1b]">No active mappings found</p>
+                    <p className="text-[10px] font-bold text-gray-400 mt-1 italic leading-relaxed">Follow Steps 1 & 2 above to create mappings.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {categories.map((cat) => {
+                      const subs = subsByParent[cat._id] || [];
+                      if (subs.length === 0) return null;
+                      return (
+                        <div key={cat._id} className="animate-in fade-in slide-in-from-top-2 duration-300">
+                          <div className="flex items-center gap-2 mb-3 bg-gray-50/80 p-2 rounded-lg border border-gray-100">
+                            <div className="w-6 h-6 rounded-md overflow-hidden shrink-0 border border-black/5">
+                              <Image src={cat.image} alt="" width={24} height={24} className="object-cover" />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-[#234d1b] truncate">{cat.name}</span>
+                            <span className="text-[9px] font-bold bg-[#f8bf51] text-white px-2 py-0.5 rounded-full ml-auto">{subs.length} items</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2 pl-2">
+                            {subs.map((sub: any) => (
+                              <motion.div
+                                key={sub._id}
+                                layout
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-[#234d1b] group hover:border-[#f8bf51]/40 shadow-sm transition-all"
+                              >
+                                {sub.name}
+                                <button
+                                  onClick={() => setDeleteSubId(sub._id)}
+                                  className="ml-1 w-4 h-4 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                                  aria-label={`Remove ${sub.name}`}
+                                >
+                                  <X size={9} />
+                                </button>
+                              </motion.div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
         </AnimatePresence>
       )}
 
-      <ConfirmationModal
-        isOpen={!!deleteCatId}
-        onClose={() => setDeleteCatId(null)}
-        onConfirm={handleDeleteCategory}
-        title="Delete Category"
-        message="Are you sure you want to delete this category? All its sub-categories will be affected."
-        confirmText="Delete Category"
-        type="danger"
-      />
-
-      <ConfirmationModal
-        isOpen={!!deleteSubId}
-        onClose={() => setDeleteSubId(null)}
-        onConfirm={handleDeleteSubCategory}
-        title="Delete Sub-Category"
-        message="Are you sure you want to delete this sub-category?"
-        confirmText="Delete"
-        type="danger"
-      />
+      {/* Confirmation Modals */}
+      <ConfirmationModal isOpen={!!deleteCatId} onClose={() => setDeleteCatId(null)} onConfirm={handleDeleteCategory} title="Delete Category" message="Are you sure you want to delete this category? All its database sub-category mappings will remain but will lose their parent link." confirmText="Delete Category" type="danger" />
+      <ConfirmationModal isOpen={!!deleteSubId} onClose={() => setDeleteSubId(null)} onConfirm={handleDeleteSubCategory} title="Remove Mapping" message="Delete this sub-category mapping from the database? This cannot be undone." confirmText="Delete Mapping" type="danger" />
 
       {/* Edit Category Modal */}
-      <AnimatePresence>
-        {editingCategory && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={handleCancelEdit}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto overscroll-contain shadow-2xl"
-            >
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl font-black text-[#234d1b]">
-                  Edit Category
-                </h2>
-                <button
-                  onClick={handleCancelEdit}
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
-                  aria-label="Close modal"
-                >
-                  <X size={18} className="sm:w-5 sm:h-5" />
-                </button>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">
-                    Category Name
-                  </label>
-                  <input
-                    type="text"
-                    value={editCategoryName}
-                    onChange={(e) => {
-                      setEditCategoryName(e.target.value);
-                      setEditCategorySlug(
-                        e.target.value
-                          .toLowerCase()
-                          .trim()
-                          .replace(/ /g, "-")
-                          .replace(/[^\w-]+/g, ""),
-                      );
-                    }}
-                    className="w-full bg-[#ece0cc] border-none rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#f8bf51]/50 transition-shadow font-bold text-[#234d1b]"
-                    placeholder="Enter category name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">
-                    Slug
-                  </label>
-                  <input
-                    type="text"
-                    value={editCategorySlug}
-                    onChange={(e) => setEditCategorySlug(e.target.value)}
-                    className="w-full bg-[#ece0cc] border-none rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#f8bf51]/50 transition-shadow font-bold text-[#234d1b]"
-                    placeholder="category-slug"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">
-                    Description (Optional)
-                  </label>
-                  <textarea
-                    value={editCategoryDescription}
-                    onChange={(e) => setEditCategoryDescription(e.target.value)}
-                    className="w-full bg-[#ece0cc] border-none rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#f8bf51]/50 transition-all font-bold text-[#234d1b] min-h-[100px]"
-                    placeholder="Enter category description"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">
-                    Category Image
-                  </label>
-                  <ImageUpload
-                    value={editCategoryImage}
-                    onChange={(val) => setEditCategoryImage(val)}
-                    hint="600×600px, square format, transparent background optional"
-                  />
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-                  <button
-                    onClick={handleCancelEdit}
-                    className="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl hover:bg-gray-200 transition-colors font-bold uppercase tracking-widest text-[10px] sm:text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleUpdateCategory}
-                    disabled={!editCategoryName || !editCategoryImage}
-                    className="flex-1 bg-[#234d1b] text-white py-3 rounded-xl hover:bg-[#1a3614] transition-colors font-bold uppercase tracking-widest text-[10px] sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
-                  >
-                    <Save size={16} />
-                    Update
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <EditingCategoryModal 
+        isOpen={!!editingCategory}
+        onClose={handleCancelEdit}
+        onSave={handleUpdateCategory}
+        name={editCategoryName}
+        setName={setEditCategoryName}
+        slug={editCategorySlug}
+        setSlug={setEditCategorySlug}
+        description={editCategoryDescription}
+        setDescription={setEditCategoryDescription}
+        image={editCategoryImage}
+        setImage={setEditCategoryImage}
+      />
     </div>
+  );
+}
+
+// ── Shared Modal Components ──
+
+function EditingCategoryModal({ 
+  isOpen, onClose, onSave, 
+  name, setName, slug, setSlug, 
+  description, setDescription, 
+  image, setImage 
+}: any) {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={onClose}>
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="bg-white rounded-[32px] p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto overscroll-contain shadow-2xl custom-scrollbar relative">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-serif font-black text-[#234d1b]">Edit Category</h2>
+              <button onClick={onClose} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors"><X size={20} /></button>
+            </div>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Category Name</label>
+                  <input 
+                    type="text" 
+                    value={name} 
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      setSlug(e.target.value.toLowerCase().trim().replace(/ /g, "-").replace(/[^\w-]+/g, ""));
+                    }}
+                    className="w-full bg-[#ece0cc] border-none rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-[#f8bf51]/50 font-bold text-[#234d1b]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Slug</label>
+                  <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} className="w-full bg-[#ece0cc] border-none rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-[#f8bf51]/50 font-bold text-[#234d1b]" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Description</label>
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-[#ece0cc] border-none rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-[#f8bf51]/50 font-bold text-[#234d1b] min-h-[100px] resize-none" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Image</label>
+                <ImageUpload value={image} onChange={(val) => setImage(val)} hint="600×600px square recommended" />
+              </div>
+              <div className="flex gap-4 pt-4">
+                <button onClick={onClose} className="flex-1 py-4 rounded-xl bg-gray-100 text-gray-600 font-bold uppercase tracking-widest text-xs hover:bg-gray-200 transition-colors">Cancel</button>
+                <button onClick={onSave} className="flex-1 bg-[#234d1b] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#1a3614] shadow-lg transition-colors flex items-center justify-center gap-2"><Save size={16} /> Update Changes</button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

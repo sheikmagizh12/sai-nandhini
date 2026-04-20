@@ -6,7 +6,7 @@ export const metadata = {
   description: "Learn about the heritage, philosophy, and culinary journey of Sai Nandhini.",
 };
 
-export const revalidate = 60; // ISR cache revalidation
+export const dynamic = "force-dynamic";
 
 export default async function AboutPage() {
   const settings = await getSettings();

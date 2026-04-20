@@ -11,8 +11,7 @@ export const metadata = {
     "Browse our collection of authentic homemade sweets, snacks, and treats. Direct from our kitchen to your doorstep.",
 };
 
-// Revalidate every 60 seconds (ISR)
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function ShopPage() {
   const [products, categories, settings] = await Promise.all([

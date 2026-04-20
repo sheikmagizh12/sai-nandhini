@@ -137,11 +137,14 @@ export default function UOMPage() {
         method: "DELETE",
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         toast.success("Unit deleted successfully");
         fetchUoms();
       } else {
-        toast.error("Failed to delete UOM");
+        // Show specific error from API (e.g. "assigned to X products")
+        toast.error(data.error || "Failed to delete UOM");
       }
     } catch (error) {
       console.error(error);

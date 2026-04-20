@@ -18,6 +18,7 @@ import {
   ShoppingCart,
   X,
   Save,
+  ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
@@ -37,7 +38,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
 
   // Modals state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
+  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
@@ -65,18 +66,6 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
     maxDiscountAmount: 0,
     usageLimit: undefined,
     perUserLimit: undefined,
-  });
-
-  const [bulkData, setBulkData] = useState({
-    count: 5,
-    prefix: "",
-    discountType: "percentage",
-    discountValue: 10,
-    minOrderValue: 500,
-    isActive: true,
-    displayInCheckout: true,
-    usageLimit: 1,
-    perUserLimit: 1,
   });
 
   const fetchCoupons = async () => {
@@ -175,46 +164,6 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
     }
   };
 
-  const handleBulkGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsActionLoading(true);
-
-    // Generate array of coupons to send
-    const newCoupons = Array.from({ length: bulkData.count }).map(() => ({
-      code: `${bulkData.prefix}${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-      discountType: bulkData.discountType,
-      discountValue: bulkData.discountValue,
-      minOrderValue: bulkData.minOrderValue,
-      isActive: bulkData.isActive,
-      displayInCheckout: bulkData.displayInCheckout,
-      usageLimit: bulkData.usageLimit,
-      perUserLimit: bulkData.perUserLimit,
-      description: `Bulk generated coupon`,
-    }));
-
-    try {
-      const res = await fetch("/api/admin/coupons", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newCoupons),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
-        toast.success(`Generated ${data.count} coupons successfully`);
-        setIsBulkDialogOpen(false);
-        fetchCoupons();
-      } else {
-        toast.error(data.error || "Failed to bulk generate");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to generate coupons");
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
   const handleShare = async (code: string) => {
     const text = `Use code ${code} for a discount on your next order!`;
     if (navigator.share) {
@@ -300,13 +249,6 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <button
-              onClick={() => setIsBulkDialogOpen(true)}
-              className="px-6 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-black border border-gray-100 text-gray-400 hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest focus:ring-4 focus:ring-primary/5 touch-manipulation w-full sm:w-auto active:scale-95"
-            >
-              <Copy size={16} className="shrink-0" />
-              Bulk Create
-            </button>
             <button
               onClick={openAddDialog}
               className="bg-primary text-white px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-black shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all flex items-center justify-center gap-2 active:scale-95 text-[10px] uppercase tracking-widest focus:ring-4 focus:ring-primary/10 touch-manipulation w-full sm:w-auto"
@@ -518,7 +460,7 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
 
       {/* Shared backdrop for both modals */}
       <AnimatePresence>
-        {(isDialogOpen || isBulkDialogOpen) && (
+        {isDialogOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -584,24 +526,46 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
+                      <div className="space-y-2 relative">
                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
                           Discount Type
                         </label>
-                        <select
-                          value={currentCoupon.discountType}
-                          onChange={(e: any) =>
-                            setCurrentCoupon({
-                              ...currentCoupon,
-                              discountType: e.target.value,
-                            })
-                          }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-colors font-medium text-gray-700 appearance-none cursor-pointer"
+                        <button
+                          type="button"
+                          onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
+                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-colors font-medium text-gray-700 text-left flex justify-between items-center"
                         >
-                          <option value="percentage">Percentage (%)</option>
-                          <option value="fixed">Fixed Amount (₹)</option>
-                          <option value="free-delivery">Free Delivery</option>
-                        </select>
+                          {currentCoupon.discountType === "percentage" ? "Percentage (%)" : currentCoupon.discountType === "fixed" ? "Fixed Amount (₹)" : "Free Delivery"}
+                          <ChevronDown size={18} className={`transition-transform duration-200 ${isTypeDropdownOpen ? "rotate-180" : ""}`} />
+                        </button>
+                        <AnimatePresence>
+                          {isTypeDropdownOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="absolute z-50 w-full mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden"
+                            >
+                              {[
+                                { value: "percentage", label: "Percentage (%)" },
+                                { value: "fixed", label: "Fixed Amount (₹)" },
+                                { value: "free-delivery", label: "Free Delivery" },
+                              ].map((option) => (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  onClick={() => {
+                                    setCurrentCoupon({ ...currentCoupon, discountType: option.value as any });
+                                    setIsTypeDropdownOpen(false);
+                                  }}
+                                  className={`w-full text-left px-6 py-4 text-sm font-medium transition-colors ${currentCoupon.discountType === option.value ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-50 bg-white"}`}
+                                >
+                                  {option.label}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
 
                       {currentCoupon.discountType !== "free-delivery" && (
@@ -822,206 +786,6 @@ export default function CouponsClient({ initialData }: { initialData: any[] }) {
                       <Save size={18} />
                     )}
                     {currentCoupon._id ? "Update Coupon" : "Create Coupon"}
-                  </button>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Bulk Generate Modal */}
-            {isBulkDialogOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="bg-white rounded-[2.5rem] shadow-2xl w-[95%] md:w-full max-w-lg flex flex-col overflow-hidden relative"
-              >
-                <div className="p-8 border-b border-gray-100 bg-[#ece0cc] flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-serif font-black text-primary-dark flex items-center gap-2">
-                      <Settings2 size={24} className="text-primary" /> Bulk
-                      Create
-                    </h2>
-                    <p className="text-xs font-medium text-gray-400 mt-1">
-                      Generate multiple unique codes at once.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setIsBulkDialogOpen(false)}
-                    className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
-
-                <div className="p-8 space-y-6">
-                  <form
-                    id="bulk-form"
-                    onSubmit={handleBulkGenerate}
-                    className="space-y-6"
-                  >
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
-                          Coupon Count
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          max="100"
-                          required
-                          value={bulkData.count}
-                          onChange={(e) =>
-                            setBulkData({
-                              ...bulkData,
-                              count: Number(e.target.value),
-                            })
-                          }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
-                          Code Prefix
-                        </label>
-                        <input
-                          type="text"
-                          value={bulkData.prefix}
-                          onChange={(e) =>
-                            setBulkData({
-                              ...bulkData,
-                              prefix: e.target.value.toUpperCase(),
-                            })
-                          }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-black uppercase text-primary-dark"
-                          placeholder="E.g. NEW"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
-                        Discount Type
-                      </label>
-                      <select
-                        value={bulkData.discountType}
-                        onChange={(e: any) =>
-                          setBulkData({
-                            ...bulkData,
-                            discountType: e.target.value,
-                          })
-                        }
-                        className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-medium text-gray-700 appearance-none cursor-pointer"
-                      >
-                        <option value="percentage">Percentage (%)</option>
-                        <option value="fixed">Fixed Amount (₹)</option>
-                        <option value="free-delivery">Free Delivery</option>
-                      </select>
-                    </div>
-
-                    {bulkData.discountType !== "free-delivery" && (
-                      <div className="space-y-2 animate-in fade-in">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
-                          Discount Value
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                            {bulkData.discountType === "percentage" ? (
-                              <Percent size={18} />
-                            ) : (
-                              <IndianRupee size={18} />
-                            )}
-                          </span>
-                          <input
-                            type="number"
-                            required
-                            value={bulkData.discountValue || ""}
-                            onChange={(e) =>
-                              setBulkData({
-                                ...bulkData,
-                                discountValue: Number(e.target.value),
-                              })
-                            }
-                            className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 pl-12 pr-6 outline-none transition-shadow font-bold text-gray-700"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
-                        Min. Order (₹)
-                      </label>
-                      <input
-                        type="number"
-                        value={bulkData.minOrderValue}
-                        onChange={(e) =>
-                          setBulkData({
-                            ...bulkData,
-                            minOrderValue: Number(e.target.value),
-                          })
-                        }
-                        className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
-                          Usage Limit
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={bulkData.usageLimit}
-                          onChange={(e) =>
-                            setBulkData({
-                              ...bulkData,
-                              usageLimit: Number(e.target.value),
-                            })
-                          }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">
-                          Per User Limit
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={bulkData.perUserLimit}
-                          onChange={(e) =>
-                            setBulkData({
-                              ...bulkData,
-                              perUserLimit: Number(e.target.value),
-                            })
-                          }
-                          className="w-full bg-[#ece0cc] border-none focus:ring-2 focus:ring-primary/20 rounded-2xl py-4 px-6 outline-none transition-shadow font-bold text-gray-700"
-                        />
-                      </div>
-                    </div>
-                  </form>
-                </div>
-
-                <div className="p-8 border-t border-gray-100 bg-gray-50 flex gap-4">
-                  <button
-                    onClick={() => setIsBulkDialogOpen(false)}
-                    className="flex-1 py-4 rounded-2xl font-bold bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    form="bulk-form"
-                    disabled={isActionLoading}
-                    className="flex-1 bg-primary text-white py-4 rounded-2xl font-bold hover:bg-primary-dark transition-colors shadow-xl active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
-                  >
-                    {isActionLoading ? (
-                      <Loader2 className="animate-spin" size={18} />
-                    ) : (
-                      <Copy size={18} />
-                    )}
-                    Generate
                   </button>
                 </div>
               </motion.div>

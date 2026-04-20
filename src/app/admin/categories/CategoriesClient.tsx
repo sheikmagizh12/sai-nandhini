@@ -40,6 +40,8 @@ export default function CategoriesClient({
   const [deleteCatId, setDeleteCatId] = useState<string | null>(null);
   const [deleteSubId, setDeleteSubId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [isAddingSubCategory, setIsAddingSubCategory] = useState(false);
 
   // Edit state
   const [editingCategory, setEditingCategory] = useState<any | null>(null);
@@ -97,6 +99,7 @@ export default function CategoriesClient({
       .replace(/[^\w-]+/g, "");
 
     try {
+      setIsAddingCategory(true);
       const formData = new FormData();
       formData.append("name", newCategory);
       formData.append("slug", slug);
@@ -123,6 +126,8 @@ export default function CategoriesClient({
     } catch (error) {
       console.error(error);
       toast.error("An error occurred");
+    } finally {
+      setIsAddingCategory(false);
     }
   };
 
@@ -159,6 +164,7 @@ export default function CategoriesClient({
 
     if (!newSubCategory.name || !newSubCategory.parentId) return;
     try {
+      setIsAddingSubCategory(true);
       const res = await fetch("/api/admin/subcategories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -177,6 +183,8 @@ export default function CategoriesClient({
     } catch (error) {
       console.error(error);
       toast.error("An error occurred");
+    } finally {
+      setIsAddingSubCategory(false);
     }
   };
 
@@ -331,10 +339,10 @@ export default function CategoriesClient({
                     />
                     <button
                       onClick={handleAddCategory}
-                      disabled={!newCategory || !newCategoryImage}
+                      disabled={!newCategory || !newCategoryImage || isAddingCategory}
                       className="bg-[#234d1b] text-white p-3 rounded-xl hover:bg-[#234d1b] transition-transform shadow-lg active:scale-95 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation"
                     >
-                      <Plus size={20} />
+                      {isAddingCategory ? <Loader2 size={20} className="animate-spin" /> : <Plus size={20} />}
                     </button>
                   </div>
                   <FormError message={fieldErrors.name} />
@@ -473,9 +481,11 @@ export default function CategoriesClient({
                         />
                         <button
                           onClick={handleAddSubCategory}
-                          className="bg-[#f8bf51] text-white px-6 py-3 sm:py-4 rounded-xl hover:bg-[#b0934e] transition-colors shadow-lg active:scale-95 font-bold uppercase tracking-widest text-[10px] sm:text-xs focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation whitespace-nowrap"
+                          disabled={!newSubCategory.name || isAddingSubCategory}
+                          className="bg-[#f8bf51] text-white px-6 py-3 sm:py-4 rounded-xl hover:bg-[#b0934e] transition-colors shadow-lg active:scale-95 font-bold uppercase tracking-widest text-[10px] sm:text-xs disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none touch-manipulation whitespace-nowrap flex items-center gap-2"
                         >
-                          Add Item
+                          {isAddingSubCategory && <Loader2 size={16} className="animate-spin" />}
+                          {isAddingSubCategory ? "Adding..." : "Add Item"}
                         </button>
                       </div>
                       <FormError message={fieldErrors.name} />
